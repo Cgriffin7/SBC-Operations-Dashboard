@@ -796,7 +796,10 @@ async function loadLiveData() {
     const now = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
     setStatus('Live · ' + JOBS.length + ' jobs · ' + BIDS.length + ' bids · Updated ' + now, false);
 
-    // Reset chart init flags so charts re-render with fresh data
+    // Destroy and reset all charts for fresh re-render with live data
+    ['_execDonutChart','_execPipeChart','_rfpPmChart','_rfpYearChart'].forEach(k=>{
+      if(window[k]){try{window[k].destroy();}catch(e){}window[k]=null;}
+    });
     window._execChartsInit = false;
     window._rfpChartsInit = false;
 
@@ -901,16 +904,10 @@ function renderExec(){
     <td>${fmtV(b.value)}</td>
     <td style="white-space:nowrap;">${fmtDue(b.due,false)}</td>
   </tr>`).join('');
-  // Destroy existing charts if they exist to allow re-render with live data
+  // Destroy existing charts cleanly before re-creating
 if(window._execDonutChart){try{window._execDonutChart.destroy();}catch(e){}window._execDonutChart=null;}
 if(window._execPipeChart){try{window._execPipeChart.destroy();}catch(e){}window._execPipeChart=null;}
-// Reset canvas elements to clear any stale state
-['exec-donut','exec-pipeline'].forEach(id=>{
-  const c=document.getElementById(id);
-  if(c){const p=c.parentNode;const n=c.cloneNode(false);p.replaceChild(n,c);}
-});
-if(!window._execChartsInit){
-    window._execChartsInit=true;
+if(true){
     window._execDonutChart = new Chart(document.getElementById('exec-donut'),{type:'doughnut',data:{labels:['Awarded','Lost','Pending'],datasets:[{data:[63,88,56],backgroundColor:['#1D9E75','#E24B4A','#BA7517'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});
     window._execPipeChart = new Chart(document.getElementById('exec-pipeline'),{type:'bar',data:{labels:['Upcoming','Bidding','Submitted'],datasets:[{data:[10,14,52],backgroundColor:['#EF9F27','#378ADD','#5DCAA5'],borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(128,128,128,0.08)'}}}}});
   }
@@ -1061,17 +1058,14 @@ let rfpResult='', rfpSort='due', rfpDir=1;
   const clients=[...new Set(RFPS.map(r=>r.client).filter(c=>c&&c.length>1))].sort();
   const add=(id,arr)=>{const s=document.getElementById(id);arr.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});};
   add('rfp-pm',pms); add('rfp-client',clients.slice(0,40));
-  // Reset RFP chart canvases
-['rfp-pm-chart','rfp-year-chart'].forEach(id=>{
-  const c=document.getElementById(id);
-  if(c){const p=c.parentNode;const n=c.cloneNode(false);p.replaceChild(n,c);}
-});
-if(!window._rfpChartsInit){
+  if(window._rfpPmChart){try{window._rfpPmChart.destroy();}catch(e){}window._rfpPmChart=null;}
+if(window._rfpYearChart){try{window._rfpYearChart.destroy();}catch(e){}window._rfpYearChart=null;}
+if(true){
     window._rfpChartsInit=true;
-    setTimeout(()=>{
-      new Chart(document.getElementById('rfp-pm-chart'),{type:'bar',data:{labels:['Dusty F.','Chris B.','Marco V.','John M.','David G.','Charlie G.','Avi K.','Cameron P.','Marc M.','Adam T.'],datasets:[{data:[70,56,47,41,40,31,31,17,14,12],backgroundColor:[70,56,47,41,40,31,31,17,14,12].map(p=>p>=50?'#1D9E75':p>=35?'#BA7517':'#E24B4A'),borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(128,128,128,0.08)'},max:100,ticks:{callback:v=>v+'%',font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
-      new Chart(document.getElementById('rfp-year-chart'),{type:'bar',data:{labels:['2024','2025','2026'],datasets:[{label:'Awarded',data:[1,48,13],backgroundColor:'#1D9E75',borderRadius:2},{label:'Lost',data:[1,75,6],backgroundColor:'#E24B4A',borderRadius:2},{label:'Pending',data:[0,13,41],backgroundColor:'#BA7517',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(128,128,128,0.08)'}}}}});
-    },100);
+    waitForChartJS(()=>{
+      window._rfpPmChart=new Chart(document.getElementById('rfp-pm-chart'),{type:'bar',data:{labels:['Dusty F.','Chris B.','Marco V.','John M.','David G.','Charlie G.','Avi K.','Cameron P.','Marc M.','Adam T.'],datasets:[{data:[70,56,47,41,40,31,31,17,14,12],backgroundColor:[70,56,47,41,40,31,31,17,14,12].map(p=>p>=50?'#1D9E75':p>=35?'#BA7517':'#E24B4A'),borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(128,128,128,0.08)'},max:100,ticks:{callback:v=>v+'%',font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+      window._rfpYearChart=new Chart(document.getElementById('rfp-year-chart'),{type:'bar',data:{labels:['2024','2025','2026'],datasets:[{label:'Awarded',data:[1,48,13],backgroundColor:'#1D9E75',borderRadius:2},{label:'Lost',data:[1,75,6],backgroundColor:'#E24B4A',borderRadius:2},{label:'Pending',data:[0,13,41],backgroundColor:'#BA7517',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(128,128,128,0.08)'}}}}});
+    });
   }
 })();
 function setRFPResult(el,r){rfpResult=r;document.querySelectorAll('#view-rfps .pill').forEach(p=>p.classList.toggle('active',p.dataset.r===r));renderRFP();}
@@ -1189,15 +1183,17 @@ if (localStorage.getItem('tvMode') === '1') {
 
 // ── INIT ─────────────────────────────────────────────────────────
 // Render with static data once DOM + scripts are ready
-function initialRender() {
-  renderExec();
-  renderBB();
+function waitForChartJS(cb, n) {
+  n = n || 0;
+  if (typeof Chart !== 'undefined') { cb(); }
+  else if (n < 40) { setTimeout(() => waitForChartJS(cb, n+1), 100); }
+  else { cb(); } // give up waiting, render without charts
 }
+function initialRender() { renderExec(); renderBB(); }
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initialRender);
+  document.addEventListener('DOMContentLoaded', () => waitForChartJS(initialRender));
 } else {
-  // Small delay to ensure Chart.js CDN has executed
-  setTimeout(initialRender, 200);
+  waitForChartJS(initialRender);
 }
 // Then attempt silent token refresh to auto-load live data
 window.addEventListener('load', async () => {
