@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operations Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+<style>
+:root {
+  --bg: #f9f9f8;
+  --surface: #ffffff;
+  --surface2: #f2f1ee;
+  --border: rgba(0,0,0,0.1);
+  --border2: rgba(0,0,0,0.18);
+  --text: #1a1a18;
+  --text2: #5a5a56;
+  --text3: #9a9a94;
+  --blue: #378ADD; --blue-bg: #E6F1FB; --blue-txt: #185FA5;
+  --green: #1D9E75; --green-bg: #EAF3DE; --green-txt: #3B6D11;
+  --amber: #BA7517; --amber-bg: #FAEEDA; --amber-txt: #854F0B;
+  --red: #E24B4A; --red-bg: #FCEBEB; --red-txt: #A32D2D;
+  --purple: #534AB7; --purple-bg: #EEEDFE; --purple-txt: #3C3489;
+  --coral-bg: #FAECE7; --coral-txt: #993C1D;
+  --gray-bg: #F1EFE8; --gray-txt: #5F5E5A;
+  --teal: #1D9E75;
+  --radius: 8px; --radius-lg: 12px;
+  --nav-w: 200px;
+  --header-h: 56px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111110; --surface: #1c1c1a; --surface2: #252522;
+    --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.18);
+    --text: #f0f0ec; --text2: #a0a09a; --text3: #606058;
+    --blue-bg: #0c2540; --blue-txt: #85B7EB;
+    --green-bg: #0a2010; --green-txt: #97C459;
+    --amber-bg: #2a1a00; --amber-txt: #EF9F27;
+    --red-bg: #280a0a; --red-txt: #F09595;
+    --purple-bg: #1a1640; --purple-txt: #AFA9EC;
+    --coral-bg: #2a0c00; --coral-txt: #F0997B;
+    --gray-bg: #222220; --gray-txt: #B4B2A9;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+/* NAV */
+nav { width: var(--nav-w); background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 33px; left: 0; height: calc(100vh - 33px); z-index: 100; }
+.nav-brand { padding: 18px 20px 16px; border-bottom: 0.5px solid var(--border); }
+.nav-brand-name { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.2; }
+.nav-brand-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.nav-items { flex: 1; padding: 8px 0; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; font-size: 13px; color: var(--text2); cursor: pointer; border-left: 2px solid transparent; transition: all 0.12s; text-decoration: none; }
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { color: var(--text); border-left-color: var(--text); background: var(--surface2); font-weight: 500; }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.6; }
+.nav-item.active svg { opacity: 1; }
+.nav-footer { padding: 14px 20px; border-top: 0.5px solid var(--border); font-size: 11px; color: var(--text3); }
+
+/* MAIN */
+main { margin-left: var(--nav-w); flex: 1; min-height: 100vh; padding-top: 0; }
+.page-header { height: var(--header-h); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; background: var(--surface); border-bottom: 0.5px solid var(--border); position: sticky; top: 0; z-index: 50; }
+.page-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.header-badge { font-size: 11px; background: var(--surface2); border: 0.5px solid var(--border); border-radius: 20px; padding: 3px 10px; color: var(--text2); }
+.page-content { padding: 24px 28px; }
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; }
+
+/* KPI GRID */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 20px; }
+.kpi-grid-5 { grid-template-columns: repeat(5, minmax(0,1fr)); }
+.kpi { background: var(--surface2); border-radius: var(--radius); padding: 14px 16px; border-left: 3px solid transparent; }
+.kpi-n { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1; }
+.kpi-l { font-size: 11px; color: var(--text2); margin-top: 4px; }
+.kpi-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* GRID LAYOUTS */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+
+/* CARDS */
+.card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; }
+.card-title { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 12px; letter-spacing: 0.03em; }
+
+/* CONTROLS */
+.controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.controls input, .controls select { font-size: 12px; padding: 7px 10px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--surface); color: var(--text); outline: none; }
+.controls input:focus, .controls select:focus { border-color: var(--blue); }
+.controls input { flex: 1; min-width: 180px; }
+.pill-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 14px; }
+.pill { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; border: 0.5px solid var(--border2); background: var(--surface); color: var(--text2); cursor: pointer; transition: all 0.1s; }
+.pill:hover { border-color: var(--text); color: var(--text); }
+.pill.active { background: var(--text); color: var(--bg); border-color: transparent; }
+
+/* TABLE */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th { font-size: 10px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3); padding: 0 8px 9px; text-align: left; border-bottom: 0.5px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap; }
+thead th:hover { color: var(--text); }
+thead th.sorted { color: var(--text); }
+tbody tr { border-bottom: 0.5px solid var(--border); transition: background 0.08s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--surface2); }
+tbody td { font-size: 12px; padding: 8px 8px; color: var(--text); vertical-align: middle; }
+.td-muted { color: var(--text2); }
+.td-sm { font-size: 11px; color: var(--text2); }
+.empty-row td { text-align: center; padding: 2.5rem; color: var(--text3); font-size: 13px; }
+.tbl-info { font-size: 11px; color: var(--text3); margin-top: 8px; }
+
+/* BADGES */
+.badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 500; white-space: nowrap; }
+.b-con { background: var(--blue-bg); color: var(--blue-txt); }
+.b-pre { background: var(--green-bg); color: var(--green-txt); }
+.b-close { background: var(--gray-bg); color: var(--gray-txt); }
+.b-hold { background: var(--coral-bg); color: var(--coral-txt); }
+.b-ret { background: var(--purple-bg); color: var(--purple-txt); }
+.b-bid { background: var(--amber-bg); color: var(--amber-txt); }
+.b-up { background: var(--purple-bg); color: var(--purple-txt); }
+.b-sub { background: var(--green-bg); color: var(--green-txt); }
+.b-rfp { background: var(--purple-bg); color: var(--purple-txt); }
+.b-rom { background: var(--coral-bg); color: var(--coral-txt); }
+.b-budget { background: var(--gray-bg); color: var(--gray-txt); }
+.b-won { background: var(--green-bg); color: var(--green-txt); }
+.b-lost { background: var(--red-bg); color: var(--red-txt); }
+.b-pend { background: var(--amber-bg); color: var(--amber-txt); }
+
+/* BAR ROWS */
+.bar-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 0.5px solid var(--border); }
+.bar-row:last-child { border-bottom: none; }
+.bar-name { font-size: 12px; color: var(--text); width: 130px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-track { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; }
+.bar-val { font-size: 12px; color: var(--text2); width: 58px; text-align: right; flex-shrink: 0; }
+.bar-jobs { font-size: 11px; color: var(--text3); width: 20px; text-align: right; flex-shrink: 0; }
+
+/* STATUS GRID */
+.status-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 20px; }
+.status-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+.status-n { font-size: 24px; font-weight: 600; color: var(--text); }
+.status-l { font-size: 11px; color: var(--text2); margin-top: 3px; }
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+
+/* PM CARDS */
+.pm-cards { display: grid; grid-template-columns: repeat(auto-fill,minmax(290px,1fr)); gap: 12px; }
+.pm-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px 18px; }
+.pm-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 0.5px solid var(--border); }
+.avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+.pm-card-name { font-size: 13px; font-weight: 500; }
+.pm-card-meta { font-size: 11px; color: var(--text2); margin-top: 1px; }
+.pm-job-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-bottom: 0.5px solid var(--border); }
+.pm-job-row:last-child { border-bottom: none; }
+.pm-job-name { font-size: 12px; flex: 1; padding-right: 8px; }
+.pm-job-val { font-size: 11px; color: var(--text3); }
+
+/* CHART */
+.chart-wrap { position: relative; width: 100%; }
+
+/* VIEW TOGGLE */
+.view-toggle { display: flex; margin-left: auto; }
+.vbtn { font-size: 11px; padding: 5px 11px; border: 0.5px solid var(--border2); background: var(--surface); color: var(--text2); cursor: pointer; transition: all 0.1s; }
+.vbtn:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+.vbtn:last-child { border-radius: 0 var(--radius) var(--radius) 0; border-left: none; }
+.vbtn.active { background: var(--text); color: var(--bg); }
+
+/* TV MODE */
+.tv-wrapper { background: #000; min-height: calc(100vh - var(--header-h)); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.tv-frame { background: var(--surface); border-radius: var(--radius-lg); width: 100%; max-width: 1200px; min-height: 560px; display: flex; flex-direction: column; border: 0.5px solid var(--border); }
+.tv-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 0.5px solid var(--border); }
+.tv-logo { font-size: 15px; font-weight: 600; }
+.tv-clock { font-size: 15px; color: var(--text2); }
+.tv-dots { display: flex; gap: 5px; }
+.tv-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border2); transition: background 0.3s; }
+.tv-dot.active { background: var(--text); }
+.tv-slide { display: none; flex: 1; padding: 24px 28px; }
+.tv-slide.active { display: block; }
+.tv-slide-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 16px; }
+.tv-kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 18px; }
+.tv-kpi { background: var(--surface2); border-radius: var(--radius); padding: 18px 20px; border-left: 3px solid transparent; }
+.tv-kpi-n { font-size: 36px; font-weight: 600; line-height: 1; }
+.tv-kpi-l { font-size: 12px; color: var(--text2); margin-top: 5px; }
+.tv-foot { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; border-top: 0.5px solid var(--border); }
+.tv-foot-info { font-size: 11px; color: var(--text3); }
+.tv-ctrls { display: flex; gap: 6px; }
+.tv-btn { font-size: 11px; padding: 5px 12px; border: 0.5px solid var(--border2); background: var(--surface); color: var(--text2); border-radius: var(--radius); cursor: pointer; }
+.tv-progress { height: 2px; background: var(--border); }
+.tv-progress-bar { height: 100%; background: var(--text); width: 0; }
+
+/* DUE DATE URGENCY */
+.due-urgent { color: var(--red-txt); font-weight: 500; }
+.due-soon { color: var(--amber-txt); }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  nav { width: 56px; }
+  .nav-brand-name, .nav-brand-sub, .nav-item span { display: none; }
+  .nav-item { justify-content: center; padding: 10px; }
+  main { margin-left: 56px; }
+  .kpi-grid, .kpi-grid-5 { grid-template-columns: repeat(2,1fr); }
+  .two-col, .three-col { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div id="data-status-bar" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1D9E75;color:white;font-size:12px;font-weight:500;text-align:center;padding:7px 16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;" onclick="loadLiveData()">
+  <span>⚡ Click to load live data from OneDrive</span>
+  <span id="data-status" style="opacity:0.85;font-weight:400;"></span>
+  <span id="data-spinner" style="display:none;">⟳</span>
+</div>
+<div style="height:33px;"></div>
+
+<nav>
+  <div class="nav-brand">
+    <div class="nav-brand-name">Ops Dashboard</div>
+    <div class="nav-brand-sub">PM_Job_List_2026</div>
+  </div>
+  <div class="nav-items">
+    <a class="nav-item active" onclick="showView('exec')" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Executive</span>
+    </a>
+    <a class="nav-item" onclick="showView('bidboard')" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      <span>Bid Board</span>
+    </a>
+    <a class="nav-item" onclick="showView('pm')" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>PM Dashboard</span>
+    </a>
+    <a class="nav-item" onclick="showView('super')" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      <span>Super Dashboard</span>
+    </a>
+    <a class="nav-item" onclick="showView('rfps')" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+      <span>Bids &amp; RFPs</span>
+    </a>
+    <a class="nav-item" onclick="showView('tv')" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      <span>TV Display</span>
+    </a>
+  </div>
+  <div class="nav-footer">Updated 5/15/2026</div>
+</nav>
+
+<main>
+
+  <!-- EXEC DASHBOARD -->
+  <div id="view-exec" class="view active">
+    <div class="page-header">
+      <span class="page-title">Executive Dashboard</span>
+      <div class="header-right">
+        <span class="header-badge" id="exec-date">May 15, 2026</span>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="kpi-grid">
+        <div class="kpi" style="border-left-color:#378ADD;"><div class="kpi-n" id="e-wip-jobs">50</div><div class="kpi-l">Active WIP jobs</div><div class="kpi-sub">Construction + Pre-Con + Punch</div></div>
+        <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n">$347M</div><div class="kpi-l">WIP portfolio value</div><div class="kpi-sub">Across 9 active PMs</div></div>
+        <div class="kpi" style="border-left-color:#BA7517;"><div class="kpi-n">24</div><div class="kpi-l">Active bids</div><div class="kpi-sub">Bidding + upcoming</div></div>
+        <div class="kpi" style="border-left-color:#534AB7;"><div class="kpi-n">41.7%</div><div class="kpi-l">Overall win rate</div><div class="kpi-sub">63W / 88L all time</div></div>
+      </div>
+      <div class="status-grid">
+        <div class="status-card"><div class="status-n">27</div><div class="status-l"><span class="status-dot" style="background:#378ADD;"></span>Construction</div></div>
+        <div class="status-card"><div class="status-n">20</div><div class="status-l"><span class="status-dot" style="background:#1D9E75;"></span>Pre-con</div></div>
+        <div class="status-card"><div class="status-n">23</div><div class="status-l"><span class="status-dot" style="background:#888;"></span>Closeout</div></div>
+        <div class="status-card"><div class="status-n">6</div><div class="status-l"><span class="status-dot" style="background:#534AB7;"></span>Retention billed</div></div>
+        <div class="status-card"><div class="status-n">3</div><div class="status-l"><span class="status-dot" style="background:#D85A30;"></span>On hold</div></div>
+        <div class="status-card" style="background:var(--surface2);"><div class="status-n" style="color:var(--text2);">79</div><div class="status-l">Total tracked</div></div>
+      </div>
+      <div class="two-col">
+        <div class="card"><div class="card-title">WIP value by PM</div><div id="exec-wip-bars"></div></div>
+        <div class="card"><div class="card-title">Win rate by PM</div><div id="exec-win-bars"></div></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Bid outcomes — all time</div>
+          <div class="chart-wrap" style="height:160px;"><canvas id="exec-donut" role="img" aria-label="Bid outcomes: 63 awarded, 88 lost, 56 pending">63 awarded, 88 lost, 56 pending.</canvas></div>
+          <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;">
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#1D9E75;display:inline-block;"></span>Awarded 63</span>
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#E24B4A;display:inline-block;"></span>Lost 88</span>
+            <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#BA7517;display:inline-block;"></span>Pending 56</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Bid pipeline by status</div>
+          <div class="chart-wrap" style="height:160px;"><canvas id="exec-pipeline" role="img" aria-label="Pipeline: 10 upcoming, 14 bidding, 52 submitted">Upcoming 10, Bidding 14, Submitted 52.</canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Active bids due soon</div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Project</th><th>PM</th><th>Status</th><th>Value</th><th>Due</th></tr></thead>
+          <tbody id="exec-bids-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BID BOARD -->
+  <div id="view-bidboard" class="view">
+    <div class="page-header">
+      <span class="page-title">Bid Board</span>
+      <div class="header-right">
+        <span class="header-badge" id="bb-count">76 bids</span>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="kpi-grid">
+        <div class="kpi" style="border-left-color:#BA7517;"><div class="kpi-n" id="bb-k-up">10</div><div class="kpi-l">Upcoming bids</div></div>
+        <div class="kpi" style="border-left-color:#378ADD;"><div class="kpi-n" id="bb-k-bid">14</div><div class="kpi-l">Actively bidding</div></div>
+        <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n" id="bb-k-sub">52</div><div class="kpi-l">Submitted</div></div>
+        <div class="kpi" style="border-left-color:#534AB7;"><div class="kpi-n" id="bb-k-val">$303M</div><div class="kpi-l">Pipeline value</div></div>
+      </div>
+      <div class="controls">
+        <input type="text" id="bb-search" placeholder="Search project or PM…" oninput="renderBB()">
+        <select id="bb-pm" onchange="renderBB()"><option value="">All PMs</option></select>
+        <select id="bb-type" onchange="renderBB()"><option value="">All types</option><option>RFP</option><option>ROM</option><option>Budget</option></select>
+      </div>
+      <div class="pill-row" id="bb-pills">
+        <button class="pill active" data-st="" onclick="setBBStatus(this,'')">All (76)</button>
+        <button class="pill" data-st="Upcoming Bid" onclick="setBBStatus(this,'Upcoming Bid')">Upcoming (10)</button>
+        <button class="pill" data-st="Bidding" onclick="setBBStatus(this,'Bidding')">Bidding (14)</button>
+        <button class="pill" data-st="Submitted" onclick="setBBStatus(this,'Submitted')">Submitted (52)</button>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr>
+          <th onclick="sortBB('name')" data-col="name">Project</th>
+          <th onclick="sortBB('pm')" data-col="pm">PM</th>
+          <th onclick="sortBB('status')" data-col="status">Status</th>
+          <th onclick="sortBB('type')" data-col="type">Type</th>
+          <th onclick="sortBB('value')" data-col="value" style="text-align:right;">Value</th>
+          <th onclick="sortBB('due')" data-col="due">Due date</th>
+        </tr></thead>
+        <tbody id="bb-tbody"></tbody>
+      </table></div>
+      <div class="tbl-info" id="bb-info"></div>
+    </div>
+  </div>
+
+  <!-- PM DASHBOARD -->
+  <div id="view-pm" class="view">
+    <div class="page-header">
+      <span class="page-title">PM Dashboard</span>
+      <div class="header-right">
+        <div class="view-toggle">
+          <button class="vbtn active" id="pm-vbtn-t" onclick="setPMView('table')">Table</button>
+          <button class="vbtn" id="pm-vbtn-c" onclick="setPMView('cards')">Cards</button>
+        </div>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="kpi-grid">
+        <div class="kpi" style="border-left-color:#378ADD;"><div class="kpi-n" id="pm-k-con">27</div><div class="kpi-l">Construction</div></div>
+        <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n" id="pm-k-pre">20</div><div class="kpi-l">Pre-con</div></div>
+        <div class="kpi" style="border-left-color:#888;"><div class="kpi-n" id="pm-k-close">23</div><div class="kpi-l">Closeout</div></div>
+        <div class="kpi" style="border-left-color:#534AB7;"><div class="kpi-n" id="pm-k-val">$347M</div><div class="kpi-l">Portfolio value</div></div>
+      </div>
+      <div class="controls">
+        <input type="text" id="pm-search" placeholder="Search project, PM, superintendent…" oninput="renderPM()">
+        <select id="pm-pm" onchange="renderPM()"><option value="">All PMs</option></select>
+        <select id="pm-super" onchange="renderPM()"><option value="">All supers</option></select>
+        <select id="pm-pe" onchange="renderPM()"><option value="">All PEs</option></select>
+      </div>
+      <div class="pill-row">
+        <button class="pill active" data-st="" onclick="setPMStatus(this,'')">All (79)</button>
+        <button class="pill" data-st="Construction" onclick="setPMStatus(this,'Construction')">Construction</button>
+        <button class="pill" data-st="Pre-Con" onclick="setPMStatus(this,'Pre-Con')">Pre-con</button>
+        <button class="pill" data-st="Closeout" onclick="setPMStatus(this,'Closeout')">Closeout</button>
+        <button class="pill" data-st="Retention Billed" onclick="setPMStatus(this,'Retention Billed')">Retention</button>
+        <button class="pill" data-st="On Hold" onclick="setPMStatus(this,'On Hold')">On hold</button>
+      </div>
+      <div id="pm-table-view">
+        <div class="tbl-wrap"><table>
+          <thead><tr>
+            <th onclick="sortPM('job_num')" data-col="job_num">#</th>
+            <th onclick="sortPM('name')" data-col="name">Project</th>
+            <th onclick="sortPM('pm')" data-col="pm">PM</th>
+            <th onclick="sortPM('status')" data-col="status">Status</th>
+            <th onclick="sortPM('value')" data-col="value" style="text-align:right;">Value</th>
+            <th onclick="sortPM('super')" data-col="super">Superintendent</th>
+            <th onclick="sortPM('pe')" data-col="pe">PE</th>
+            <th onclick="sortPM('end')" data-col="end">End date</th>
+            <th>Notes</th>
+          </tr></thead>
+          <tbody id="pm-tbody"></tbody>
+        </table></div>
+      </div>
+      <div id="pm-cards-view" style="display:none;"><div class="pm-cards" id="pm-cards-grid"></div></div>
+      <div class="tbl-info" id="pm-info"></div>
+    </div>
+  </div>
+
+  <!-- SUPER DASHBOARD -->
+  <div id="view-super" class="view">
+    <div class="page-header">
+      <span class="page-title">Superintendent Dashboard</span>
+      <div class="header-right">
+        <div class="view-toggle">
+          <button class="vbtn active" id="su-vbtn-t" onclick="setSUView('table')">Table</button>
+          <button class="vbtn" id="su-vbtn-c" onclick="setSUView('cards')">Cards</button>
+        </div>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="kpi-grid">
+        <div class="kpi" style="border-left-color:#378ADD;"><div class="kpi-n" id="su-k-supers">20</div><div class="kpi-l">Superintendents</div></div>
+        <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n" id="su-k-active">46</div><div class="kpi-l">Active assignments</div></div>
+        <div class="kpi" style="border-left-color:#BA7517;"><div class="kpi-n">Jim Harrison</div><div class="kpi-l">Most jobs (17 total)</div></div>
+        <div class="kpi" style="border-left-color:#534AB7;"><div class="kpi-n" id="su-k-val">$347M</div><div class="kpi-l">Portfolio covered</div></div>
+      </div>
+      <div class="controls">
+        <input type="text" id="su-search" placeholder="Search superintendent or project…" oninput="renderSU()">
+        <select id="su-super" onchange="renderSU()"><option value="">All superintendents</option></select>
+        <select id="su-pm" onchange="renderSU()"><option value="">All PMs</option></select>
+      </div>
+      <div class="pill-row">
+        <button class="pill active" data-st="" onclick="setSUStatus(this,'')">All jobs</button>
+        <button class="pill" data-st="Construction" onclick="setSUStatus(this,'Construction')">Construction</button>
+        <button class="pill" data-st="Pre-Con" onclick="setSUStatus(this,'Pre-Con')">Pre-con</button>
+        <button class="pill" data-st="Closeout" onclick="setSUStatus(this,'Closeout')">Closeout</button>
+      </div>
+      <div id="su-table-view">
+        <div class="tbl-wrap"><table>
+          <thead><tr>
+            <th onclick="sortSU('super')" data-col="super">Superintendent</th>
+            <th onclick="sortSU('name')" data-col="name">Project</th>
+            <th onclick="sortSU('job_num')" data-col="job_num">#</th>
+            <th onclick="sortSU('pm')" data-col="pm">PM</th>
+            <th onclick="sortSU('status')" data-col="status">Status</th>
+            <th onclick="sortSU('value')" data-col="value" style="text-align:right;">Value</th>
+            <th onclick="sortSU('end')" data-col="end">End date</th>
+          </tr></thead>
+          <tbody id="su-tbody"></tbody>
+        </table></div>
+      </div>
+      <div id="su-cards-view" style="display:none;"><div class="pm-cards" id="su-cards-grid"></div></div>
+      <div class="tbl-info" id="su-info"></div>
+    </div>
+  </div>
+
+  <!-- BIDS & RFPs -->
+  <div id="view-rfps" class="view">
+    <div class="page-header">
+      <span class="page-title">Bids &amp; RFPs</span>
+      <div class="header-right"><span class="header-badge">233 records</span></div>
+    </div>
+    <div class="page-content">
+      <div class="kpi-grid kpi-grid-5">
+        <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n" id="rfp-k-won">63</div><div class="kpi-l">Awarded</div></div>
+        <div class="kpi" style="border-left-color:#E24B4A;"><div class="kpi-n" id="rfp-k-lost">88</div><div class="kpi-l">Lost</div></div>
+        <div class="kpi" style="border-left-color:#BA7517;"><div class="kpi-n" id="rfp-k-pend">56</div><div class="kpi-l">Pending</div></div>
+        <div class="kpi" style="border-left-color:#378ADD;"><div class="kpi-n" id="rfp-k-wr">41.7%</div><div class="kpi-l">Win rate</div></div>
+        <div class="kpi" style="border-left-color:#534AB7;"><div class="kpi-n" id="rfp-k-val">$71M</div><div class="kpi-l">Value won</div></div>
+      </div>
+      <div class="two-col">
+        <div class="card"><div class="card-title">Win rate by PM</div><div class="chart-wrap" style="height:200px;"><canvas id="rfp-pm-chart" role="img" aria-label="Win rate by PM bar chart">Win rates 12% to 70%.</canvas></div></div>
+        <div class="card"><div class="card-title">Outcomes by year</div><div class="chart-wrap" style="height:200px;"><canvas id="rfp-year-chart" role="img" aria-label="Bid outcomes by year 2024 to 2026">Annual won/lost/pending counts.</canvas></div></div>
+      </div>
+      <div class="controls">
+        <input type="text" id="rfp-search" placeholder="Search project, PM, client, location…" oninput="renderRFP()">
+        <select id="rfp-pm" onchange="renderRFP()"><option value="">All PMs</option></select>
+        <select id="rfp-type" onchange="renderRFP()"><option value="">All types</option><option>RFP</option><option>ROM</option><option>Budget</option></select>
+        <select id="rfp-client" onchange="renderRFP()"><option value="">All clients</option></select>
+      </div>
+      <div class="pill-row">
+        <button class="pill active" data-r="" onclick="setRFPResult(this,'')">All</button>
+        <button class="pill" data-r="Awarded" onclick="setRFPResult(this,'Awarded')">Awarded</button>
+        <button class="pill" data-r="Lost" onclick="setRFPResult(this,'Lost')">Lost</button>
+        <button class="pill" data-r="Pending" onclick="setRFPResult(this,'Pending')">Pending</button>
+        <button class="pill" data-r="Bidding" onclick="setRFPResult(this,'Bidding')">Bidding</button>
+        <button class="pill" data-r="Upcoming Bid" onclick="setRFPResult(this,'Upcoming Bid')">Upcoming</button>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr>
+          <th onclick="sortRFP('name')" data-col="name">Project</th>
+          <th onclick="sortRFP('pm')" data-col="pm">PM</th>
+          <th onclick="sortRFP('type')" data-col="type">Type</th>
+          <th onclick="sortRFP('result')" data-col="result">Result</th>
+          <th onclick="sortRFP('value')" data-col="value" style="text-align:right;">Value</th>
+          <th onclick="sortRFP('client')" data-col="client">Client</th>
+          <th onclick="sortRFP('location')" data-col="location">Location</th>
+          <th onclick="sortRFP('due')" data-col="due">Due</th>
+          <th>Notes</th>
+        </tr></thead>
+        <tbody id="rfp-tbody"></tbody>
+      </table></div>
+      <div class="tbl-info" id="rfp-info"></div>
+    </div>
+  </div>
+
+  <!-- TV MODE -->
+  <div id="view-tv" class="view">
+    <div class="page-header">
+      <span class="page-title">TV Display</span>
+      <div class="header-right"><span class="header-badge">Auto-rotating · 4 slides · 8s each</span></div>
+    </div>
+    <div class="tv-wrapper">
+      <div class="tv-frame">
+        <div class="tv-head">
+          <span class="tv-logo">Operations Dashboard</span>
+          <div class="tv-dots" id="tv-dots"></div>
+          <span class="tv-clock" id="tv-clock"></span>
+        </div>
+
+        <div class="tv-slide active" id="tv-s0">
+          <div class="tv-slide-lbl">Portfolio overview</div>
+          <div class="tv-kpi-grid">
+            <div class="tv-kpi" style="border-left-color:#378ADD;"><div class="tv-kpi-n">$347M</div><div class="tv-kpi-l">Total WIP value</div></div>
+            <div class="tv-kpi" style="border-left-color:#1D9E75;"><div class="tv-kpi-n">50</div><div class="tv-kpi-l">Active WIP jobs</div></div>
+            <div class="tv-kpi" style="border-left-color:#BA7517;"><div class="tv-kpi-n">24</div><div class="tv-kpi-l">Bids in flight</div></div>
+            <div class="tv-kpi" style="border-left-color:#534AB7;"><div class="tv-kpi-n">41.7%</div><div class="tv-kpi-l">All-time win rate</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div style="background:var(--surface2);border-radius:var(--radius);padding:14px 18px;">
+              <div style="font-size:11px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">WIP by status</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;font-size:14px;"><span style="width:10px;height:10px;border-radius:50%;background:#378ADD;flex-shrink:0;"></span>Construction <strong style="margin-left:auto;">27</strong></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:14px;"><span style="width:10px;height:10px;border-radius:50%;background:#1D9E75;flex-shrink:0;"></span>Pre-con <strong style="margin-left:auto;">20</strong></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:14px;"><span style="width:10px;height:10px;border-radius:50%;background:#888;flex-shrink:0;"></span>Closeout <strong style="margin-left:auto;">23</strong></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:14px;"><span style="width:10px;height:10px;border-radius:50%;background:#534AB7;flex-shrink:0;"></span>Retention billed <strong style="margin-left:auto;">6</strong></div>
+              </div>
+            </div>
+            <div style="background:var(--surface2);border-radius:var(--radius);padding:14px 18px;">
+              <div style="font-size:11px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Bid pipeline</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;font-size:14px;"><span style="width:10px;height:10px;border-radius:50%;background:#EF9F27;flex-shrink:0;"></span>Upcoming <strong style="margin-left:auto;">10</strong></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:14px;"><span style="width:10px;height:10px;border-radius:50%;background:#378ADD;flex-shrink:0;"></span>Actively bidding <strong style="margin-left:auto;">14</strong></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:14px;"><span style="width:10px;height:10px;border-radius:50%;background:#1D9E75;flex-shrink:0;"></span>Submitted <strong style="margin-left:auto;">52</strong></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:14px;"><span style="width:10px;height:10px;border-radius:50%;background:#E24B4A;flex-shrink:0;"></span>All-time win rate <strong style="margin-left:auto;">41.7%</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tv-slide" id="tv-s1">
+          <div class="tv-slide-lbl">Active bids — due soonest</div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr>
+              <th style="font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);padding:0 8px 10px;text-align:left;border-bottom:0.5px solid var(--border);">Project</th>
+              <th style="font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);padding:0 8px 10px;text-align:left;border-bottom:0.5px solid var(--border);">PM</th>
+              <th style="font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);padding:0 8px 10px;text-align:left;border-bottom:0.5px solid var(--border);">Status</th>
+              <th style="font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);padding:0 8px 10px;text-align:right;border-bottom:0.5px solid var(--border);">Value</th>
+              <th style="font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);padding:0 8px 10px;text-align:left;border-bottom:0.5px solid var(--border);">Due</th>
+            </tr></thead>
+            <tbody id="tv-bids-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="tv-slide" id="tv-s2">
+          <div class="tv-slide-lbl">WIP value by PM</div>
+          <div id="tv-wip-bars"></div>
+        </div>
+
+        <div class="tv-slide" id="tv-s3">
+          <div class="tv-slide-lbl">Win rate by PM — all-time decided bids</div>
+          <div id="tv-win-bars"></div>
+        </div>
+
+        <div class="tv-foot">
+          <span class="tv-foot-info">Updated 5/15/2026 &nbsp;·&nbsp; <span id="tv-slide-lbl">Slide 1 of 4</span></span>
+          <div class="tv-ctrls">
+            <button class="tv-btn" onclick="tvPrev()">← Prev</button>
+            <button class="tv-btn" id="tv-play-btn" onclick="tvToggle()">⏸ Pause</button>
+            <button class="tv-btn" onclick="tvNext()">Next →</button>
+          </div>
+        </div>
+        <div class="tv-progress"><div class="tv-progress-bar" id="tv-pbar"></div></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── LIVE DATA CONFIG ─────────────────────────────────────────────
+const AZURE_CLIENT_ID = 'd7796b05-ebb0-4a8a-b1b5-0286631374d3';
+const AZURE_TENANT_ID  = '1cc4076c-d96f-490e-a11a-66f8cd257820';
+const FILE_PATH = 'Claude/Projects/SBC Operations Dashboard/PM Job List 2026.xlsm';
+
+const msalConfig = {
+  auth: {
+    clientId: AZURE_CLIENT_ID,
+    authority: 'https://login.microsoftonline.com/' + AZURE_TENANT_ID,
+    redirectUri: window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/')
+  },
+  cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false }
+};
+const msalInstance = new msal.PublicClientApplication(msalConfig);
+const GRAPH_SCOPES = ['Files.Read', 'User.Read'];
+
+// Static fallback data (used until live data loads)
+const JOBS = [{"pm": "Cameron Peach", "job_num": "3744", "name": "Itron", "value": 4303350, "status": "Construction", "super": "Paulo Salvador", "pe": "Ivan Ledesma", "pc": "Sydney Hewitt", "start": "03/02/2026", "end": "11/15/2026", "punch": "12/01/2026", "comments": "2/12: Demo complete.  On pause for repricing.  2/23: Day 2 - completion date 11/19"}, {"pm": "Cameron Peach", "job_num": "3780", "name": "HYFIX", "value": 585285, "status": "Pre-Con", "super": "TBD", "pe": "Ivan Ledesma", "pc": "Sydney Hewitt", "start": "06/15/2026", "end": "09/09/2026", "punch": "09/16/2026", "comments": "*4/21 - Start date pending permit approval"}, {"pm": "Charlie Griffin", "job_num": "3661", "name": "Renesas TI", "value": 70000000, "status": "Construction", "super": "John McGowan", "pe": "Antonio Gonzalez", "pc": "Sydney Hewitt", "start": "06/01/2024", "end": "01/26/2026", "punch": "03/13/2026", "comments": "1/12:  Jenna to begin closeout WL Date 1/25/26."}, {"pm": "Charlie Griffin", "job_num": "3522", "name": "2595 Junction Ave.", "value": 850000, "status": "On Hold", "super": "TBD", "pe": "TBD", "pc": "TBD", "start": "N/A", "end": "N/A", "punch": "N/A", "comments": "Pending Final Decision on moving forward"}, {"pm": "Charlie Griffin", "job_num": "3538", "name": "2660 Zanker Rd.", "value": 750000, "status": "On Hold", "super": "TBD", "pe": "TBD", "pc": "TBD", "start": "N/A", "end": "N/A", "punch": "N/A", "comments": "Pending Final Decision on moving forward"}, {"pm": "Charlie Griffin", "job_num": "7003", "name": "ASML TX Plano", "value": 1054650, "status": "Construction", "super": "Vince Odom", "pe": "Antonio Gonzalez", "pc": "Sydney Hewitt", "start": "10/20/2025", "end": "04/16/2026", "punch": "4/31/2026", "comments": ""}, {"pm": "Charlie Griffin", "job_num": "3567", "name": "ASML", "value": 2485420, "status": "Closeout", "super": "MANUEL VILLALOBOS", "pe": "CONNER EDGER", "pc": "Jenna Brown", "start": "01/01/2023", "end": "05/30/2025", "punch": "05/30/2025", "comments": ""}, {"pm": "Charlie Griffin", "job_num": "5002", "name": "ASML AZ Punch Work", "value": 200000, "status": "Closeout", "super": "ELIJAH MOSLEY", "pe": "CONNER EDGER", "pc": "Jenna Brown", "start": "01/13/2025", "end": "05/02/2025", "punch": "05/02/2025", "comments": ""}, {"pm": "Chip Hackett", "job_num": "7000", "name": "Luxelocker Austin", "value": 10671645, "status": "Construction", "super": "Vince Odom", "pe": "Greg Gonzalez", "pc": "Eileen Kile", "start": "05/11/2026", "end": "06/01/2027", "punch": "06/01/2027", "comments": ""}, {"pm": "Chip Hackett", "job_num": "3534", "name": "Bascom Station", "value": 152558531, "status": "Retention Billed", "super": "Gilberto Valdovinos", "pe": "Greg Gonzalez", "pc": "Hong Windham", "start": "11/28/2022", "end": "10/29/2025", "punch": "11/30/2025", "comments": "Some security scope still ongoing until mid-Feb."}, {"pm": "Chris Beekman", "job_num": "3704", "name": "Valley Christian HS HVAC Improvement", "value": 445541, "status": "Construction", "super": "Sean Toombs", "pe": "Crystal Lazzarini", "pc": "Araceli Cruz-Antonio", "start": "06/02/2025", "end": "05/08/2026", "punch": "05/08/2026", "comments": "1/12: Pending FA Dampers and Final.   | 2/16: Jordan to hold off on Final + Retention billing until Chris reconciles outstanding RCO's.   | 3/16: FA Dampers to be installed 3/17. |"}, {"pm": "Chris Beekman", "job_num": "3732", "name": "Fidelity Campbell HVAC", "value": 493446, "status": "Construction", "super": "Fernando Gonzalez", "pe": "Crystal Lazzarini", "pc": "Araceli Cruz-Antonio", "start": "02/16/2026", "end": "05/01/2026", "punch": "05/22/2026", "comments": "*5/22 - final walkthrough with landlord (Kidder Matthews)"}, {"pm": "Chris Beekman", "job_num": "3751", "name": "Techmart Suite 522 - Niles", "value": 1069276, "status": "Construction", "super": "Manuel Villalobos", "pe": "Crystal Lazzarini", "pc": "Araceli Cruz-Antonio", "start": "01/20/2026", "end": "06/15/2026", "punch": "06/15/2026", "comments": "fire permit delaying project ~2 weeks as of 3/13/26.   | 3/16: Techmart to issue 3rd PO for additional budget allowance.  Chris to pull new Job # when ready."}, {"pm": "Chris Beekman", "job_num": "3753", "name": "2550 Flex Suite 525", "value": 0, "status": "Construction", "super": "Sean Toombs", "pe": "Crystal Lazzarini", "pc": "Araceli Cruz-Antonio", "start": "01/12/2026", "end": "04/28/2026", "punch": "04/28/2026", "comments": "3/16: Araceli to review closeout checklist with team and send request to subs.  Jordan to bill 100% for March and hold off on Retention for April. | 4/8 - Punched last week, buildi"}, {"pm": "Chris Beekman", "job_num": "3779", "name": "Techmart VSP Suite 522", "value": 19744, "status": "Construction", "super": "Sean Toombs", "pe": "Crystal Lazzarini", "pc": "Araceli Cruz-Antonio", "start": "04/02/2026", "end": "06/15/2026", "punch": "06/15/2026", "comments": "*4/8 - This had to be broken out as separate job but same as 3751"}, {"pm": "Chris Beekman", "job_num": "TBD", "name": "Ikea East Palo Alto Parking Lot Storage", "value": 182736, "status": "Pre-Con", "super": "", "pe": "Crystal Lazzarini", "pc": "Araceli Cruz-Antonio", "start": "", "end": "", "punch": "", "comments": ""}, {"pm": "Chris Beekman", "job_num": "3728", "name": "Amazon Milpitas DUR3 (DSC)", "value": 3321749, "status": "Pre-Con", "super": "Edwin Craig", "pe": "Heather Cushman", "pc": "Eileen Kile", "start": "TBD", "end": "TBD", "punch": "TBD", "comments": "Plans will be revised and project will be re-priced. Amazon to provide an update by next month."}, {"pm": "Chris Beekman", "job_num": "3776", "name": "Amazon Milpitas DSF7-GH", "value": 873668, "status": "Pre-Con", "super": "Edwin Craig", "pe": "Heather Cushman", "pc": "Eileen Kile", "start": "05/13/2026", "end": "07/10/2026", "punch": "=K15", "comments": "Estimated start date. Waiting on Permit."}, {"pm": "Chris Beekman", "job_num": "3775", "name": "Amazon SSF DFA5-PWR", "value": 1214534, "status": "Pre-Con", "super": "Edwin Craig", "pe": "Heather Cushman", "pc": "Eileen Kile", "start": "06/01/2026", "end": "08/10/2026", "punch": "=K16", "comments": "Estimated start date. Waiting on Permit and drawings from Civil Eng. Trenching that was going to be in PG&E's scope will now be in SBC's scope"}, {"pm": "Chris Beekman", "job_num": "3608", "name": "Holiday Inn Express Santa Clara TI", "value": 297553, "status": "Closeout", "super": "Eric Villalobos", "pe": "N/A", "pc": "Araceli Cruz-Antonio", "start": "12/18/2024", "end": "02/27/2026", "punch": "02/27/2026", "comments": "Public Works signed off 10/30/25, pending Building Final sign off.  | 3/16: Theron to step in to assist with Final?  Chris reached out to Theron for assistance with scheduling Eric"}, {"pm": "Chris Beekman", "job_num": "3730", "name": "Techmart Suite 520 - L&T Technology", "value": 344704, "status": "Closeout", "super": "Manuel Villalobos", "pe": "N/A", "pc": "Araceli Cruz-Antonio", "start": "07/21/2025", "end": "11/28/2025", "punch": "12/29/2025", "comments": "1/12:  Jordan can bill retention.  Araceli can start the closeout request.  Ongoing. | *4/8 - Billed in full inc retention, NOT paid yet. Closeout complete and sent to owner."}, {"pm": "Chris Beekman", "job_num": "3741", "name": "Kirkwood Animal Hospital TI", "value": 198539, "status": "Closeout", "super": "Sean Toombs", "pe": "Crystal Lazzarini", "pc": "Araceli Cruz-Antonio", "start": "09/29/2025", "end": "03/09/2026", "punch": "03/09/2026", "comments": "Retention outstanding only.   | 2/16: Araceli to start client closeout request.  | 3/16: Wood Conn delays.  Owner wants to reduce Retention payment due to delayed finish. | *4/8 - "}, {"pm": "Chris Beekman", "job_num": "3742", "name": "Quest Global TI", "value": 0, "status": "Closeout", "super": "Sean Toombs", "pe": "Crystal Lazzarini", "pc": "Araceli Cruz-Antonio", "start": "10/28/2025", "end": "01/21/2026", "punch": "01/21/2026", "comments": "2/16: Araceli to review closoeut checklist with team and send request to subs.  | 3/16:  Retention pending. | *4/8 - Still need a couple subs to submit on closeout. Tracking to get"}, {"pm": "Chris Beekman", "job_num": "3743", "name": "1275 El Camino Real TI", "value": 103411, "status": "Closeout", "super": "Joe Miller", "pe": "Crystal Lazzarini", "pc": "Araceli Cruz-Antonio", "start": "02/02/2026", "end": "03/13/2026", "punch": "03/13/2026", "comments": "3/16: Araceli to review closeout checklist with team and send request to subs.  Jordan to bill 100% and Retention for March.  | *4/8 - Waiting on 1 pendant light to arrive and inst"}, {"pm": "Chris Beekman", "job_num": "3750", "name": "Techmart Suite 522 - Niles DESIGN ONLY", "value": 40356, "status": "Closeout", "super": "TBD", "pe": "Crystal Lazzarini", "pc": "Araceli Cruz-Antonio", "start": "11/14/2025", "end": "02/27/2026", "punch": "02/27/2026", "comments": "DESIGN broken out from main scope so MEP can being design drawings.   | 1/12:  Ready to bill 100%  | 2/16: Jordan to contact subs for invoices. | *4/8 - Jordan to bill retention"}, {"pm": "Chris Beekman", "job_num": "3752", "name": "550 Allerton", "value": 121190, "status": "Closeout", "super": "Joe Miller", "pe": "Crystal Lazzarini", "pc": "Araceli Cruz-Antonio", "start": "01/26/2026", "end": "03/20/2026", "punch": "03/20/2026", "comments": "9Wood will take 10-12 weeks from order.   | 3/16: Chris to get February billing back to Jordan to issue.  Araceli can start closeout checklist for team review. | 4/8 - This is comp"}, {"pm": "David Girdley", "job_num": "3734", "name": "Spec Coat", "value": 2204006, "status": "Construction", "super": "Fernando Gonzalez", "pe": "Heather Cushman", "pc": "Eileen Kile", "start": "08/25/2025", "end": "02/13/2026", "punch": "02/13/2026", "comments": "Closeout docs have been collected. Bill Retention.  | *4/14 - Still need to close out the final permit. Still waiting on a few subs for closeout docs. David to check if we billed r"}, {"pm": "David Girdley", "job_num": "3777", "name": "55 Trimble Landlord Reposition", "value": 1900000, "status": "Pre-Con", "super": "Sean Toombs", "pe": "Heather Cushman", "pc": "Eileen Kile", "start": "06/08/2026", "end": "11/04/2026", "punch": "", "comments": "Precon"}, {"pm": "David Girdley", "job_num": "6000", "name": "Fidelity Boise", "value": 1500000, "status": "Construction", "super": "Drew Gaither", "pe": "Heather Cushman", "pc": "Eileen Kile", "start": "01/12/2026", "end": "06/01/2026", "punch": "06/15/2026", "comments": "Underway"}, {"pm": "David Girdley", "job_num": "3784", "name": "Lotus Preschool", "value": 10000000, "status": "Pre-Con", "super": "Craig Bolding", "pe": "Heather Cushman", "pc": "Eileen Kile", "start": "05/18/2026", "end": "08/01/2027", "punch": "08/15/2026", "comments": "Precon"}, {"pm": "David Girdley", "job_num": "3778", "name": "Vespaio", "value": 3000000, "status": "Pre-Con", "super": "Joe Miller", "pe": "Heather Cushman", "pc": "Eileen Kile", "start": "06/01/2026", "end": "12/01/2026", "punch": "12/01/2026", "comments": "Soft Award - Contract Negotiations"}, {"pm": "David Girdley", "job_num": "TBD", "name": "Fidelity Folsom", "value": 1682446, "status": "Pre-Con", "super": "Fernando Gonzalez", "pe": "Heather Cushman", "pc": "Eileen Kile", "start": "07/15/2026", "end": "12/15/2026", "punch": "12/15/2026", "comments": ""}, {"pm": "David Girdley", "job_num": "3632", "name": "SSFJ Phase Two", "value": 9300000, "status": "Retention Billed", "super": "Joe Miller", "pe": "N/A", "pc": "Eileen Kile", "start": "01/03/2024", "end": "08/11/2025", "punch": "09/05/2025", "comments": "STRUGGLING TO COLLECT.  3/16:  Cameron has call with clients 3/18 to discuss final payout. | *4/14 - Closeouts have not been started, they still owe us money"}, {"pm": "David Girdley", "job_num": "3726", "name": "N Canyon Building Repairs", "value": 1300000, "status": "Closeout", "super": "Edwin Craig", "pe": "Heather Cushman", "pc": "Eileen Kile", "start": "07/15/2025", "end": "01/20/2026", "punch": "", "comments": "100% Complete Sending Closeout.  3/16:  Jordan to send Retention bill once David sends updated SOV.  | *4/14 - Closeout is missing roofing warranty. Final billing sent out today"}, {"pm": "David Girdley", "job_num": "3716", "name": "SSFJ Phase Three", "value": 75000, "status": "Retention Billed", "super": "Joe Miller", "pe": "Heather Cushman", "pc": "Eileen Kile", "start": "N/A", "end": "N/A", "punch": "", "comments": "HALTED.    3/16:  Cameron has call with clients 3/18 to discuss final payout. | *4/14 - Closeouts have not been started, they still owe us money"}, {"pm": "Dusty Furtado", "job_num": "3731", "name": "Fremont Swim", "value": 3670480, "status": "Construction", "super": "Troy Turturici", "pe": "Greg Gonzalez", "pc": "Araceli Cruz-Antonio", "start": "09/29/2025", "end": "06/24/2026", "punch": "06/30/2026", "comments": "4/9: End date moved to 6/26. "}, {"pm": "Dusty Furtado", "job_num": "3773", "name": "Menlo School Reroof - Phase 2", "value": 456854, "status": "Construction", "super": "Eric Villalobos", "pe": "Greg Gonzalez", "pc": "Araceli Cruz-Antonio", "start": "06/08/2026", "end": "08/07/2026", "punch": "TBD", "comments": "Bid resubmitted 3/3 | 4/9 - Just need 1 contract for Statewide"}, {"pm": "Dusty Furtado", "job_num": "3770", "name": "Menlo School HVAC - Phase 1", "value": 2735623, "status": "Construction", "super": "Eric Villalobos", "pe": "Greg Gonzalez", "pc": "Araceli Cruz-Antonio", "start": "06/08/2026", "end": "08/15/2026", "punch": "08/15/2026", "comments": ""}, {"pm": "Dusty Furtado", "job_num": "3771", "name": "Menlo School HVAC - Phase 2", "value": 996921, "status": "Construction", "super": "Eric Villalobos", "pe": "Greg Gonzalez", "pc": "Araceli Cruz-Antonio", "start": "06/08/2027", "end": "08/15/2027", "punch": "08/15/2027", "comments": ""}, {"pm": "Dusty Furtado", "job_num": "3782", "name": "Warnock Dental Office", "value": 1200000, "status": "Pre-Con", "super": "TBD", "pe": "Greg Gonzalez", "pc": "Araceli Cruz-Antonio", "start": "09/01/2026", "end": "11/23/2026", "punch": "11/30/2026", "comments": ""}, {"pm": "Dusty Furtado", "job_num": "3781", "name": "Mancinis Sleep World (Pre-Con)", "value": 53000, "status": "Pre-Con", "super": "TBD", "pe": "Greg Gonzalez", "pc": "Araceli Cruz-Antonio", "start": "06/22/2026", "end": "06/03/2026", "punch": "N/A", "comments": ""}, {"pm": "John Machi", "job_num": "3737", "name": "Wineshipping.com", "value": 0, "status": "Construction", "super": "Craig Bolding", "pe": "Ivan Ledesma", "pc": "Sydney Hewitt", "start": "02/23/2026", "end": "06/05/2026", "punch": "06/05/2026", "comments": "4/7: Schedule is on track & we're paid current thru Feb | 4/16 - DHA did not have TAB included so this is going to be an add. They will be out there Monday to complete a site surve"}, {"pm": "John Machi", "job_num": "3763", "name": "Newmark Ste #575 @ OSW-L5", "value": 2066319, "status": "Construction", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Sydney Hewitt", "start": "12/01/2025", "end": "06/05/2026", "punch": "06/05/2026", "comments": "4/7: Schedule is on track & we're paid current thru Feb | 4/30: Several RCO's have been approved to proceed & will push the completion date out | 5/14: Permit Final Docs saved in f"}, {"pm": "John Machi", "job_num": "3764", "name": "Wellness & Women's RR Upgrade OSW-L5", "value": 99219, "status": "Construction", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Sydney Hewitt", "start": "12/01/2025", "end": "05/15/2026", "punch": "05/15/2026", "comments": "4/7: March invoice was sent to Scott Giddens $67k & balance to finish + Retention is +$32k.  4/23: FS Permit in process of approval. | 4/30: Still working on p-list action items & "}, {"pm": "John Machi", "job_num": "3768", "name": "Sky Zone at Westgate Center", "value": 0, "status": "Construction", "super": "Noel Hurtado", "pe": "Ivan Ledesma", "pc": "Sydney Hewitt", "start": "01/12/2026", "end": "06/05/2026", "punch": "06/05/2026", "comments": "4/7: Pending long lead times for(N) storefront doors & windows at main entry.  4/23: Permit is still Pending; completion is based on obtaining permit and scheduling inspections.  |"}, {"pm": "John Machi", "job_num": "Forthcoming", "name": "Repair Work NetApp @ Santana Row", "value": 11157, "status": "Construction", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Sydney Hewitt", "start": "03/20/2026", "end": "05/08/2026", "punch": "05/08/2026", "comments": "4/7: Pricing was approved via email from the Chief Bldg. Engr. w/FRT & waiting to receive executed contract & request job #. | 4/30: Work will be complete tomorrow. Still pending c"}, {"pm": "John Machi", "job_num": "3774", "name": "Misc. Stucco Patch w/FRT @ 356 Santana Row", "value": 12979, "status": "Construction", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Sydney Hewitt", "start": "04/20/2026", "end": "05/15/2026", "punch": "05/15/2026", "comments": "4/7: March invoice was sent to Anthony Perez w/FRT for $12,979.00 and balance to finish is $0.00 | 4/30: Work started today & is tracking to be complete by or before 5/22."}, {"pm": "John Machi", "job_num": "Forthcoming ", "name": "Exterior Wall Repairs f/Old Best Buy Bldg. (Ph 1)", "value": 49262, "status": "Construction", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Sydney Hewitt", "start": "04/20/2026", "end": "05/15/2026", "punch": "05/15/2026", "comments": "4/30: Pending forthing contract for the $49k in which the work was just completed. Pending Change Order for $236k to do more ext. wall patch that would start 5/26 & finish by or be"}, {"pm": "John Machi", "job_num": "3692", "name": "UBS - Napa", "value": 0, "status": "Closeout", "super": "Marcelo Estrada", "pe": "Ivan Ledesma", "pc": "Jenna Brown", "start": "03/10/2025", "end": "08/08/2025", "punch": "08/22/2025", "comments": "4/7: UBS is up to date on payment & Trin just sent a billing for $4,315.00 for RCO #022 that we just completed and is not past due yet."}, {"pm": "John Machi", "job_num": "3698", "name": "AV Related Work for JLL at Santana Row", "value": 17746, "status": "Closeout", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Jenna Brown", "start": "02/10/2025", "end": "02/28/2025", "punch": "04/23/2025", "comments": "4/7: 100% complete, paid in full & closed"}, {"pm": "John Machi", "job_num": "3688", "name": "Celestial AI", "value": 378893, "status": "Closeout", "super": "Paulo Salvador", "pe": "Ivan Ledesma", "pc": "Jenna Brown", "start": "02/17/2025", "end": "05/02/2025", "punch": "05/02/2025", "comments": "4/7: Jordan confirmed that we have been paid in full for this project and it is closed."}, {"pm": "John Machi", "job_num": "3694", "name": "Old H&M Space", "value": 0, "status": "Closeout", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Jenna Brown", "start": "02/03/2025", "end": "08/15/2025", "punch": "08/15/2025", "comments": "4/7:  | - 100% complete & paid in full. | - Closeout needs to be sent to FRT |  | 5/14: Permit Final Docs saved in folder."}, {"pm": "John Machi", "job_num": "3695", "name": "Couchbase @ OSW-L1", "value": 0, "status": "Closeout", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Jenna Brown", "start": "02/03/2025", "end": "05/16/2025", "punch": "05/16/2025", "comments": "4/7: 100% complete, paid in full & closed"}, {"pm": "John Machi", "job_num": "3712", "name": "New North Corridor @ OSW L3", "value": 99412, "status": "Closeout", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Jenna Brown", "start": "02/03/2025", "end": "07/30/2025", "punch": "08/01/2025", "comments": "4/7:  | - Just waiting on CofSJ to approve (N) as-builts for Fire Sprinklers.  | - Once approved then Jim can obtain signature from Fire Marshall. | - Pending payment for retention"}, {"pm": "John Machi", "job_num": "3700", "name": "3rd Floor Common Areas (Napa)", "value": 0, "status": "Closeout", "super": "Marcelo Estrada", "pe": "Ivan Ledesma", "pc": "Jenna Brown", "start": "02/10/2025", "end": "06/15/2025", "punch": "08/22/2025", "comments": "4/7: | - Closeout package was sent to the LL on 3/24/26 | - We've been paid in full"}, {"pm": "John Machi", "job_num": "3709", "name": "Calix Ste #450 @ OSW-L4", "value": 0, "status": "Closeout", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Jenna Brown", "start": "04/15/2025", "end": "08/15/2025", "punch": "09/26/2025", "comments": "4/8: Confirming that Hong sent our closeout package to Calix & FRT on 4/9/29  | 4/7:   | - John is finishing up reconciling the sub contingencies.   | - $31,499.24 is outstanding f"}, {"pm": "John Machi", "job_num": "3719", "name": "BetterHelp Ste #375 @ OSW-L3", "value": 0, "status": "Closeout", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Jenna Brown", "start": "04/28/2025", "end": "08/01/2025", "punch": "08/22/2025", "comments": "4/7:  | - JM to reconcile sub contingencies. | - Closeout needs to be sent to FRT & BetterHelp. | - Work is 100% complete & Finaled.   | - We've been paid in full. |  | 5/14: Permi"}, {"pm": "John Machi", "job_num": "3720", "name": "New Demising Walls on L3 @ OSW", "value": 116587, "status": "Closeout", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Jenna Brown", "start": "02/03/2025", "end": "12/31/2025", "punch": "12/31/2025", "comments": "4/7:  | - Finaled | - Closeout package will be part of #3748 (Corridors, Wellness & Women's RR on L3) | - We've been paid in full |  | 4/30: Jim has one more item to close to get F"}, {"pm": "John Machi", "job_num": "3723", "name": "Securiti Ste #325 @ OSW-L3", "value": 1539456, "status": "Retention Billed", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Jenna Brown", "start": "09/29/2025", "end": "12/31/2025", "punch": "12/31/2025", "comments": "4/7: | - Finaled | - We've been paid in full. | - Closeout was completed & issued to Securiti & FRT"}, {"pm": "John Machi", "job_num": "3736", "name": "Sheetrock Perimeter/Exterior Walls @ OSW-L5", "value": 63300, "status": "Retention Billed", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Sydney Hewitt", "start": "08/26/2025", "end": "11/06/2025", "punch": "11/06/2025", "comments": "1/16:   | - Paid in full. | 11/17:  | - 76% billed, pending Retention bill.   | - No Closeout package needed.  "}, {"pm": "John Machi", "job_num": "3748", "name": "Corridors, Wellness Rm, Women's RR@ OSW-L3", "value": 269951, "status": "Retention Billed", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Sydney Hewitt", "start": "11/03/2025", "end": "01/23/2026", "punch": "01/23/2026", "comments": "4/7:  | - $27k retention has been outstanding since 12/31/25 & JM reached out to Scott Giddens for assist. on getting paid. | - Pending FS final | - Closeout packages for #3712, 37"}, {"pm": "John Machi", "job_num": "3765", "name": "(N) Corridors & Demising Walls @ L5", "value": 545994, "status": "Closeout", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Sydney Hewitt", "start": "12/01/2025", "end": "12/29/2025", "punch": "12/29/2025", "comments": "4/7: $545,994.00 for Jan, 2026, is outstanding & JM reached out to Scott Giddens for assist. on getting paid. |  | 4/8: Billed in full inc retention but not paid | *This will be a "}, {"pm": "John Machi", "job_num": "3772", "name": "Resolve Odor in Women's RR @ OSW-L4", "value": 23437, "status": "Construction", "super": "Jim Harrison", "pe": "Ivan Ledesma", "pc": "Sydney Hewitt", "start": "01/12/2026", "end": "03/31/2026", "punch": "03/31/2026", "comments": "4/7: | - The project is 100% complete and Sydney will collect warranty letters only, service work |  | 4/8: Closeout was started yesterday"}, {"pm": "Marc Morgan", "job_num": "TBD", "name": "Luxelocker Bozeman", "value": 8000000, "status": "Pre-Con", "super": "TBD", "pe": "TBD", "pc": "TBD", "start": "04/15/2026", "end": "05/01/2027", "punch": "", "comments": ""}, {"pm": "Marc Morgan", "job_num": "TBD", "name": "Luxelocker Round Rock", "value": 8000000, "status": "Pre-Con", "super": "TBD", "pe": "TBD", "pc": "TBD", "start": "05/01/2026", "end": "TBD", "punch": "", "comments": ""}, {"pm": "Marc Morgan", "job_num": "TBD", "name": "Luxelocker McKinney", "value": 8000000, "status": "Pre-Con", "super": "TBD", "pe": "TBD", "pc": "TBD", "start": "05/01/2026", "end": "TBD", "punch": "", "comments": ""}, {"pm": "Marc Morgan", "job_num": "TBD", "name": "Luxelocker Arvada", "value": 8000000, "status": "Pre-Con", "super": "TBD", "pe": "TBD", "pc": "TBD", "start": "TBD", "end": "TBD", "punch": "", "comments": ""}, {"pm": "Marc Morgan", "job_num": "TBD", "name": "Luxelocker Sacramento", "value": 8000000, "status": "Pre-Con", "super": "TBD", "pe": "TBD", "pc": "TBD", "start": "TBD", "end": "TBD", "punch": "", "comments": ""}, {"pm": "Marc Morgan", "job_num": "3710", "name": "La Rinconada Maintenance Facility", "value": 3643670, "status": "Pre-Con", "super": "TBD", "pe": "TBD", "pc": "TBD", "start": "07/01/2026", "end": "TBD", "punch": "", "comments": ""}, {"pm": "Marc Morgan", "job_num": "TBD", "name": "La Rinconada Comfort Station", "value": 456740, "status": "Pre-Con", "super": "TBD", "pe": "TBD", "pc": "TBD", "start": "07/15/2026", "end": "TBD", "punch": "", "comments": ""}, {"pm": "Marco Velasco", "job_num": "3609", "name": "ASML Micro Bulk Tank ", "value": 519573, "status": "Construction", "super": "Eric Villalobos", "pe": "Antonio Gonzalez", "pc": "Eileen Kile", "start": "11/24/2025", "end": "06/30/2026", "punch": "06/30/2026", "comments": "Work is on going, had issue with pad size and not the updated structural dwgs submitted to the City, Site Design screw up, looks like the pad as built will be ok, will need to cut "}, {"pm": "Marco Velasco", "job_num": "3724", "name": "ASML Generator Construction", "value": 2225135, "status": "Construction", "super": "Elijah Mosley", "pe": "Antonio Gonzalez", "pc": "Eileen Kile", "start": "01/19/2025", "end": "07/31/2026", "punch": "07/31/2026", "comments": "Work is on going, Techon falling behind, Elijah and Theron pushing Techon to stay on track "}, {"pm": "Marco Velasco", "job_num": "3703", "name": "ASML SJ 1100", "value": 123675, "status": "On Hold", "super": "Elijah Mosley", "pe": "Antonio Gonzalez", "pc": "Eileen Kile", "start": "07/30/2025", "end": "05/30/2026", "punch": "", "comments": "Pending parts that ASML ordered, currently 90% complete "}, {"pm": "Marco Velasco", "job_num": "3740", "name": "ASML D&E Lab Construction ", "value": 328156, "status": "Construction", "super": "Eric Villalobos", "pe": "Antonio Gonzalez", "pc": "Eileen Kile", "start": "12/22/2025", "end": "06/30/2026", "punch": "06/30/2026", "comments": "Project will be 95% complete by 4/3, then will wait until permament power is avalable on 5/7, with balancing and building finals by 5/15.  4/23: Receivables at 90%; Tammi to bill r"}, {"pm": "Marco Velasco", "job_num": "6001", "name": "ASML ID Boise TI", "value": 1992323, "status": "Construction", "super": "Drew Gaither", "pe": "Antonio Gonzalez", "pc": "Eileen Kile", "start": "02/02/2026", "end": "06/26/2026", "punch": "07/15/2026", "comments": "Ongoing, Drew is pushing to get back on track. Fire Alarm might be a hold up, working on getting another sub on board. 4/23: Completion currently tracking for end of June.  "}, {"pm": "Marco Velasco", "job_num": "3769", "name": "ASML Pavers", "value": 0, "status": "Pre-Con", "super": "TBD", "pe": "Antonio Gonzalez", "pc": "Eileen Kile", "start": "06/01/2026", "end": "08/01/2026", "punch": "08/01/2026", "comments": "Planning review meeting 4/13.  Tentative start is end of May."}, {"pm": "Marco Velasco", "job_num": "TBD", "name": "Unitek College (Landlord) ", "value": 0, "status": "Pre-Con", "super": "TBD", "pe": "Antonio Gonzalez", "pc": "Eileen Kile", "start": "", "end": "", "punch": "", "comments": ""}, {"pm": "Marco Velasco", "job_num": "3738", "name": "Gener8 Tool Install", "value": 103143, "status": "Closeout", "super": "FREDDIE TAGALOA", "pe": "TAMARA MAGARO", "pc": "Eileen Kile", "start": "09/15/2025", "end": "10/03/2025", "punch": "", "comments": "Jerri is working with Gener8 on a payment plan; $1500/week.  Being paid!"}, {"pm": "Marco Velasco", "job_num": "3757", "name": "Standford Trellis's Demo ", "value": 145945, "status": "Closeout", "super": "Marcelo Estrada", "pe": "Crystal Lazzarini", "pc": "EILEEN KILE", "start": "12/15/2025", "end": "01/16/2026", "punch": "", "comments": "Only one invoice remaining to be paid for Rains. This week the sheetmetal caps are being installed 3/23"}];
+const BIDS = [{"pm": "Adam Tafralis", "name": "The Plex Addition", "status": "Upcoming Bid", "type": "ROM", "value": 13000000, "due": "TBD"}, {"pm": "Adam Tafralis", "name": "VCHS Summer work", "status": "Upcoming Bid", "type": "", "value": 250000, "due": "TBD"}, {"pm": "Adam Tafralis", "name": "RMR 4720 Lakeview Fremont", "status": "Upcoming Bid", "type": "", "value": 1000000, "due": "TBD"}, {"pm": "Adam Tafralis", "name": "Fellowship Center", "status": "Upcoming Bid", "type": "ROM", "value": 0, "due": "TBD"}, {"pm": "Avi Kripalani", "name": "Amazon DCX5 EV", "status": "Submitted", "type": "RFP", "value": 944461, "due": "09/12/2025"}, {"pm": "Avi Kripalani", "name": "Amazon McClellan Park DSR6", "status": "Submitted", "type": "RFP", "value": 3294329, "due": "01/30/2026"}, {"pm": "Avi Kripalani", "name": "Peninsula Vet Center (Veterens Affairs)", "status": "Submitted", "type": "RFP", "value": 999699, "due": "02/04/2026"}, {"pm": "Avi Kripalani", "name": "1215 Terra Bella", "status": "Submitted", "type": "RFP", "value": 1349731, "due": "02/18/2026"}, {"pm": "Avi Kripalani", "name": "2880 Lakeside (Abacus Expansion)", "status": "Submitted", "type": "RFP", "value": 315841, "due": "02/23/2026"}, {"pm": "Avi Kripalani", "name": "Red Bull TI", "status": "Submitted", "type": "ROM", "value": 538914, "due": "02/23/2026"}, {"pm": "Cameron Peach", "name": "1185 Terra Bella Parking Lot", "status": "Submitted", "type": "ROM", "value": 0, "due": "10/24/2025"}, {"pm": "Charlie Griffin", "name": "Berliner & Cohan", "status": "Bidding", "type": "ROM", "value": 9400000, "due": "02/16/2026"}, {"pm": "Charlie Griffin", "name": "Kote TI", "status": "Bidding", "type": "RFP", "value": 0, "due": "04/27/2026"}, {"pm": "Charlie Griffin", "name": "Veeam", "status": "Upcoming Bid", "type": "RFP", "value": 1291264, "due": "TBD"}, {"pm": "Charlie Griffin", "name": "Illumio", "status": "Upcoming Bid", "type": "", "value": 0, "due": "TBD"}, {"pm": "Charlie Griffin", "name": "Lexus Pop Up", "status": "Upcoming Bid", "type": "RFP", "value": 0, "due": "TBD"}, {"pm": "Charlie Griffin", "name": "(N) Staircase at Westgate f/Sky Zone", "status": "Bidding", "type": "ROM", "value": 45905, "due": "TBD"}, {"pm": "Chip Hackett", "name": "Brawley Storage", "status": "Submitted", "type": "Budget", "value": 8721221, "due": "04/23/2026"}, {"pm": "Chip Hackett", "name": "Luxe Bozeman", "status": "Submitted", "type": "Budget", "value": 11225922, "due": "05/08/2026"}, {"pm": "Chip Hackett", "name": "Luxe Arvada Civil", "status": "Submitted", "type": "Budget", "value": 9989295, "due": "05/08/2026"}, {"pm": "Chip Hackett", "name": "Luxe Round Rock", "status": "Bidding", "type": "Budget", "value": 9269904, "due": "05/19/2026"}, {"pm": "Chip Hackett", "name": "Luxe McKinney Civil", "status": "Bidding", "type": "Budget", "value": 5000000, "due": "05/19/2026"}, {"pm": "Chip Hackett", "name": "Luxe Sacramento", "status": "Upcoming Bid", "type": "Budget", "value": 5000000, "due": "06/29/2026"}, {"pm": "Chip Hackett", "name": "Menlo Park Public Market", "status": "Upcoming Bid", "type": "ROM", "value": 3059325, "due": "TBD"}, {"pm": "Chris Beekman", "name": "Fidelity Dublin HVAC", "status": "Submitted", "type": "Budget", "value": 35871, "due": "11/20/2025"}, {"pm": "Chris Beekman", "name": "6028 Stevenson - Sound Studio", "status": "Submitted", "type": "Budget", "value": 976035, "due": "11/21/2025"}, {"pm": "Chris Beekman", "name": "Techmart Suite 419 VSP", "status": "Submitted", "type": "RFP", "value": 336760, "due": "12/12/2025"}, {"pm": "Chris Beekman", "name": "Fidelity Larkspur Electrical", "status": "Submitted", "type": "Budget", "value": 123946, "due": "12/15/2025"}, {"pm": "Chris Beekman", "name": "Techmart Suite 517 - Eltropy new suite", "status": "Submitted", "type": "Budget", "value": 164669, "due": "01/15/2026"}, {"pm": "Chris Beekman", "name": "Techmart Suite 132 Sound Issue", "status": "Submitted", "type": "Budget", "value": 60248, "due": "02/04/2026"}, {"pm": "Chris Beekman", "name": "Supermicro Freezer", "status": "Submitted", "type": "Budget", "value": 173869, "due": "02/20/2026"}, {"pm": "Chris Beekman", "name": "Los Gatos Landing", "status": "Submitted", "type": "RFP", "value": 43347, "due": "02/20/2026"}, {"pm": "Chris Beekman", "name": "Techmart Suite 507 - John Wiley & Sons", "status": "Submitted", "type": "Budget", "value": 176760, "due": "03/13/2026"}, {"pm": "Chris Beekman", "name": "1745 Technology Dr Ste. 600 - GSME", "status": "Submitted", "type": "ROM", "value": 1188252, "due": "03/13/2026"}, {"pm": "Chris Beekman", "name": "The Grove at Walnut Creek", "status": "Submitted", "type": "RFP", "value": 307097, "due": "04/08/2026"}, {"pm": "Chris Beekman", "name": "Korea Investment Partners", "status": "Submitted", "type": "ROM", "value": 215523, "due": "04/09/2026"}, {"pm": "Chris Beekman", "name": "Riveron - Mission Tower 2", "status": "Submitted", "type": "ROM", "value": 1590245, "due": "04/29/2026"}, {"pm": "Chris Beekman", "name": "560 Winchester", "status": "Submitted", "type": "RFP", "value": 554199, "due": "05/12/2026"}, {"pm": "Chris Beekman", "name": "Nuvacore TI", "status": "Bidding", "type": "RFP", "value": 0, "due": "05/22/2026"}, {"pm": "David Girdley", "name": "SSFJ - Penthouse Pricing Set", "status": "Submitted", "type": "RFP", "value": 7860793, "due": "07/31/2025"}, {"pm": "David Girdley", "name": "Sporton", "status": "Submitted", "type": "RFP", "value": 400000, "due": "10/28/2025"}, {"pm": "David Girdley", "name": "90 E Tasman", "status": "Submitted", "type": "RFP", "value": 100000, "due": "02/20/2026"}, {"pm": "David Girdley", "name": "Dumbarton Building 1B", "status": "Submitted", "type": "Budget", "value": 27400613, "due": "02/24/2026"}, {"pm": "David Girdley", "name": "Fidelity Mountain View", "status": "Submitted", "type": "RFP", "value": 152495, "due": "04/08/2026"}, {"pm": "David Girdley", "name": "SF Armory Racquet Club", "status": "Submitted", "type": "RFP", "value": 802765, "due": "04/24/2026"}, {"pm": "David Girdley", "name": "Amazon DHX1 PSH", "status": "Submitted", "type": "RFP", "value": 190339, "due": "04/30/2026"}, {"pm": "David Girdley", "name": "Amazon Houston DH08 PSH", "status": "Submitted", "type": "RFP", "value": 1922341, "due": "04/30/2026"}, {"pm": "David Girdley", "name": "Lotus Preschool", "status": "Bidding", "type": "RFP", "value": 10000000, "due": "05/01/2026"}, {"pm": "David Girdley", "name": "Fidelity Investor Center - Burbank", "status": "Bidding", "type": "RFP", "value": 1500000, "due": "05/15/2026"}, {"pm": "Dusty Furtado", "name": "SJ Airport Fountains", "status": "Submitted", "type": "Budget", "value": 148000, "due": "04/06/2026"}, {"pm": "Dusty Furtado", "name": "Delivery Corridor Westgate", "status": "Submitted", "type": "ROM", "value": 1347592, "due": "04/14/2026"}, {"pm": "Dusty Furtado", "name": "Menlo Waterproofing (Martin Hall)", "status": "Submitted", "type": "Budget", "value": 150000, "due": "04/16/2026"}, {"pm": "Dusty Furtado", "name": "Lens Crafters / Skylights", "status": "Submitted", "type": "Budget", "value": 275000, "due": "04/20/2026"}, {"pm": "Dusty Furtado", "name": "O'Brian", "status": "Submitted", "type": "ROM", "value": 1000000, "due": "04/24/2026"}, {"pm": "Dusty Furtado", "name": "Life Time Fitness Santana Row (Best Buy)", "status": "Submitted", "type": "ROM", "value": 2751149, "due": "05/14/2026"}, {"pm": "Dusty Furtado", "name": "Blox BayShore", "status": "Bidding", "type": "Budget", "value": 1500500, "due": "05/20/2026"}, {"pm": "Dusty Furtado", "name": "Mechanics Bank (1540 ECR)", "status": "Bidding", "type": "RFP", "value": 854354, "due": "05/29/2026"}, {"pm": "JB Cahoon", "name": "Make Matter", "status": "Submitted", "type": "ROM", "value": 3034189, "due": "03/20/2026"}, {"pm": "JB Cahoon", "name": "VW Belmont", "status": "Submitted", "type": "ROM", "value": 2089217, "due": "03/22/2026"}, {"pm": "John Machi", "name": "Zoom - Conf Rm. Refresh @ EBC", "status": "Submitted", "type": "ROM", "value": 360211, "due": "01/16/2026"}, {"pm": "John Machi", "name": "Zoom - 8th Flr TI", "status": "Submitted", "type": "ROM", "value": 3453457, "due": "02/03/2026"}, {"pm": "John Machi", "name": "Exhaust Hood for Caf\u00e9 @ OSW-L1", "status": "Submitted", "type": "ROM", "value": 734429, "due": "04/08/2026"}, {"pm": "John Machi", "name": "CBRE San Jose Office", "status": "Submitted", "type": "RFP", "value": 2695107, "due": "04/24/2026"}, {"pm": "John Machi", "name": "Insidesource Ste #550 @ OSW", "status": "Submitted", "type": "RFP", "value": 1753266, "due": "05/08/2026"}, {"pm": "John Machi", "name": "PNC Bank OSW", "status": "Upcoming Bid", "type": "RFP", "value": 0, "due": "TBD"}, {"pm": "Larry Lenz", "name": "Atria TI", "status": "Bidding", "type": "RFP ", "value": 0, "due": "05/26/2026"}, {"pm": "Larry Lenz", "name": "The Junction (Los Gatos Retail)", "status": "Bidding", "type": "RFP", "value": 0, "due": "06/19/2026"}, {"pm": "Marc Morgan", "name": "Extra Space Storage Belmont", "status": "Submitted", "type": "ROM", "value": 0, "due": "09/05/2025"}, {"pm": "Marc Morgan", "name": "540 University Ave", "status": "Submitted", "type": "RFP", "value": 16493233, "due": "09/29/2025"}, {"pm": "Marc Morgan", "name": "Extra Space Gilroy", "status": "Submitted", "type": "RFP", "value": 5142819, "due": "11/07/2025"}, {"pm": "Marc Morgan", "name": "2300 Broadway", "status": "Submitted", "type": "ROM", "value": 97055940, "due": "11/14/2025"}, {"pm": "Marc Morgan", "name": "Antiochian Orthodox Church", "status": "Bidding", "type": "RFP", "value": 9314373, "due": "02/27/2026"}, {"pm": "Marco Velasco", "name": "Florence Moore - Gavilan & Loro Renewals (Stanford)", "status": "Submitted", "type": "ROM", "value": 3862313, "due": "12/15/2025"}, {"pm": "Marco Velasco", "name": "SLAC Restrooms (Stanford)", "status": "Submitted", "type": "RFP", "value": 2934721, "due": "04/27/2026"}, {"pm": "Marco Velasco", "name": "ASML AZ Phoenix TI", "status": "Bidding", "type": "RFP", "value": 2000000, "due": "05/01/2026"}, {"pm": "Marco Velasco", "name": "Unitek", "status": "Submitted", "type": "ROM", "value": 3253046, "due": "05/13/2026"}];
+const RFPS = [{"name": "Amazon Fremont - DXC5 AVI", "pm": "David Girdley", "type": "RFP", "location": "Fremont, CA", "value": 306000, "due": "11/01/2024", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Amazon"}, {"name": "Amazon Richmond - DSF8 AVI", "pm": "David Girdley", "type": "RFP", "location": "Richmond, CA", "value": 226000, "due": "11/08/2024", "status": "Submitted", "result": "Lost", "notes": "", "client": "Amazon"}, {"name": "Two Bear Capital", "pm": "John Machi", "type": "ROM", "location": "Menlo Park, CA", "value": 928072, "due": "01/07/2025", "status": "Submitted", "result": "Lost", "notes": "(20) Alternates were provided on our proposal that = $695k", "client": "Two Bear Capital"}, {"name": "2962 Bunker Hill Fitness Center", "pm": "Marco Velasco", "type": "RFP", "location": "Santa Clara, CA", "value": 159033, "due": "02/07/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "South Bay Development"}, {"name": "3051 Tasman Pavillion Cafe ", "pm": "Marco Velasco", "type": "RFP", "location": "Santa Clara, CA", "value": 375764, "due": "02/07/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": ""}, {"name": "Naprotek", "pm": "Charlie Griffin", "type": "RFP", "location": "San Jose, CA", "value": 2000000, "due": "02/14/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Naprotek"}, {"name": "Amazon Chandler - DTU3 EV", "pm": "David Girdley", "type": "RFP", "location": "Chandler, AZ", "value": 1447000, "due": "02/28/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Amazon"}, {"name": "Amazon Las Vegas - DLV7 PWR", "pm": "David Girdley", "type": "RFP", "location": "Las Vegas, NV", "value": 1640000, "due": "02/28/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Amazon"}, {"name": "Amazon Elk Grove - DSR4 AVI", "pm": "David Girdley", "type": "RFP", "location": "Elk Grove, CA", "value": 800000, "due": "03/06/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Amazon"}, {"name": "Amazon Chandler - DTU3 AVI", "pm": "David Girdley", "type": "RFP", "location": "Chandler, AZ", "value": 800000, "due": "03/07/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Amazon"}, {"name": "Amazon Phoenix - DTU6 AVI", "pm": "David Girdley", "type": "RFP", "location": "Phoenix, AZ", "value": 800000, "due": "03/07/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Amazon"}, {"name": "3005 Tasman Market Ready", "pm": "Marco Velasco", "type": "ROM", "location": "Santa Clara, CA", "value": 5283297, "due": "03/09/2025", "status": "Submitted", "result": "Lost", "notes": "Charlie is re-bidding ", "client": "VCC"}, {"name": "ASML AZ CLS & Trumpf", "pm": "Charlie Griffin", "type": "RFP", "location": "Phoenix, AZ", "value": 20000000, "due": "03/10/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "ASML"}, {"name": "ASML AZ Piping Upgrade", "pm": "Charlie Griffin", "type": "RFP", "location": "Phoenix, AZ", "value": 3000000, "due": "03/10/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "ASML"}, {"name": "ASML AZ Roll Up Door", "pm": "Charlie Griffin", "type": "RFP", "location": "Phoenix, AZ", "value": 125000, "due": "03/10/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "ASML"}, {"name": "2962 Bunker Hill Market Ready", "pm": "Cameron Peach", "type": "ROM", "location": "Santa Clara, CA", "value": 1500000, "due": "03/10/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": ""}, {"name": "Amazon Milpitas - DUR3 AVI", "pm": "David Girdley", "type": "RFP", "location": "Milpitas, CA", "value": 800000, "due": "03/14/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Amazon"}, {"name": "Amazon Milpitas - DUR3 DSC", "pm": "David Girdley", "type": "RFP", "location": "Milpitas, CA", "value": 200000, "due": "03/14/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Amazon"}, {"name": "SolarEdge Relocation", "pm": "Charlie Griffin", "type": "ROM", "location": "Milpitas, CA", "value": 2000000, "due": "03/26/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "SolarEdge"}, {"name": "Menlo School Paint and Reroof", "pm": "Dusty Furtado", "type": "Budget", "location": "", "value": 850000, "due": "04/10/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": ""}, {"name": "Virtusa CEO Office TI", "pm": "Chris Beekman", "type": "Budget", "location": "Milpitas, CA", "value": 59989, "due": "04/11/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Virtusa"}, {"name": "Amazon Oxnard OXR1 ALP", "pm": "David Girdley", "type": "RFP", "location": "Oxnard, CA", "value": 500000, "due": "04/11/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Amazon"}, {"name": "1911 Lundy Ave", "pm": "Chris Beekman", "type": "RFP", "location": "San Jose, CA", "value": 303684, "due": "04/11/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": ""}, {"name": "Fidelity Monterey", "pm": "David Girdley", "type": "RFP", "location": "Monterey, CA", "value": 120000, "due": "04/16/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Structure Tone"}, {"name": "4520 Burton", "pm": "Marco Velasco", "type": "ROM", "location": "San Jose, CA", "value": 0, "due": "04/17/2025", "status": "Hold", "result": "", "notes": "", "client": ""}, {"name": "150 Rose Orchard", "pm": "Charlie Griffin", "type": "Budget", "location": "San Jose, CA", "value": 750000, "due": "04/17/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "JLL"}, {"name": "3003 Tasman - Lobby Renovation", "pm": "Marco Velasco", "type": "ROM", "location": "Santa Clara, CA", "value": 383932, "due": "04/18/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "South Bay Development"}, {"name": "Zerova Technologies - 47800 Fremont Blvd", "pm": "Chris Beekman", "type": "RFP", "location": "Fremont, CA", "value": 169939, "due": "04/18/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": ""}, {"name": "845 Embedded Way", "pm": "David Girdley", "type": "RFP", "location": "San Jose, CA", "value": 264755, "due": "04/21/2025", "status": "Submitted", "result": "Lost", "notes": "Submitted second round of pricing on 6/23", "client": "Colliers"}, {"name": "Bay to Bay Facility", "pm": "Scott Harper", "type": "RFP", "location": "San Jose, CA", "value": 664964, "due": "04/25/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Bay To Bay"}, {"name": "Amazon Colorado Springs DSC3 AVI", "pm": "David Girdley", "type": "RFP", "location": "Colorado Springs, CO", "value": 739697, "due": "04/28/2025", "status": "Submitted", "result": "Lost", "notes": "Dahlin Introduced 4/14/25. Havent heard back from client as of 6/25", "client": "Amazon"}, {"name": "3003 Tasman - Exterior Windows", "pm": "Marco Velasco", "type": "RFP", "location": "Santa Clara, CA", "value": 339446, "due": "04/28/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "South Bay Development"}, {"name": "Immobiliare Management", "pm": "Dusty Furtado", "type": "RFP", "location": "Menlo Park, CA", "value": 1504523, "due": "04/30/2025", "status": "Submitted", "result": "Awarded", "notes": "Super: Fernando", "client": "4 Corners"}, {"name": "Fidelity Pasadena", "pm": "Dusty Furtado", "type": "RFP", "location": "Pasadena, CA", "value": 1108457, "due": "05/02/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Structure Tone"}, {"name": "Edward Jones Branch #98400", "pm": "Chris Beekman", "type": "RFP", "location": "Campbell, CA", "value": 245576, "due": "05/02/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "C&W"}, {"name": "118 Charcot", "pm": "Adam Tafralis", "type": "ROM", "location": "San Jose, CA", "value": 0, "due": "05/05/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": ""}, {"name": "Etched", "pm": "Cameron Peach", "type": "RFP", "location": "San Jose, CA", "value": 0, "due": "05/10/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": ""}, {"name": "477 North Canyons - Building Repairs", "pm": "Dusty Furtado", "type": "RFP", "location": "Livermore, CA", "value": 1269684, "due": "05/14/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Carl B. Johnson"}, {"name": "FJ Porsche Walnut Creek", "pm": "Marc Morgan", "type": "ROM", "location": "Walnut Creek, CA", "value": 150000, "due": "05/16/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Fletcher Jones/Gensler"}, {"name": "Tipalti Level 6 Re-Pricing", "pm": "Avi Kripalani", "type": "ROM", "location": "Foster City, CA", "value": 800000, "due": "05/19/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Tipalti/Katie Volk Design"}, {"name": "Calphin Swim Academy - Round 2", "pm": "Scott Harper", "type": "Budget", "location": "Fremont, CA", "value": 4000000, "due": "05/23/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Joseph He"}, {"name": "Techmart S456 TI - Hillstone", "pm": "Chris Beekman", "type": "Budget", "location": "Santa Clara, CA", "value": 62402, "due": "05/27/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Hudson Pacific"}, {"name": "Infineon ", "pm": "JB Cahoon", "type": "ROM", "location": "San Jose, CA", "value": 80000000, "due": "05/28/2025", "status": "Hold", "result": "", "notes": "", "client": ""}, {"name": "4750 Patrick Henry Dr. - Cobot", "pm": "Chris Beekman", "type": "Budget", "location": "Santa Clara, CA", "value": 325000, "due": "05/29/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Cobot"}, {"name": "Mogul Market Ready", "pm": "Charlie Griffin", "type": "RFP", "location": "Santa Clara, CA", "value": 4030189, "due": "05/30/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Vertical Capital Consulting"}, {"name": "Kimley Horn TI", "pm": "Dusty Furtado", "type": "RFP", "location": "San Jose, CA", "value": 1500000, "due": "06/04/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Orchard Commercial"}, {"name": "Fidelity Burlingame Painting", "pm": "Chris Beekman", "type": "Budget", "location": "Burlingame, CA", "value": 26989, "due": "06/06/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Fidelity"}, {"name": "Techmart Suite 520 - LTTS", "pm": "Chris Beekman", "type": "RFP", "location": "Santa Clara, CA", "value": 344704, "due": "06/06/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Hudson Pacific"}, {"name": "Gener8", "pm": "Marco Velasco", "type": "Budget", "location": "San Jose, CA", "value": 103143, "due": "06/06/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Gener8"}, {"name": "1120 Auburn St. - dB Control", "pm": "Chris Beekman", "type": "Budget", "location": "Fremont, CA", "value": 260000, "due": "06/11/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "dB Control"}, {"name": "Jay Street Market Ready", "pm": "Chris Beekman", "type": "Budget", "location": "Santa Clara, CA", "value": 476436, "due": "06/12/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Four Corners"}, {"name": "Techmart Suite 422 - Rigor AI", "pm": "Chris Beekman", "type": "Budget", "location": "Santa Clara, CA", "value": 44090, "due": "06/12/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Hudson Pacific"}, {"name": "Amazon Tucson DTU2 AVI", "pm": "David Girdley", "type": "RFP", "location": "Tucson, AZ", "value": 1400000, "due": "06/19/2025", "status": "Submitted", "result": "Lost", "notes": "Client will call on 6/27 to discuss", "client": "Amazon"}, {"name": "ASML 125 Rio Robles Lab Expansion", "pm": "Marco Velasco", "type": "RFP", "location": "San Jose, CA", "value": 277405, "due": "06/19/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "ASML"}, {"name": "F5 Networks - Patio Refresh", "pm": "Charlie Griffin", "type": "RFP", "location": "San Jose, CA", "value": 1134695, "due": "06/20/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": ""}, {"name": "960 Stewart", "pm": "Adam Tafralis", "type": "ROM", "location": "", "value": 9500000, "due": "06/20/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": ""}, {"name": "Fii Sunnyvale M2 M3 Buildings Renovation", "pm": "Adam Tafralis", "type": "RFP", "location": "Sunnyvale, CA", "value": 120000000, "due": "06/23/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": ""}, {"name": "100 Middlefield Rd.", "pm": "Marco Velasco", "type": "RFP", "location": "Menlo Park, CA", "value": 1202172, "due": "06/24/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Buildbloick io"}, {"name": "wineshipping.com", "pm": "John Machi", "type": "Budget", "location": "Napa, CA", "value": 1147056, "due": "06/25/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": ""}, {"name": "Los Gatos Swim & Raquet", "pm": "Dusty Furtado", "type": "Budget", "location": "Los Gatos, CA", "value": 400000, "due": "07/01/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Los Gatos Swim & Raquet"}, {"name": "ASML SJ Micro Bulk Tank", "pm": "Marco Velasco", "type": "Budget", "location": "San Jose, CA", "value": 0, "due": "07/03/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": ""}, {"name": "Fidelity Campbell HVAC", "pm": "Chris Beekman", "type": "Budget", "location": "Campbell, CA", "value": 493446, "due": "07/10/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Fidelity"}, {"name": "1478 Gladding Ct", "pm": "Avi Kripalani", "type": "ROM", "location": "Milpitas, CA", "value": 0, "due": "07/11/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": ""}, {"name": "Fidelity Mountain View", "pm": "Chris Beekman", "type": "Budget", "location": "Mountain View, CA", "value": 23640, "due": "07/18/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Structure Tone"}, {"name": "Fidelity Palo Alto", "pm": "Chris Beekman", "type": "Budget", "location": "Palo Alto, CA", "value": 44108, "due": "07/18/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Structure Tone"}, {"name": "Fidelity Sunnyvale", "pm": "Chris Beekman", "type": "Budget", "location": "Sunnyvale, CA", "value": 43894, "due": "07/18/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Structure Tone"}, {"name": "Extra Space Storage Rocklin", "pm": "Marc Morgan", "type": "RFP", "location": "Rocklin, CA", "value": 2997662, "due": "07/22/2025", "status": "Submitted", "result": "Lost", "notes": "8/4 client is now looking at it", "client": "Extra Storage Space"}, {"name": "Department of Consumer Affairs", "pm": "Avi Kripalani", "type": "RFP", "location": "San Jose, CA", "value": 270014, "due": "07/28/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Department of Consumer Affairs "}, {"name": "Project El Camino", "pm": "Charlie Griffin", "type": "RFP", "location": "Santa Clara, CA", "value": 4298561, "due": "07/28/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Vertical Capital Consulting"}, {"name": "Creekside Bible Church Rebuild", "pm": "Adam Tafralis", "type": "ROM", "location": "Cupertino, CA", "value": 5300000, "due": "07/31/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Creekside Bible"}, {"name": "SSFJ - Penthouse Pricing Set", "pm": "David Girdley", "type": "RFP", "location": "Menlo Park, CA", "value": 7860793, "due": "07/31/2025", "status": "Submitted", "result": "Pending", "notes": "", "client": "Stephen Silver Fine Jewelry"}, {"name": "Expedia San Jose", "pm": "John Machi", "type": "ROM", "location": "San Jose, CA", "value": 10355984, "due": "07/31/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Expedia, Inc. Group"}, {"name": "800 Corporate Vanilla", "pm": "Marco Velasco", "type": "RFP", "location": "Fremont, CA", "value": 534287, "due": "07/31/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Colliers"}, {"name": "Hayward Airport Corporate Hanger", "pm": "Adam Tafralis", "type": "ROM", "location": "Hayward, CA", "value": 9900000, "due": "08/01/2025", "status": "Submitted", "result": "Pending", "notes": "", "client": "Western LLC"}, {"name": "Southridge Church", "pm": "Marc Morgan", "type": "RFP", "location": "San Jose, CA", "value": 18461685, "due": "08/01/2025", "status": "Submitted", "result": "Lost", "notes": "Notice of award by 7/31", "client": "Southridge Church"}, {"name": "Renesas AZ Tempe", "pm": "Charlie Griffin", "type": "Budget", "location": "Tempe, AZ", "value": 562639, "due": "08/04/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Renesas"}, {"name": "Amazon Oakley DFO2-AVI", "pm": "Avi Kripalani", "type": "RFP", "location": "Oakley, CA", "value": 869815, "due": "08/06/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Amazon"}, {"name": "Spec Coat", "pm": "Avi Kripalani", "type": "ROM", "location": "Fremont,CA", "value": 3500000, "due": "08/07/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Logan Fitch"}, {"name": "D-Matrix", "pm": "JB Cahoon", "type": "ROM", "location": "", "value": 11550000, "due": "08/11/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "D-Matrix"}, {"name": "4900 Patrick Henry (Fabrinet)", "pm": "Marco Velasco", "type": "ROM", "location": "Santa Clara, CA", "value": 676882, "due": "08/13/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Fabrinet"}, {"name": "Amazon Las Vegas DLV7-AVI", "pm": "Avi Kripalani", "type": "RFP", "location": "Las Vegas, NV", "value": 784876, "due": "08/15/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Amazon"}, {"name": "525 University Ave", "pm": "Avi Kripalani", "type": "RFP", "location": "Palo Alto, CA", "value": 837522, "due": "08/18/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Buildbloick io"}, {"name": "1275 El Camino Real Retail TI", "pm": "Chris Beekman", "type": "Budget", "location": "Menlo Park, CA", "value": 103411, "due": "08/22/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Hayes Group"}, {"name": "Kona Island Coffee", "pm": "Marco Velasco", "type": "RFP", "location": "Mountain View, CA", "value": 628426, "due": "08/22/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Kona Island Coffee"}, {"name": "Zscaler HQ", "pm": "JB Cahoon", "type": "RFP", "location": "Santa Clara, CA", "value": 32189060, "due": "08/22/2025", "status": "Submitted", "result": "Lost", "notes": "Award date 9/5/25", "client": "Newmark"}, {"name": "Quest Global TI - 2550 N. 1st St.", "pm": "Chris Beekman", "type": "RFP", "location": "San Jose, CA", "value": 248056, "due": "08/25/2025", "status": "Submitted", "result": "Awarded", "notes": "Awarded on 9/3/25", "client": "The Irvine Company"}, {"name": "ASML TX Richardson TI", "pm": "Charlie Griffin", "type": "Budget", "location": "Plano, TX", "value": 1095407, "due": "08/26/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "ASML"}, {"name": "Mogul 3062 Bunker Hill TI", "pm": "Charlie Griffin", "type": "RFP", "location": "Santa Clara, CA", "value": 1349196, "due": "08/28/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Vertical Capital Consulting"}, {"name": "FRT's Management Office", "pm": "John Machi", "type": "ROM", "location": "San Jose, CA", "value": 2013635, "due": "08/29/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Federal Realty"}, {"name": "Luxe Mesquite Privacy Wall", "pm": "Marc Morgan", "type": "RFP", "location": "Mesquite, NV", "value": 174975, "due": "09/03/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "LuxeLocker"}, {"name": "Extra Space Storage Belmont", "pm": "Marc Morgan", "type": "ROM", "location": "Belmont, CA", "value": 0, "due": "09/05/2025", "status": "Submitted", "result": "Pending", "notes": "", "client": "Extra Storage Space"}, {"name": "Wellness Room and RR @ OSW-L3", "pm": "John Machi", "type": "Budget", "location": "San Jose, CA", "value": 269951, "due": "09/05/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Federal Realty"}, {"name": "Sky Zone", "pm": "John Machi", "type": "Budget", "location": "San Jose, CA", "value": 1105356, "due": "09/05/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Federal Realty"}, {"name": "Demising, Corridors, Wellness & Womens RR @ OSW-L3", "pm": "John Machi", "type": "Budget", "location": "San Jose, CA", "value": 645213, "due": "09/08/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Federal Realty"}, {"name": "Luxe Monument CO", "pm": "Marc Morgan", "type": "Budget", "location": "Monument, CO", "value": 0, "due": "09/09/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "LuxeLocker"}, {"name": "Amazon Milpitas DSF7", "pm": "Avi Kripalani", "type": "RFP", "location": "Milpitas, CA", "value": 695123, "due": "09/09/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Amazon"}, {"name": "Techmart Suite 510 - Eltropy Phonebooth", "pm": "Chris Beekman", "type": "Budget", "location": "Santa Clara, CA", "value": 52797, "due": "09/11/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Eltropy"}, {"name": "Fidelity Boise ID", "pm": "David Girdley", "type": "RFP", "location": "Boise, ID", "value": 1454450, "due": "09/12/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Structure Tone"}, {"name": "Amazon DCX5 EV", "pm": "Avi Kripalani", "type": "RFP", "location": "San Jose, CA", "value": 944461, "due": "09/12/2025", "status": "Submitted", "result": "Pending", "notes": "", "client": "Amazon"}, {"name": "Amazon DFA5 PWR", "pm": "Avi Kripalani", "type": "RFP", "location": "South San Francisco, CA", "value": 959233, "due": "09/19/2025", "status": "Submitted", "result": "Awarded", "notes": "Waiting on revised package. Shelved until Q1 2026", "client": "Amazon"}, {"name": "Veolia", "pm": "Avi Kripalani", "type": "RFP", "location": "San Jose, CA", "value": 82100, "due": "09/19/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Veolia"}, {"name": "415 Cassia", "pm": "Chris Beekman", "type": "RFP", "location": "Redwood City, CA", "value": 271760, "due": "09/22/2025", "status": "Submitted", "result": "Lost", "notes": "ON HOLD - They may have a buyer for the building", "client": "Premia"}, {"name": "Luxshare TI", "pm": "Chris Beekman", "type": "RFP", "location": "Milpitas, CA", "value": 640683, "due": "09/25/2025", "status": "Submitted", "result": "Lost", "notes": "Irvine confirmed we did not win bid on Friday 10/3/25", "client": "The Irvine Company"}, {"name": "Techmart 1st Floor Restroom Shower Seats", "pm": "Chris Beekman", "type": "ROM", "location": "Santa Clara, CA", "value": 8836, "due": "09/26/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Hudson Pacific"}, {"name": "ASML ID Boise TI", "pm": "Charlie Griffin", "type": "Budget", "location": "Boise, ID", "value": 0, "due": "09/29/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "ASML"}, {"name": "540 University Ave", "pm": "Marc Morgan", "type": "RFP", "location": "Palo Alto, CA", "value": 16493233, "due": "09/29/2025", "status": "Submitted", "result": "Pending", "notes": "", "client": "Thoits Bros"}, {"name": "Securiti @ OSW-L3", "pm": "John Machi", "type": "RFP", "location": "San Jose, CA", "value": 0, "due": "10/01/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Federal Realty"}, {"name": "Delta Electronics", "pm": "Marco Velasco", "type": "RFP", "location": "Fremont, CA", "value": 5679787, "due": "10/03/2025", "status": "Hold", "result": "", "notes": "", "client": "Delta Electronics"}, {"name": "Six Sigma Microelectronics", "pm": "Avi Kripalani", "type": "RFP", "location": "Milpitas, CA", "value": 47729, "due": "10/03/2025", "status": "Submitted", "result": "Lost", "notes": "Still on hold as of 1/5", "client": ""}, {"name": "Interior Demo at 80 Technology Ct, Napa for SBD", "pm": "John Machi", "type": "ROM", "location": "Napa, Ca", "value": 62450, "due": "10/13/2025", "status": "Submitted", "result": "Lost", "notes": "Revised pricing submitted 11/05/25", "client": "SBD"}, {"name": "Jeanne d'Arc Manor", "pm": "Chris Beekman", "type": "Budget", "location": "San Jose, CA", "value": 170000, "due": "10/13/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "The John Steward Company"}, {"name": "Celestial AI Lab Expansion", "pm": "Marco Velasco", "type": "RFP", "location": "Santa Clara, CA", "value": 0, "due": "10/15/2025", "status": "Hold", "result": "", "notes": "", "client": "Celestial AI"}, {"name": "Techmart Suite 419", "pm": "Chris Beekman", "type": "Budget", "location": "Santa Clara, CA", "value": 241856, "due": "10/15/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Hudson Pacific"}, {"name": "3101 Jay Street - Upscale AI", "pm": "Chris Beekman", "type": "ROM", "location": "Santa Clara, CA", "value": 517290, "due": "10/16/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Upscale AI, C&W"}, {"name": "Fidelity Del Mar", "pm": "David Girdley", "type": "RFP", "location": "San Diego, CA", "value": 2819384, "due": "10/21/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Structure Tone"}, {"name": "550 Allerton", "pm": "Chris Beekman", "type": "Budget", "location": "Redwood City, CA", "value": 121190, "due": "10/23/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Premia"}, {"name": "Newmark @ OSW-L5", "pm": "John Machi", "type": "RFP", "location": "San Jose, CA", "value": 2066319, "due": "10/24/2025", "status": "Submitted", "result": "Awarded", "notes": "Revised pricing for Newmark Ste #575 @ OSW-L5 based in IFPC set dated 10/10/25", "client": "Federal Realty"}, {"name": "E Ink", "pm": "JB Cahoon", "type": "RFP", "location": "San Jose, CA", "value": 0, "due": "10/24/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Westlake Consulting Group"}, {"name": "1185 Terra Bella Parking Lot", "pm": "Cameron Peach", "type": "ROM", "location": "Mountain View, CA", "value": 0, "due": "10/24/2025", "status": "Submitted", "result": "Pending", "notes": "", "client": ""}, {"name": "Sporton", "pm": "David Girdley", "type": "RFP", "location": "Milpitas, CA", "value": 400000, "due": "10/28/2025", "status": "Submitted", "result": "Pending", "notes": "", "client": "Sporton"}, {"name": "2099 Gold St. TI", "pm": "Chris Beekman", "type": "Budget", "location": "Alviso, CA", "value": 37964, "due": "10/30/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "World System Builders"}, {"name": "Market Ready Suite #'s 500 & 525 @ OSW-L5", "pm": "John Machi", "type": "ROM", "location": "San Jose, CA", "value": 4004209, "due": "10/31/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Federal Realty"}, {"name": "Techmart Suite 522 - Niles 2.0", "pm": "Chris Beekman", "type": "Budget", "location": "Santa Clara, CA", "value": 1069276, "due": "10/31/2025", "status": "Submitted", "result": "Awarded", "notes": "Break out design scope $40,356 into separate job #3750", "client": "Hudson Pacific"}, {"name": "Extra Space Gilroy", "pm": "Marc Morgan", "type": "RFP", "location": "Gilroy, CA", "value": 5142819, "due": "11/07/2025", "status": "Submitted", "result": "Pending", "notes": "", "client": "Extra Storage Space"}, {"name": "Techmart Suite 510 - Eltropy Added Workstations", "pm": "Chris Beekman", "type": "Budget", "location": "Santa Clara, CA", "value": 13383, "due": "11/11/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Eltropy"}, {"name": "2550 Flex Suite 525", "pm": "Chris Beekman", "type": "RFP", "location": "San Jose, CA", "value": 322444, "due": "11/12/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Irvine Company"}, {"name": "2300 Broadway", "pm": "Marc Morgan", "type": "ROM", "location": "Redwood City, CA", "value": 97055940, "due": "11/14/2025", "status": "Submitted", "result": "Pending", "notes": "", "client": "Tishman Speyer"}, {"name": "Techmart Suite 519 TI - infill wall", "pm": "Chris Beekman", "type": "Budget", "location": "Santa Clara, CA", "value": 12837, "due": "11/18/2025", "status": "Submitted", "result": "Awarded", "notes": "Tenant to move in 1/1/26", "client": "Hudson Pacific Properties"}, {"name": "Fidelity Dublin HVAC", "pm": "Chris Beekman", "type": "Budget", "location": "Dublin, CA", "value": 35871, "due": "11/20/2025", "status": "Submitted", "result": "Pending", "notes": "", "client": "Fidelity"}, {"name": "Menlo School HVAC", "pm": "Dusty Furtado", "type": "ROM", "location": "Atherton, CA", "value": 3234704, "due": "11/21/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "K2 Architects"}, {"name": "6028 Stevenson - Sound Studio", "pm": "Chris Beekman", "type": "Budget", "location": "Fremont, CA", "value": 976035, "due": "11/21/2025", "status": "Submitted", "result": "Pending", "notes": "", "client": "Joseph Nguyen"}, {"name": "356 Santana Row - Potential Tenant for the MR Space ", "pm": "John Machi", "type": "ROM", "location": "San Jose, CA", "value": 770504, "due": "11/25/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Federal Realty"}, {"name": "Governor's Corner Trellis", "pm": "Marco Velasco", "type": "ROM", "location": "Stanford, CA", "value": 20748, "due": "11/26/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Stanford University"}, {"name": "Indomum, Inc. Sunnyvale", "pm": "John Machi", "type": "ROM", "location": "Sunnyvale, CA", "value": 1813022, "due": "12/05/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Indomum, Inc."}, {"name": "Vespaio @ 130 Stockton", "pm": "David Girdley", "type": "RFP", "location": "San Jose, CA", "value": 3034240, "due": "12/05/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Wind River"}, {"name": "Ferrette RV Park", "pm": "Marc Morgan", "type": "ROM", "location": "Austin, TX", "value": 6179884, "due": "12/05/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": ""}, {"name": "Indomum, Inc. Santana Row", "pm": "John Machi", "type": "ROM", "location": "San Jose, CA", "value": 2237755, "due": "12/09/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Indomum, Inc."}, {"name": "Potential (N) Management Office for FRT", "pm": "John Machi", "type": "ROM", "location": "San Jose, CA", "value": 2920843, "due": "12/11/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": "Federal Realty"}, {"name": "Techmart Suite 419 VSP", "pm": "Chris Beekman", "type": "RFP", "location": "Santa Clara, CA", "value": 336760, "due": "12/12/2025", "status": "Submitted", "result": "Pending", "notes": "Previously bid this suite back in October 2025", "client": "Hudson Pacific Properties"}, {"name": "Florence Moore - Gavilan & Loro Renewals (Stanford)", "pm": "Marco Velasco", "type": "ROM", "location": "Stanford, CA", "value": 3862313, "due": "12/15/2025", "status": "Submitted", "result": "", "notes": "", "client": "Stanford University"}, {"name": "Fidelity Larkspur Electrical", "pm": "Chris Beekman", "type": "Budget", "location": "Larkspur, CA", "value": 123946, "due": "12/15/2025", "status": "Submitted", "result": "Pending", "notes": "", "client": "Fidelity"}, {"name": "Ikea East Palo Alto Parking Lot Storage", "pm": "Chris Beekman", "type": "ROM", "location": "East Palo Alto, CA", "value": 182736, "due": "12/17/2025", "status": "Submitted", "result": "Awarded", "notes": "", "client": "ISS"}, {"name": "5729 Fontanoso Way TI ", "pm": "Cameron Peach", "type": "Budget", "location": "San Jose, CA", "value": 1650000, "due": "12/20/2025", "status": "Submitted", "result": "Lost", "notes": "", "client": ""}, {"name": "La Rinc Comfort Station", "pm": "Marc Morgan", "type": "RFP", "location": "Los Gatos, CA", "value": 760143, "due": "01/13/2026", "status": "Submitted", "result": "Awarded", "notes": "", "client": "E2 Architecture"}, {"name": "Techmart Suite 517 - Eltropy new suite", "pm": "Chris Beekman", "type": "Budget", "location": "Santa Clara, CA", "value": 164669, "due": "01/15/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Hudson Pacific Properties"}, {"name": "Zoom - Conf Rm. Refresh @ EBC", "pm": "John Machi", "type": "ROM", "location": "San Jose, CA", "value": 360211, "due": "01/16/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "ZOOM"}, {"name": "Fidelity Summerlin, NV", "pm": "David Girdley", "type": "RFP", "location": "Summerlin, NV", "value": 1762160, "due": "01/21/2026", "status": "Submitted", "result": "Lost", "notes": "", "client": "Fidelity"}, {"name": "Amazon Oakland DSJ9", "pm": "Avi Kripalani", "type": "RFP", "location": "Oakland, CA", "value": 1643679, "due": "01/21/2026", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Amazon"}, {"name": "Amazon McClellan Park DSR6", "pm": "Avi Kripalani", "type": "RFP", "location": "McClellan, CA", "value": 3294329, "due": "01/30/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Amazon"}, {"name": "Zoom - 8th Flr TI", "pm": "John Machi", "type": "ROM", "location": "San Jose, CA", "value": 3453457, "due": "02/03/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "ZOOM"}, {"name": "Techmart Suite 132 Sound Issue", "pm": "Chris Beekman", "type": "Budget", "location": "Santa Clara, CA", "value": 60248, "due": "02/04/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Hudson Pacific Properties"}, {"name": "Peninsula Vet Center (Veterens Affairs)", "pm": "Avi Kripalani", "type": "RFP", "location": "Redwood City, CA", "value": 999699, "due": "02/04/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Veterens Affairs"}, {"name": "55 W Trimble, San Jose", "pm": "David Girdley", "type": "RFP", "location": "San Jose, CA", "value": 1854860, "due": "02/10/2026", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Grosvenor Americas"}, {"name": "Warnock Dental", "pm": "Dusty Furtado", "type": "Budget", "location": "Morgan Hill, CA", "value": 1200000, "due": "02/12/2026", "status": "Submitted", "result": "Awarded", "notes": "", "client": ""}, {"name": "Berliner & Cohan", "pm": "Charlie Griffin", "type": "ROM", "location": "San Jose, CA", "value": 9400000, "due": "02/16/2026", "status": "Bidding", "result": "", "notes": "", "client": "Compass Solutions"}, {"name": "Luxe Austin", "pm": "Chip Hackett", "type": "Budget", "location": "Austin, TX", "value": 10600000, "due": "02/17/2026", "status": "Submitted", "result": "Awarded", "notes": "", "client": "LuxeLocker"}, {"name": "1215 Terra Bella", "pm": "Avi Kripalani", "type": "RFP", "location": "Mountain View, CA", "value": 1349731, "due": "02/18/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Cushman and Wakefield"}, {"name": "Nexus Works LLC", "pm": "Chris Beekman", "type": "RFP", "location": "Palo Alto, CA", "value": 3033187, "due": "02/20/2026", "status": "Submitted", "result": "Lost", "notes": "", "client": "Skyline Partners CM"}, {"name": "Supermicro Freezer", "pm": "Chris Beekman", "type": "Budget", "location": "San Jose, CA", "value": 173869, "due": "02/20/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Supermicro"}, {"name": "Los Gatos Landing", "pm": "Chris Beekman", "type": "RFP", "location": "Los Gatos, CA", "value": 43347, "due": "02/20/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Ethos"}, {"name": "90 E Tasman", "pm": "David Girdley", "type": "RFP", "location": "Santa Clara, CA", "value": 100000, "due": "02/20/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": ""}, {"name": "2880 Lakeside (Abacus Expansion)", "pm": "Avi Kripalani", "type": "RFP", "location": "Santa Clara, CA", "value": 315841, "due": "02/23/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Muller Co"}, {"name": "Red Bull TI", "pm": "Avi Kripalani", "type": "ROM", "location": "Fremont, CA", "value": 538914, "due": "02/23/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Redbull"}, {"name": "Dumbarton Building 1B", "pm": "David Girdley", "type": "Budget", "location": "Fremont, CA", "value": 27400613, "due": "02/24/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Drawbridge Realty"}, {"name": "Antiochian Orthodox Church", "pm": "Marc Morgan", "type": "RFP", "location": "Los Altos,CA", "value": 9314373, "due": "02/27/2026", "status": "Bidding", "result": "", "notes": "", "client": "Church of Redeemer"}, {"name": "Atria Demo", "pm": "John Machi", "type": "RFP", "location": "Menlo Park, CA", "value": 870000, "due": "02/27/2026", "status": "Submitted", "result": "Lost", "notes": "", "client": "Atria Institute"}, {"name": "Mancini Sleep World (Pre-Con)", "pm": "Dusty Furtado", "type": "Budget", "location": "San Leandro, CA", "value": 53582, "due": "03/03/2026", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Mancini Sleepworld"}, {"name": "Local 39", "pm": "Avi Kripalani", "type": "RFP", "location": "Santa Clara, CA", "value": 3892703, "due": "03/06/2026", "status": "Submitted", "result": "Lost", "notes": "", "client": ""}, {"name": "Hyfix - 3052 Bunker Hill", "pm": "Cameron Peach", "type": "RFP", "location": "Santa Clara, CA", "value": 585285, "due": "03/09/2026", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Vertical Capital Consulting"}, {"name": "Techmart Suite 507 - John Wiley & Sons", "pm": "Chris Beekman", "type": "Budget", "location": "Santa Clara, CA", "value": 176760, "due": "03/13/2026", "status": "Submitted", "result": "Pending", "notes": "Restoration for lease expiring 11/30/26", "client": "John Wiley & Sons (Atypon Systems)"}, {"name": "1745 Technology Dr Ste. 600 - GSME", "pm": "Chris Beekman", "type": "ROM", "location": "San Jose, CA", "value": 1188252, "due": "03/13/2026", "status": "Submitted", "result": "Pending", "notes": "5/4 working on new landing spot (no longer going into Hudson location)", "client": "Hudson Pacific"}, {"name": "Make Matter", "pm": "JB Cahoon", "type": "ROM", "location": "Sunnyvale, CA", "value": 3034189, "due": "03/20/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Newmark"}, {"name": "VW Belmont", "pm": "JB Cahoon", "type": "ROM", "location": "Belmont, CA", "value": 0, "due": "03/22/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Newmark"}, {"name": "3003 Tasman Lobby Expansion", "pm": "Cameron Peach", "type": "RFP", "location": "Santa Clara, CA", "value": 3816052, "due": "03/25/2026", "status": "Submitted", "result": "Lost", "notes": "Client went w/ a lower bidder", "client": "SBD"}, {"name": "Menlo Childcare Playground Renovation", "pm": "Dusty Furtado", "type": "ROM", "location": "Atherton, CA", "value": 125000, "due": "03/31/2026", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Menlo School"}, {"name": "SJ Airport Fountains", "pm": "Dusty Furtado", "type": "Budget", "location": "San Jose, CA", "value": 148000, "due": "04/06/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": ""}, {"name": "The Grove at Walnut Creek", "pm": "Chris Beekman", "type": "RFP", "location": "Walnut Creek, CA", "value": 307097, "due": "04/08/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Ethos"}, {"name": "Exhaust Hood for Caf\u00e9 @ OSW-L1", "pm": "John Machi", "type": "ROM", "location": "San Jose, CA", "value": 734429, "due": "04/08/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Federal Realty"}, {"name": "Fidelity Folsom", "pm": "David Girdley", "type": "RFP", "location": "Folsom, CA", "value": 1601446, "due": "04/08/2026", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Structure Tone"}, {"name": "Fidelity Mountain View", "pm": "David Girdley", "type": "RFP", "location": "Mountain View, CA", "value": 152495, "due": "04/08/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Structure Tone"}, {"name": "Korea Investment Partners", "pm": "Chris Beekman", "type": "ROM", "location": "Santa Clara, CA", "value": 215523, "due": "04/09/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "JLL"}, {"name": "Best Buy Phase 1", "pm": "John Machi", "type": "ROM", "location": "San Jose, CA", "value": 49262, "due": "04/13/2026", "status": "Submitted", "result": "Awarded", "notes": "", "client": "FRT"}, {"name": "100 View", "pm": "Marco Velasco", "type": "ROM", "location": "Mountain View, CA", "value": 3139507, "due": "04/13/2026", "status": "Submitted", "result": "Awarded", "notes": "4/23: MV updating budget to include an additional suite.", "client": ""}, {"name": "Delivery Corridor Westgate", "pm": "Dusty Furtado", "type": "ROM", "location": "San Jose, CA", "value": 1347592, "due": "04/14/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Federal Realty"}, {"name": "Menlo Waterproofing (Martin Hall)", "pm": "Dusty Furtado", "type": "Budget", "location": "Menlo Park, CA", "value": 150000, "due": "04/16/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": ""}, {"name": "D-Matrix (Phase 1)", "pm": "Marco Velasco", "type": "", "location": "", "value": 250000, "due": "04/17/2026", "status": "Submitted", "result": "Awarded", "notes": "4/23; MV submitting Phase 1 to Tenant on Monday 4/27.", "client": ""}, {"name": "Hiller Aviation Museum", "pm": "Chris Beekman", "type": "RFP", "location": "San Carlos, CA", "value": 3598996, "due": "04/17/2026", "status": "Submitted", "result": "Awarded", "notes": "", "client": ""}, {"name": "Peninsula Clean Energy", "pm": "Chris Beekman", "type": "RFP", "location": "San Mateo, CA", "value": 1390067, "due": "04/17/2026", "status": "Submitted", "result": "Lost", "notes": "Client went w/ a lower bidder", "client": "Peninsula Clean Energy"}, {"name": "Lens Crafters / Skylights", "pm": "Dusty Furtado", "type": "Budget", "location": "Saratoga, CA", "value": 275000, "due": "04/20/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": ""}, {"name": "Brawley Storage", "pm": "Chip Hackett", "type": "Budget", "location": "Brawley, CA", "value": 8721221, "due": "04/23/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": ""}, {"name": "CBRE San Jose Office", "pm": "John Machi", "type": "RFP", "location": "San Jose, CA", "value": 2695107, "due": "04/24/2026", "status": "Submitted", "result": "Pending", "notes": "4/30: May 5 Interview Notifications, May 12 Interviews, May 19 Award Decision", "client": "CBRE"}, {"name": "O'Brian", "pm": "Dusty Furtado", "type": "ROM", "location": "Menlo Park, CA", "value": 1000000, "due": "04/24/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": ""}, {"name": "1091 Cleanroom", "pm": "Marco Velasco", "type": "Budget", "location": "", "value": 3000000, "due": "04/24/2026", "status": "", "result": "", "notes": "", "client": ""}, {"name": "SF Armory Racquet Club", "pm": "David Girdley", "type": "RFP", "location": "San Francisco, CA", "value": 802765, "due": "04/24/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "NJJ Holding"}, {"name": "Kote TI", "pm": "Charlie Griffin", "type": "RFP", "location": "Menlo Park, CA", "value": 0, "due": "04/27/2026", "status": "Bidding", "result": "", "notes": "", "client": "Studio S Squared"}, {"name": "SLAC Restrooms (Stanford)", "pm": "Marco Velasco", "type": "RFP", "location": "Menlo Park, CA", "value": 2934721, "due": "04/27/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Stanford University"}, {"name": "Riveron - Mission Tower 2", "pm": "Chris Beekman", "type": "ROM", "location": "Santa Clara, CA", "value": 1590245, "due": "04/29/2026", "status": "Submitted", "result": "", "notes": "", "client": "JLL"}, {"name": "Amazon DHX1 PSH", "pm": "David Girdley", "type": "RFP", "location": "Houston, TX", "value": 190339, "due": "04/30/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Amazon"}, {"name": "Amazon Houston DH08 PSH", "pm": "David Girdley", "type": "RFP", "location": "Houston, TX", "value": 1922341, "due": "04/30/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Amazon"}, {"name": "Lotus Preschool", "pm": "David Girdley", "type": "RFP", "location": "San Jose, CA", "value": 10000000, "due": "05/01/2026", "status": "Bidding", "result": "Pending", "notes": "", "client": "Spectrum PMG"}, {"name": "ASML AZ Phoenix TI", "pm": "Marco Velasco", "type": "RFP", "location": "Phoenix, AZ", "value": 2000000, "due": "05/01/2026", "status": "Bidding", "result": "", "notes": "", "client": "ASML"}, {"name": "Luxe Bozeman", "pm": "Chip Hackett", "type": "Budget", "location": "Bozeman, MT", "value": 11225922, "due": "05/08/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": ""}, {"name": "Luxe Arvada Civil", "pm": "Chip Hackett", "type": "Budget", "location": "Arvada, CO", "value": 9989295, "due": "05/08/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "LuxeLocker"}, {"name": "Insidesource Ste #550 @ OSW", "pm": "John Machi", "type": "RFP", "location": "San Jose, CA", "value": 1753266, "due": "05/08/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "InsideSource"}, {"name": "560 Winchester", "pm": "Chris Beekman", "type": "RFP", "location": "San Jose, CA", "value": 554199, "due": "05/12/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Grosvenor Americas"}, {"name": "Unitek", "pm": "Marco Velasco", "type": "ROM", "location": "S. San Francisco", "value": 3253046, "due": "05/13/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Unitek"}, {"name": "Life Time Fitness Santana Row (Best Buy)", "pm": "Dusty Furtado", "type": "ROM", "location": "San Jose, CA", "value": 2751149, "due": "05/14/2026", "status": "Submitted", "result": "Pending", "notes": "", "client": "Federal Realty"}, {"name": "Fidelity Investor Center - Burbank", "pm": "David Girdley", "type": "RFP", "location": "Burbank, CA", "value": 1500000, "due": "05/15/2026", "status": "Bidding", "result": "", "notes": "", "client": ""}, {"name": "Luxe Round Rock", "pm": "Chip Hackett", "type": "Budget", "location": "Round Rock, TX", "value": 9269904, "due": "05/19/2026", "status": "Bidding", "result": "Pending", "notes": "", "client": ""}, {"name": "Luxe McKinney Civil", "pm": "Chip Hackett", "type": "Budget", "location": "McKinney, TX", "value": 5000000, "due": "05/19/2026", "status": "Bidding", "result": "", "notes": "", "client": "LuxeLocker"}, {"name": "Blox BayShore", "pm": "Dusty Furtado", "type": "Budget", "location": "Mountain View, CA", "value": 1500500, "due": "05/20/2026", "status": "Bidding", "result": "", "notes": "", "client": "Jason Oberman"}, {"name": "Nuvacore TI", "pm": "Chris Beekman", "type": "RFP", "location": "Santa Clara, CA", "value": 0, "due": "05/22/2026", "status": "Bidding", "result": "", "notes": "", "client": "Hudson Pacific Properties"}, {"name": "Atria TI", "pm": "Larry Lenz", "type": "RFP ", "location": "Menlo Park, CA", "value": 0, "due": "05/26/2026", "status": "Bidding", "result": "Pending", "notes": "", "client": "Atria Institute"}, {"name": "Mechanics Bank (1540 ECR)", "pm": "Dusty Furtado", "type": "RFP", "location": "Menlo Park, CA", "value": 854354, "due": "05/29/2026", "status": "Bidding", "result": "", "notes": "", "client": "Mechanics Bank"}, {"name": "The Junction (Los Gatos Retail)", "pm": "Larry Lenz", "type": "RFP", "location": "Los Gatos, CA", "value": 0, "due": "06/19/2026", "status": "Bidding", "result": "", "notes": "", "client": "Harmonie Park Development Group"}, {"name": "Luxe Sacramento", "pm": "Chip Hackett", "type": "Budget", "location": "Sacramento, CA", "value": 5000000, "due": "06/29/2026", "status": "Upcoming Bid", "result": "", "notes": "", "client": ""}, {"name": "Veeam", "pm": "Charlie Griffin", "type": "RFP", "location": "San Jose, CA", "value": 1291264, "due": "TBD", "status": "Upcoming Bid", "result": "Pending", "notes": "", "client": "AP+I"}, {"name": "Menlo Park Public Market", "pm": "Chip Hackett", "type": "ROM", "location": "Menlo Park, CA", "value": 3059325, "due": "TBD", "status": "Upcoming Bid", "result": "", "notes": "", "client": ""}, {"name": "Illumio", "pm": "Charlie Griffin", "type": "", "location": "Santa Clara, CA", "value": 0, "due": "TBD", "status": "Upcoming Bid", "result": "", "notes": "", "client": "VCC"}, {"name": "Menlo School Freezer", "pm": "Adam Tafralis", "type": "ROM", "location": "Menlo Park, CA", "value": 250000, "due": "TBD", "status": "Submitted", "result": "Lost", "notes": "", "client": "Menlo School"}, {"name": "UMC ", "pm": "Adam Tafralis", "type": "ROM", "location": "Sunnyvale, CA", "value": 1000000, "due": "TBD", "status": "Submitted", "result": "Lost", "notes": "", "client": ""}, {"name": "1070 Terra Bella", "pm": "Adam Tafralis", "type": "ROM", "location": "Mountain View, CA", "value": 0, "due": "TBD", "status": "Submitted", "result": "Lost", "notes": "", "client": ""}, {"name": "250 E. Caribbean", "pm": "Adam Tafralis", "type": "ROM", "location": "Sunnyvale, CA", "value": 0, "due": "TBD", "status": "Submitted", "result": "Lost", "notes": "", "client": "Baidu"}, {"name": "915 Bryant", "pm": "Cameron Peach", "type": "RFP", "location": "San Francisco, CA", "value": 0, "due": "TBD", "status": "Submitted", "result": "Lost", "notes": "", "client": "OA"}, {"name": "Office Space Modification (Attovia)", "pm": "Marco Velasco", "type": "ROM", "location": "San Carlos, CA", "value": 50699, "due": "TBD", "status": "Submitted", "result": "Lost", "notes": "", "client": "Attovia"}, {"name": "The Plex Addition", "pm": "Adam Tafralis", "type": "ROM", "location": "San Jose, CA", "value": 13000000, "due": "TBD", "status": "Upcoming Bid", "result": "", "notes": "", "client": ""}, {"name": "VCHS Summer work", "pm": "Adam Tafralis", "type": "", "location": "", "value": 250000, "due": "TBD", "status": "Upcoming Bid", "result": "", "notes": "", "client": ""}, {"name": "RMR 4720 Lakeview Fremont", "pm": "Adam Tafralis", "type": "", "location": "", "value": 1000000, "due": "TBD", "status": "Upcoming Bid", "result": "", "notes": "", "client": ""}, {"name": "Fellowship Center", "pm": "Adam Tafralis", "type": "ROM", "location": "Cupertino, CA", "value": 0, "due": "TBD", "status": "Upcoming Bid", "result": "", "notes": "", "client": "Dahlin"}, {"name": "7000 Shoreline Precon", "pm": "Marco Velasco", "type": "Budget", "location": "South San Francisco, CA", "value": 65545, "due": "TBD", "status": "Submitted", "result": "Awarded", "notes": "", "client": "Unitek"}, {"name": "Lexus Pop Up", "pm": "Charlie Griffin", "type": "RFP", "location": "San Jose, CA", "value": 0, "due": "TBD", "status": "Upcoming Bid", "result": "Pending", "notes": "4/30: Lexus is working on design, waiting on future direction to BID", "client": "Lexus"}, {"name": "(N) Staircase at Westgate f/Sky Zone", "pm": "Charlie Griffin", "type": "ROM", "location": "San Jose, CA", "value": 0, "due": "TBD", "status": "Bidding", "result": "", "notes": "TI", "client": ""}, {"name": "PNC Bank OSW", "pm": "John Machi", "type": "RFP", "location": "San Jose, CA", "value": 0, "due": "TBD", "status": "Upcoming Bid", "result": "", "notes": "", "client": ""}];
+
+// ── LIVE DATA FUNCTIONS ───────────────────────────────────────────
+let _msalInitialized = false;
+async function ensureMsalInit() {
+  if (!_msalInitialized) {
+    await msalInstance.initialize();
+    try { await msalInstance.handleRedirectPromise(); } catch(e) {}
+    _msalInitialized = true;
+  }
+}
+
+async function getToken() {
+  await ensureMsalInit();
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length > 0) {
+    try {
+      const result = await msalInstance.acquireTokenSilent({ scopes: GRAPH_SCOPES, account: accounts[0] });
+      return result.accessToken;
+    } catch(e) {
+      console.warn('Silent token failed, trying popup:', e.message);
+    }
+  }
+  const result = await msalInstance.loginPopup({ scopes: GRAPH_SCOPES });
+  return result.accessToken;
+}
+
+function setStatus(msg, loading) {
+  document.getElementById('data-status').textContent = msg;
+  document.getElementById('data-spinner').style.display = loading ? 'inline' : 'none';
+  const bar = document.getElementById('data-status-bar');
+  bar.style.background = loading ? '#BA7517' : '#1D9E75';
+  // Update main click label
+  bar.querySelector('span').textContent = loading ? 'Loading…' : '⚡ Refresh live data';
+}
+
+function excelDateToStr(v) {
+  if (typeof v === 'number' && v > 40000) {
+    const d = new Date(Math.round((v - 25569) * 86400000));
+    return (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear();
+  }
+  return v ? String(v) : '';
+}
+
+async function fetchSheetRange(token, sheetName) {
+  const encodedPath = encodeURIComponent(FILE_PATH);
+  const encodedSheet = encodeURIComponent(sheetName);
+  const url = `https://graph.microsoft.com/v1.0/me/drive/root:/${encodedPath}:/workbook/worksheets('${encodedSheet}')/usedRange?$select=values`;
+  const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('Sheet "' + sheetName + '" failed: ' + res.status + ' ' + err.substring(0,200));
+  }
+  const data = await res.json();
+  return data.values || [];
+}
+
+async function loadLiveData() {
+  try {
+    setStatus('Signing in…', true);
+    const token = await getToken();
+
+    const PM_TABS = ['Adam Tafralis','Cameron Peach','Charlie Griffin','Chip Hackett',
+      'Chris Beekman','David Girdley','Dusty Furtado','JB Cahoon',
+      'John Machi','Larry Lenz','Marc Morgan','Marco Velasco','Stephen Archer'];
+
+    // Load PM tabs
+    let liveJobs = [];
+    for (let i = 0; i < PM_TABS.length; i++) {
+      const pm = PM_TABS[i];
+      setStatus('Loading ' + pm + ' (' + (i+1) + '/' + PM_TABS.length + ')…', true);
+      try {
+        const rows = await fetchSheetRange(token, pm);
+        rows.forEach(row => {
+          if (row[1] && typeof row[1] === 'number' && row[3]) {
+            liveJobs.push({
+              pm: pm,
+              job_num: row[2] ? String(row[2]) : 'TBD',
+              name: String(row[3] || '').replace(/"/g,"'"),
+              value: typeof row[4] === 'number' ? Math.round(row[4]) : 0,
+              status: String(row[5] || ''),
+              super: String(row[6] || ''),
+              pe: String(row[7] || ''),
+              pc: String(row[8] || ''),
+              start: excelDateToStr(row[9]),
+              end: excelDateToStr(row[10]),
+              punch: excelDateToStr(row[11]),
+              comments: String(row[12] || '').replace(/\n/g,' | ').substring(0,180)
+            });
+          }
+        });
+      } catch(e) { console.warn('Skipping tab ' + pm + ':', e.message); }
+    }
+
+    // Load Bid Board
+    setStatus('Loading Bid Board…', true);
+    let liveBids = [];
+    try {
+      const bidRows = await fetchSheetRange(token, 'Bid Board');
+      bidRows.slice(3).forEach(row => {
+        if (row[1] && typeof row[1] === 'string' && row[1].trim()) {
+          liveBids.push({
+            pm: String(row[1]),
+            name: String(row[2] || '').replace(/"/g,"'"),
+            status: String(row[3] || ''),
+            type: String(row[4] || ''),
+            value: typeof row[6] === 'number' ? Math.round(row[6]) : 0,
+            due: excelDateToStr(row[7])
+          });
+        }
+      });
+    } catch(e) { console.warn('Bid Board failed:', e.message); }
+
+    // Load Bids & RFPs
+    setStatus('Loading Bids & RFPs…', true);
+    let liveRFPs = [];
+    try {
+      const rfpRows = await fetchSheetRange(token, 'Bids and RFPs');
+      rfpRows.slice(4).forEach(row => {
+        if (!row[0] || String(row[0]).includes('INSERT ROW')) return;
+        liveRFPs.push({
+          name: String(row[0] || '').replace(/"/g,"'"),
+          pm: String(row[1] || ''),
+          type: String(row[2] || ''),
+          location: String(row[4] || ''),
+          value: typeof row[6] === 'number' ? Math.round(row[6]) : 0,
+          due: excelDateToStr(row[7]),
+          status: String(row[9] || ''),
+          result: String(row[10] || ''),
+          notes: String(row[12] || '').replace(/\n/g,' ').substring(0,100),
+          client: String(row[17] || '')
+        });
+      });
+    } catch(e) { console.warn('Bids & RFPs failed:', e.message); }
+
+    // Swap in live data
+    if (liveJobs.length > 0) { JOBS.length = 0; liveJobs.forEach(j => JOBS.push(j)); }
+    if (liveBids.length > 0) { BIDS.length = 0; liveBids.forEach(b => BIDS.push(b)); }
+    if (liveRFPs.length > 0) { RFPS.length = 0; liveRFPs.forEach(r => RFPS.push(r)); }
+
+    const now = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+    setStatus('Live · ' + JOBS.length + ' jobs · ' + BIDS.length + ' bids · Updated ' + now, false);
+
+    // Reset chart init flags so charts re-render with fresh data
+    window._execChartsInit = false;
+    window._rfpChartsInit = false;
+
+    // Re-render all views
+    renderExec(); renderBB(); renderPM(); renderSU(); renderRFP();
+
+  } catch(err) {
+    console.error('Live data error:', err);
+    setStatus('Error: ' + err.message.substring(0,80) + ' — click to retry', false);
+    document.getElementById('data-status-bar').style.background = '#E24B4A';
+  }
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────
+const TODAY = new Date('2026-05-16');
+function fmtV(v){if(!v)return'—';if(v>=1e6)return'$'+(v/1e6).toFixed(1)+'M';if(v>=1e3)return'$'+(v/1e3).toFixed(0)+'K';return'$'+v;}
+function badge(cls,txt){return txt?`<span class="badge ${cls}">${txt}</span>`:'';}
+function parseDt(s){if(!s||s==='TBD'||s==='N/A'||s==='')return null;const p=s.split('/');return new Date(p[2],p[0]-1,p[1]);}
+function dueDays(d){const dt=parseDt(d);if(!dt)return null;return Math.round((dt-TODAY)/(864e5));}
+function fmtDue(d,submitted){
+  if(!d||d==='TBD')return'<span style="color:var(--text3)">TBD</span>';
+  if(submitted)return`<span class="td-muted">${d}</span>`;
+  const n=dueDays(d);
+  if(n!==null&&n<=7&&n>=0)return`<span class="due-urgent">${d} (${n}d)</span>`;
+  if(n!==null&&n<=21&&n>=0)return`<span class="due-soon">${d} (${n}d)</span>`;
+  return d;
+}
+function initials(n){return n.split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase();}
+const AV_PALETTE=[['#E6F1FB','#185FA5'],['#EAF3DE','#3B6D11'],['#FAEEDA','#854F0B'],['#EEEDFE','#3C3489'],['#FAECE7','#993C1D'],['#E1F5EE','#0F6E56']];
+function avColors(n){return AV_PALETTE[n.charCodeAt(0)%AV_PALETTE.length];}
+const STATUS_BADGE={Construction:'b-con','Pre-Con':'b-pre',Closeout:'b-close','On Hold':'b-hold','Retention Billed':'b-ret',Submitted:'b-sub',Bidding:'b-bid','Upcoming Bid':'b-up'};
+const TYPE_BADGE={RFP:'b-rfp',ROM:'b-rom',Budget:'b-budget'};
+const RESULT_BADGE={Awarded:'b-won',Lost:'b-lost',Pending:'b-pend'};
+
+function makeSort(col,dir,sorter){
+  return function(a,b){
+    let av,bv;
+    if(col==='value'){av=a.value;bv=b.value;}
+    else if(col==='end'||col==='due'){av=parseDt(a[col])||new Date('9999-01-01');bv=parseDt(b[col])||new Date('9999-01-01');}
+    else{av=(a[col]||'').toLowerCase();bv=(b[col]||'').toLowerCase();}
+    if(av<bv)return-dir;if(av>bv)return dir;return 0;
+  };
+}
+function updateSortHeaders(tableId,col){
+  document.querySelectorAll(`#${tableId} thead th`).forEach(th=>th.classList.toggle('sorted',th.dataset.col===col));
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────
+const VIEWS=['exec','bidboard','pm','super','rfps','tv'];
+function showView(id){
+  VIEWS.forEach(v=>{
+    document.getElementById('view-'+v).classList.toggle('active',v===id);
+  });
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.getAttribute('onclick')&&el.getAttribute('onclick').includes("'"+id+"'")));
+  if(id==='exec')renderExec();
+  if(id==='bidboard')renderBB();
+  if(id==='pm')renderPM();
+  if(id==='super')renderSU();
+  if(id==='rfps')renderRFP();
+  if(id==='tv')initTV();
+  return false;
+}
+
+// ── EXEC ──────────────────────────────────────────────────────────
+function renderExec(){
+  const wipData=[
+    {pm:'Chip Hackett',jobs:2,val:163230177},
+    {pm:'Charlie Griffin',jobs:6,val:75340070},
+    {pm:'Marc Morgan',jobs:7,val:44100410},
+    {pm:'David Girdley',jobs:9,val:30961452},
+    {pm:'Dusty Furtado',jobs:6,val:9112878},
+    {pm:'Chris Beekman',jobs:16,val:8726450},
+    {pm:'Marco Velasco',jobs:9,val:5437950},
+    {pm:'John Machi',jobs:22,val:5293712},
+    {pm:'Cameron Peach',jobs:2,val:4888635},
+  ];
+  const maxV=wipData[0].val;
+  document.getElementById('exec-wip-bars').innerHTML=wipData.map(p=>{
+    const pct=Math.round(p.val/maxV*100);
+    return`<div class="bar-row"><span class="bar-name">${p.pm}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:#378ADD;"></div></div><span class="bar-val">${fmtV(p.val)}</span><span class="bar-jobs">${p.jobs}</span></div>`;
+  }).join('');
+  const winData=[
+    {pm:'Dusty Furtado',won:7,lost:3,pct:70},{pm:'Chris Beekman',won:19,lost:15,pct:56},
+    {pm:'Marco Velasco',won:8,lost:9,pct:47},{pm:'John Machi',won:7,lost:10,pct:41},
+    {pm:'David Girdley',won:8,lost:12,pct:40},{pm:'Charlie Griffin',won:4,lost:9,pct:31},
+    {pm:'Avi Kripalani',won:4,lost:9,pct:31},{pm:'Cameron Peach',won:1,lost:5,pct:17},
+    {pm:'Marc Morgan',won:1,lost:6,pct:14},{pm:'Adam Tafralis',won:1,lost:7,pct:12},
+  ];
+  document.getElementById('exec-win-bars').innerHTML=winData.map(w=>{
+    const c=w.pct>=50?'#1D9E75':w.pct>=35?'#BA7517':'#E24B4A';
+    return`<div class="bar-row"><span class="bar-name">${w.pm}</span><div class="bar-track"><div class="bar-fill" style="width:${w.pct}%;background:${c};"></div></div><span class="bar-val" style="color:${c};font-weight:500;">${w.pct}%</span><span class="bar-jobs">${w.won}W/${w.lost}L</span></div>`;
+  }).join('');
+  const urgentBids=BIDS.filter(b=>b.status==='Bidding'||b.status==='Upcoming Bid').sort((a,b)=>{
+    const da=parseDt(a.due)||new Date('9999-01-01');
+    const db=parseDt(b.due)||new Date('9999-01-01');
+    return da-db;
+  }).slice(0,10);
+  document.getElementById('exec-bids-tbody').innerHTML=urgentBids.map(b=>`<tr>
+    <td>${b.name}</td>
+    <td class="td-muted">${b.pm}</td>
+    <td>${badge(STATUS_BADGE[b.status]||'',b.status)}</td>
+    <td>${fmtV(b.value)}</td>
+    <td style="white-space:nowrap;">${fmtDue(b.due,false)}</td>
+  </tr>`).join('');
+  if(!window._execChartsInit){
+    window._execChartsInit=true;
+    new Chart(document.getElementById('exec-donut'),{type:'doughnut',data:{labels:['Awarded','Lost','Pending'],datasets:[{data:[63,88,56],backgroundColor:['#1D9E75','#E24B4A','#BA7517'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});
+    new Chart(document.getElementById('exec-pipeline'),{type:'bar',data:{labels:['Upcoming','Bidding','Submitted'],datasets:[{data:[10,14,52],backgroundColor:['#EF9F27','#378ADD','#5DCAA5'],borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(128,128,128,0.08)'}}}}});
+  }
+}
+
+// ── BID BOARD ─────────────────────────────────────────────────────
+let bbStatus='', bbSort='due', bbDir=1;
+(function initBB(){
+  const pms=[...new Set(BIDS.map(b=>b.pm))].sort();
+  const sel=document.getElementById('bb-pm');
+  pms.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o);});
+})();
+function setBBStatus(el,s){bbStatus=s;document.querySelectorAll('#view-bidboard .pill').forEach(p=>p.classList.toggle('active',p.dataset.st===s));renderBB();}
+function sortBB(col){if(bbSort===col)bbDir*=-1;else{bbSort=col;bbDir=1;}updateSortHeaders('view-bidboard',col);renderBB();}
+function renderBB(){
+  const q=document.getElementById('bb-search').value.toLowerCase();
+  const pmF=document.getElementById('bb-pm').value;
+  const typeF=document.getElementById('bb-type').value;
+  let data=BIDS.filter(b=>{
+    if(bbStatus&&b.status!==bbStatus)return false;
+    if(pmF&&b.pm!==pmF)return false;
+    if(typeF&&b.type!==typeF)return false;
+    if(q&&!b.name.toLowerCase().includes(q)&&!b.pm.toLowerCase().includes(q))return false;
+    return true;
+  }).sort(makeSort(bbSort,bbDir));
+  document.getElementById('bb-k-up').textContent=data.filter(b=>b.status==='Upcoming Bid').length;
+  document.getElementById('bb-k-bid').textContent=data.filter(b=>b.status==='Bidding').length;
+  document.getElementById('bb-k-sub').textContent=data.filter(b=>b.status==='Submitted').length;
+  document.getElementById('bb-k-val').textContent='$'+Math.round(data.reduce((s,b)=>s+b.value,0)/1e6)+'M';
+  document.getElementById('bb-tbody').innerHTML=data.length?data.map(b=>`<tr>
+    <td style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${b.name}">${b.name}</td>
+    <td class="td-muted" style="white-space:nowrap;">${b.pm}</td>
+    <td>${badge(STATUS_BADGE[b.status]||'',b.status)}</td>
+    <td>${badge(TYPE_BADGE[b.type]||'',b.type)}</td>
+    <td style="text-align:right;">${fmtV(b.value)}</td>
+    <td style="white-space:nowrap;">${fmtDue(b.due,b.status==='Submitted')}</td>
+  </tr>`).join(''):'<tr class="empty-row"><td colspan="6">No bids match your filters.</td></tr>';
+  document.getElementById('bb-info').textContent=`Showing ${data.length} of ${BIDS.length} bids`;
+  document.getElementById('bb-count').textContent=`${data.length} bids`;
+}
+
+// ── PM DASHBOARD ──────────────────────────────────────────────────
+let pmStatus='', pmSort='pm', pmDir=1, pmView='table';
+(function initPM(){
+  const pms=[...new Set(JOBS.map(j=>j.pm))].sort();
+  const supers=[...new Set(JOBS.map(j=>j.super).filter(s=>s&&s!=='TBD'))].sort();
+  const pes=[...new Set(JOBS.map(j=>j.pe).filter(p=>p&&p!=='TBD'&&p!=='N/A'))].sort();
+  const add=(id,arr)=>{const s=document.getElementById(id);arr.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});};
+  add('pm-pm',pms); add('pm-super',supers); add('pm-pe',pes);
+})();
+function setPMStatus(el,s){pmStatus=s;document.querySelectorAll('#view-pm .pill').forEach(p=>p.classList.toggle('active',p.dataset.st===s));renderPM();}
+function setPMView(v){pmView=v;document.getElementById('pm-table-view').style.display=v==='table'?'block':'none';document.getElementById('pm-cards-view').style.display=v==='cards'?'block':'none';document.getElementById('pm-vbtn-t').classList.toggle('active',v==='table');document.getElementById('pm-vbtn-c').classList.toggle('active',v==='cards');}
+function sortPM(col){if(pmSort===col)pmDir*=-1;else{pmSort=col;pmDir=1;}updateSortHeaders('view-pm',col);renderPM();}
+function renderPM(){
+  const q=document.getElementById('pm-search').value.toLowerCase();
+  const pmF=document.getElementById('pm-pm').value;
+  const supF=document.getElementById('pm-super').value;
+  const peF=document.getElementById('pm-pe').value;
+  let data=JOBS.filter(j=>{
+    if(pmStatus&&j.status!==pmStatus)return false;
+    if(pmF&&j.pm!==pmF)return false;
+    if(supF&&j.super!==supF)return false;
+    if(peF&&j.pe!==peF)return false;
+    if(q&&!j.name.toLowerCase().includes(q)&&!j.pm.toLowerCase().includes(q)&&!j.super.toLowerCase().includes(q))return false;
+    return true;
+  }).sort(makeSort(pmSort,pmDir));
+  document.getElementById('pm-k-con').textContent=data.filter(j=>j.status==='Construction').length;
+  document.getElementById('pm-k-pre').textContent=data.filter(j=>j.status==='Pre-Con').length;
+  document.getElementById('pm-k-close').textContent=data.filter(j=>j.status==='Closeout').length;
+  document.getElementById('pm-k-val').textContent='$'+Math.round(data.reduce((s,j)=>s+j.value,0)/1e6)+'M';
+  document.getElementById('pm-tbody').innerHTML=data.length?data.map(j=>`<tr>
+    <td class="td-sm">${j.job_num}</td>
+    <td style="min-width:140px;">${j.name}</td>
+    <td class="td-muted" style="white-space:nowrap;">${j.pm}</td>
+    <td>${badge(STATUS_BADGE[j.status]||'',j.status)}</td>
+    <td style="text-align:right;">${fmtV(j.value)}</td>
+    <td class="td-muted" style="white-space:nowrap;">${j.super||'—'}</td>
+    <td class="td-muted" style="white-space:nowrap;">${j.pe||'—'}</td>
+    <td class="td-muted" style="white-space:nowrap;">${j.end||'—'}</td>
+    <td style="font-size:11px;color:var(--text2);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${j.comments}">${j.comments}</td>
+  </tr>`).join(''):'<tr class="empty-row"><td colspan="9">No jobs match your filters.</td></tr>';
+  const byPM={};
+  data.forEach(j=>{if(!byPM[j.pm])byPM[j.pm]=[];byPM[j.pm].push(j);});
+  document.getElementById('pm-cards-grid').innerHTML=Object.keys(byPM).sort().map(pm=>{
+    const jbs=byPM[pm];
+    const tot=jbs.reduce((s,j)=>s+j.value,0);
+    const active=jbs.filter(j=>['Construction','Pre-Con','Punch List'].includes(j.status)).length;
+    const [bg,txt]=avColors(pm);
+    return`<div class="pm-card"><div class="pm-card-head"><div class="avatar" style="background:${bg};color:${txt};">${initials(pm)}</div><div><div class="pm-card-name">${pm}</div><div class="pm-card-meta">${jbs.length} jobs · ${fmtV(tot)} · ${active} active</div></div></div>${jbs.map(j=>`<div class="pm-job-row"><div style="flex:1;min-width:0;"><div class="pm-job-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${j.name}</div><div style="font-size:11px;color:var(--text3);">${j.super&&j.super!=='TBD'?j.super:''}</div></div><div style="flex-shrink:0;text-align:right;">${badge(STATUS_BADGE[j.status]||'',j.status)}<div class="pm-job-val">${fmtV(j.value)}</div></div></div>`).join('')}</div>`;
+  }).join('');
+  document.getElementById('pm-info').textContent=`Showing ${data.length} of ${JOBS.length} jobs`;
+}
+
+// ── SUPER DASHBOARD ───────────────────────────────────────────────
+const SUPER_JOBS=JOBS.filter(j=>j.super&&j.super.toUpperCase()!=='TBD'&&j.super.trim()!=='');
+let suStatus='', suSort='super', suDir=1, suView='table';
+(function initSU(){
+  const supers=[...new Set(SUPER_JOBS.map(j=>j.super))].sort();
+  const pms=[...new Set(SUPER_JOBS.map(j=>j.pm))].sort();
+  const add=(id,arr)=>{const s=document.getElementById(id);arr.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});};
+  add('su-super',supers); add('su-pm',pms);
+})();
+function setSUStatus(el,s){suStatus=s;document.querySelectorAll('#view-super .pill').forEach(p=>p.classList.toggle('active',p.dataset.st===s));renderSU();}
+function setSUView(v){suView=v;document.getElementById('su-table-view').style.display=v==='table'?'block':'none';document.getElementById('su-cards-view').style.display=v==='cards'?'block':'none';document.getElementById('su-vbtn-t').classList.toggle('active',v==='table');document.getElementById('su-vbtn-c').classList.toggle('active',v==='cards');}
+function sortSU(col){if(suSort===col)suDir*=-1;else{suSort=col;suDir=1;}updateSortHeaders('view-super',col);renderSU();}
+function renderSU(){
+  const q=document.getElementById('su-search').value.toLowerCase();
+  const supF=document.getElementById('su-super').value;
+  const pmF=document.getElementById('su-pm').value;
+  let data=SUPER_JOBS.filter(j=>{
+    if(suStatus&&j.status!==suStatus)return false;
+    if(supF&&j.super!==supF)return false;
+    if(pmF&&j.pm!==pmF)return false;
+    if(q&&!j.super.toLowerCase().includes(q)&&!j.name.toLowerCase().includes(q)&&!j.pm.toLowerCase().includes(q))return false;
+    return true;
+  }).sort(makeSort(suSort,suDir));
+  const activeJ=data.filter(j=>j.status==='Construction'||j.status==='Pre-Con');
+  document.getElementById('su-k-supers').textContent=new Set(data.map(j=>j.super)).size;
+  document.getElementById('su-k-active').textContent=activeJ.length;
+  document.getElementById('su-k-val').textContent='$'+Math.round(data.reduce((s,j)=>s+j.value,0)/1e6)+'M';
+  document.getElementById('su-tbody').innerHTML=data.length?data.map(j=>`<tr>
+    <td style="font-weight:500;white-space:nowrap;">${j.super}</td>
+    <td>${j.name}</td>
+    <td class="td-sm">${j.job_num}</td>
+    <td class="td-muted" style="white-space:nowrap;">${j.pm}</td>
+    <td>${badge(STATUS_BADGE[j.status]||'',j.status)}</td>
+    <td style="text-align:right;">${fmtV(j.value)}</td>
+    <td class="td-muted" style="white-space:nowrap;">${j.end||'—'}</td>
+  </tr>`).join(''):'<tr class="empty-row"><td colspan="7">No jobs match your filters.</td></tr>';
+  const bySuper={};
+  data.forEach(j=>{if(!bySuper[j.super])bySuper[j.super]=[];bySuper[j.super].push(j);});
+  const maxJobs=Math.max(...Object.values(bySuper).map(a=>a.length),1);
+  document.getElementById('su-cards-grid').innerHTML=Object.keys(bySuper).sort().map(s=>{
+    const sjobs=bySuper[s];
+    const active=sjobs.filter(j=>j.status==='Construction'||j.status==='Pre-Con').length;
+    const [bg,txt]=avColors(s);
+    const loadPct=Math.round(sjobs.length/maxJobs*100);
+    const loadC=sjobs.length>=6?'#E24B4A':sjobs.length>=4?'#BA7517':'#1D9E75';
+    return`<div class="pm-card"><div class="pm-card-head"><div class="avatar" style="background:${bg};color:${txt};">${initials(s)}</div><div style="flex:1;"><div class="pm-card-name">${s}</div><div class="pm-card-meta">${sjobs.length} jobs · ${active} active</div><div style="height:5px;background:var(--surface2);border-radius:3px;margin-top:6px;overflow:hidden;"><div style="height:100%;width:${loadPct}%;background:${loadC};border-radius:3px;"></div></div></div></div>${sjobs.map(j=>`<div class="pm-job-row"><div style="flex:1;min-width:0;"><div class="pm-job-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${j.name}</div><div style="font-size:11px;color:var(--text3);">${j.pm}</div></div>${badge(STATUS_BADGE[j.status]||'',j.status)}</div>`).join('')}</div>`;
+  }).join('');
+  document.getElementById('su-info').textContent=`Showing ${data.length} of ${SUPER_JOBS.length} job assignments`;
+}
+
+// ── BIDS & RFPs ───────────────────────────────────────────────────
+let rfpResult='', rfpSort='due', rfpDir=1;
+(function initRFP(){
+  const pms=[...new Set(RFPS.map(r=>r.pm).filter(Boolean))].sort();
+  const clients=[...new Set(RFPS.map(r=>r.client).filter(c=>c&&c.length>1))].sort();
+  const add=(id,arr)=>{const s=document.getElementById(id);arr.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});};
+  add('rfp-pm',pms); add('rfp-client',clients.slice(0,40));
+  if(!window._rfpChartsInit){
+    window._rfpChartsInit=true;
+    setTimeout(()=>{
+      new Chart(document.getElementById('rfp-pm-chart'),{type:'bar',data:{labels:['Dusty F.','Chris B.','Marco V.','John M.','David G.','Charlie G.','Avi K.','Cameron P.','Marc M.','Adam T.'],datasets:[{data:[70,56,47,41,40,31,31,17,14,12],backgroundColor:[70,56,47,41,40,31,31,17,14,12].map(p=>p>=50?'#1D9E75':p>=35?'#BA7517':'#E24B4A'),borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(128,128,128,0.08)'},max:100,ticks:{callback:v=>v+'%',font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+      new Chart(document.getElementById('rfp-year-chart'),{type:'bar',data:{labels:['2024','2025','2026'],datasets:[{label:'Awarded',data:[1,48,13],backgroundColor:'#1D9E75',borderRadius:2},{label:'Lost',data:[1,75,6],backgroundColor:'#E24B4A',borderRadius:2},{label:'Pending',data:[0,13,41],backgroundColor:'#BA7517',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(128,128,128,0.08)'}}}}});
+    },100);
+  }
+})();
+function setRFPResult(el,r){rfpResult=r;document.querySelectorAll('#view-rfps .pill').forEach(p=>p.classList.toggle('active',p.dataset.r===r));renderRFP();}
+function sortRFP(col){if(rfpSort===col)rfpDir*=-1;else{rfpSort=col;rfpDir=1;}updateSortHeaders('view-rfps',col);renderRFP();}
+function renderRFP(){
+  const q=document.getElementById('rfp-search').value.toLowerCase();
+  const pmF=document.getElementById('rfp-pm').value;
+  const typeF=document.getElementById('rfp-type').value;
+  const clF=document.getElementById('rfp-client').value;
+  let data=RFPS.filter(r=>{
+    if(rfpResult){
+      if(['Awarded','Lost','Pending'].includes(rfpResult)&&r.result!==rfpResult)return false;
+      if(rfpResult==='Bidding'&&r.status!=='Bidding')return false;
+      if(rfpResult==='Upcoming Bid'&&r.status!=='Upcoming Bid')return false;
+    }
+    if(pmF&&r.pm!==pmF)return false;
+    if(typeF&&r.type!==typeF)return false;
+    if(clF&&r.client!==clF)return false;
+    if(q&&!r.name.toLowerCase().includes(q)&&!r.pm.toLowerCase().includes(q)&&!r.client.toLowerCase().includes(q)&&!r.location.toLowerCase().includes(q))return false;
+    return true;
+  }).sort(makeSort(rfpSort,rfpDir));
+  const won=data.filter(r=>r.result==='Awarded').length;
+  const lost=data.filter(r=>r.result==='Lost').length;
+  const pend=data.filter(r=>r.result==='Pending').length;
+  const total=won+lost;
+  const wonVal=data.filter(r=>r.result==='Awarded').reduce((s,r)=>s+r.value,0);
+  document.getElementById('rfp-k-won').textContent=won;
+  document.getElementById('rfp-k-lost').textContent=lost;
+  document.getElementById('rfp-k-pend').textContent=pend;
+  document.getElementById('rfp-k-wr').textContent=total?(won/total*100).toFixed(1)+'%':'—';
+  document.getElementById('rfp-k-val').textContent='$'+(wonVal/1e6).toFixed(1)+'M';
+  document.getElementById('rfp-tbody').innerHTML=data.length?data.map(r=>`<tr>
+    <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.name}">${r.name}</td>
+    <td class="td-muted" style="white-space:nowrap;">${r.pm}</td>
+    <td>${badge(TYPE_BADGE[r.type]||'',r.type)}</td>
+    <td>${r.result?badge(RESULT_BADGE[r.result]||'',r.result):badge(STATUS_BADGE[r.status]||'',r.status)}</td>
+    <td style="text-align:right;">${fmtV(r.value)}</td>
+    <td class="td-muted" style="max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.client}">${r.client||'—'}</td>
+    <td class="td-muted" style="white-space:nowrap;">${r.location||'—'}</td>
+    <td class="td-muted" style="white-space:nowrap;">${r.due||'—'}</td>
+    <td style="font-size:11px;color:var(--text2);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.notes}">${r.notes}</td>
+  </tr>`).join(''):'<tr class="empty-row"><td colspan="9">No records match your filters.</td></tr>';
+  document.getElementById('rfp-info').textContent=`Showing ${data.length} of ${RFPS.length} records`;
+}
+
+// ── TV MODE ───────────────────────────────────────────────────────
+let tvCurrent=0, tvPlaying=false, tvTimer=null, tvAnimTimer=null;
+const TV_SLIDES=4, TV_DUR=8000;
+function initTV(){
+  if(window._tvInit)return;
+  window._tvInit=true;
+  const dotsEl=document.getElementById('tv-dots');
+  for(let i=0;i<TV_SLIDES;i++){const d=document.createElement('div');d.className='tv-dot'+(i===0?' active':'');dotsEl.appendChild(d);}
+  // Bids table
+  const urgentBids=BIDS.filter(b=>b.status==='Bidding'||b.status==='Upcoming Bid').sort((a,b)=>(parseDt(a.due)||new Date('9999-01-01'))-(parseDt(b.due)||new Date('9999-01-01'))).slice(0,8);
+  document.getElementById('tv-bids-tbody').innerHTML=urgentBids.map(b=>`<tr style="border-bottom:0.5px solid var(--border);">
+    <td style="font-size:14px;padding:9px 8px;">${b.name}</td>
+    <td style="font-size:13px;padding:9px 8px;color:var(--text2);">${b.pm}</td>
+    <td style="padding:9px 8px;">${badge(STATUS_BADGE[b.status]||'',b.status)}</td>
+    <td style="font-size:13px;padding:9px 8px;text-align:right;">${fmtV(b.value)}</td>
+    <td style="font-size:13px;padding:9px 8px;white-space:nowrap;">${fmtDue(b.due,false)}</td>
+  </tr>`).join('');
+  // WIP bars
+  const wipData=[{pm:'Chip Hackett',jobs:2,val:163230177},{pm:'Charlie Griffin',jobs:6,val:75340070},{pm:'Marc Morgan',jobs:7,val:44100410},{pm:'David Girdley',jobs:9,val:30961452},{pm:'Dusty Furtado',jobs:6,val:9112878},{pm:'Chris Beekman',jobs:16,val:8726450},{pm:'Marco Velasco',jobs:9,val:5437950},{pm:'John Machi',jobs:22,val:5293712},{pm:'Cameron Peach',jobs:2,val:4888635}];
+  const maxV=wipData[0].val;
+  document.getElementById('tv-wip-bars').innerHTML=wipData.map(p=>`<div class="bar-row"><span class="bar-name" style="font-size:13px;">${p.pm}</span><div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${Math.round(p.val/maxV*100)}%;background:#378ADD;"></div></div><span class="bar-val" style="font-size:13px;">${fmtV(p.val)}</span><span class="bar-jobs" style="font-size:12px;">${p.jobs}</span></div>`).join('');
+  // Win bars
+  const winData=[{pm:'Dusty Furtado',won:7,lost:3,pct:70},{pm:'Chris Beekman',won:19,lost:15,pct:56},{pm:'Marco Velasco',won:8,lost:9,pct:47},{pm:'John Machi',won:7,lost:10,pct:41},{pm:'David Girdley',won:8,lost:12,pct:40},{pm:'Charlie Griffin',won:4,lost:9,pct:31},{pm:'Avi Kripalani',won:4,lost:9,pct:31},{pm:'Cameron Peach',won:1,lost:5,pct:17},{pm:'Marc Morgan',won:1,lost:6,pct:14},{pm:'Adam Tafralis',won:1,lost:7,pct:12}];
+  document.getElementById('tv-win-bars').innerHTML=winData.map(w=>{const c=w.pct>=50?'#1D9E75':w.pct>=35?'#BA7517':'#E24B4A';return`<div class="bar-row"><span class="bar-name" style="font-size:13px;">${w.pm}</span><div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${w.pct}%;background:${c};"></div></div><span class="bar-val" style="color:${c};font-weight:600;font-size:13px;">${w.pct}%</span><span class="bar-jobs" style="font-size:12px;">${w.won}W/${w.lost}L</span></div>`;}).join('');
+  setInterval(()=>{const n=new Date();document.getElementById('tv-clock').textContent=n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});},1000);
+  tvShowSlide(0);
+  tvStart();
+}
+function tvShowSlide(n){
+  document.querySelectorAll('.tv-slide').forEach((s,i)=>s.classList.toggle('active',i===n));
+  document.querySelectorAll('.tv-dot').forEach((d,i)=>d.classList.toggle('active',i===n));
+  document.getElementById('tv-slide-lbl').textContent=`Slide ${n+1} of ${TV_SLIDES}`;
+  tvCurrent=n;
+  tvResetAnim();
+}
+function tvNext(){tvShowSlide((tvCurrent+1)%TV_SLIDES);if(tvPlaying)tvStart();}
+function tvPrev(){tvShowSlide((tvCurrent-1+TV_SLIDES)%TV_SLIDES);if(tvPlaying)tvStart();}
+function tvStart(){if(tvTimer)clearInterval(tvTimer);tvTimer=setInterval(tvNext,TV_DUR);tvPlaying=true;}
+function tvStop(){if(tvTimer)clearInterval(tvTimer);tvTimer=null;tvPlaying=false;const b=document.getElementById('tv-pbar');b.style.transition='none';b.style.width='0';}
+function tvToggle(){if(tvPlaying){tvStop();document.getElementById('tv-play-btn').textContent='▶ Play';}else{tvStart();tvResetAnim();document.getElementById('tv-play-btn').textContent='⏸ Pause';}}
+function tvResetAnim(){
+  const b=document.getElementById('tv-pbar');
+  b.style.transition='none';b.style.width='0';
+  if(tvAnimTimer)clearTimeout(tvAnimTimer);
+  if(tvPlaying){tvAnimTimer=setTimeout(()=>{b.style.transition=`width ${TV_DUR}ms linear`;b.style.width='100%';},60);}
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+// Render with static data immediately so dashboard isn't blank
+renderExec();
+renderBB();
+// Then attempt silent token refresh to auto-load live data
+(async () => {
+  try {
+    await ensureMsalInit();
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length > 0) {
+      loadLiveData();
+    }
+  } catch(e) {
+    console.warn('Auto-init failed:', e.message);
+  }
+})();
+</script>
+</body>
+</html>
