@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Operations Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+<script src="https://unpkg.com/@azure/msal-browser@3.28.0/lib/msal-browser.min.js"></script>
 <style>
 :root {
   --bg: #f9f9f8;
@@ -589,7 +589,7 @@ const msalConfig = {
   },
   cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false }
 };
-const msalInstance = new msal.PublicClientApplication(msalConfig);
+let msalInstance = null; // initialized in ensureMsalInit
 const GRAPH_SCOPES = ['Files.Read', 'User.Read'];
 
 // Static fallback data (used until live data loads)
@@ -601,9 +601,20 @@ const RFPS = [{"name": "Amazon Fremont - DXC5 AVI", "pm": "David Girdley", "type
 let _msalInitialized = false;
 async function ensureMsalInit() {
   if (!_msalInitialized) {
-    await msalInstance.initialize();
-    try { await msalInstance.handleRedirectPromise(); } catch(e) {}
-    _msalInitialized = true;
+    try {
+      // MSAL v3: use PublicClientApplication.createPublicClientApplication
+      if (typeof msal !== 'undefined') {
+        msalInstance = await msal.PublicClientApplication.createPublicClientApplication(msalConfig);
+      } else if (typeof msalBrowser !== 'undefined') {
+        msalInstance = await msalBrowser.PublicClientApplication.createPublicClientApplication(msalConfig);
+      } else {
+        throw new Error('MSAL library not loaded - check network connection');
+      }
+      try { await msalInstance.handleRedirectPromise(); } catch(e) {}
+      _msalInitialized = true;
+    } catch(e) {
+      throw new Error('MSAL init failed: ' + e.message);
+    }
   }
 }
 
@@ -844,8 +855,13 @@ function renderExec(){
     <td style="white-space:nowrap;">${fmtDue(b.due,false)}</td>
   </tr>`).join('');
   // Destroy existing charts if they exist to allow re-render with live data
-if(window._execDonutChart){window._execDonutChart.destroy();window._execDonutChart=null;}
-if(window._execPipeChart){window._execPipeChart.destroy();window._execPipeChart=null;}
+if(window._execDonutChart){try{window._execDonutChart.destroy();}catch(e){}window._execDonutChart=null;}
+if(window._execPipeChart){try{window._execPipeChart.destroy();}catch(e){}window._execPipeChart=null;}
+// Reset canvas elements to clear any stale state
+['exec-donut','exec-pipeline'].forEach(id=>{
+  const c=document.getElementById(id);
+  if(c){const p=c.parentNode;const n=c.cloneNode(false);p.replaceChild(n,c);}
+});
 if(!window._execChartsInit){
     window._execChartsInit=true;
     window._execDonutChart = new Chart(document.getElementById('exec-donut'),{type:'doughnut',data:{labels:['Awarded','Lost','Pending'],datasets:[{data:[63,88,56],backgroundColor:['#1D9E75','#E24B4A','#BA7517'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});
@@ -998,7 +1014,12 @@ let rfpResult='', rfpSort='due', rfpDir=1;
   const clients=[...new Set(RFPS.map(r=>r.client).filter(c=>c&&c.length>1))].sort();
   const add=(id,arr)=>{const s=document.getElementById(id);arr.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});};
   add('rfp-pm',pms); add('rfp-client',clients.slice(0,40));
-  if(!window._rfpChartsInit){
+  // Reset RFP chart canvases
+['rfp-pm-chart','rfp-year-chart'].forEach(id=>{
+  const c=document.getElementById(id);
+  if(c){const p=c.parentNode;const n=c.cloneNode(false);p.replaceChild(n,c);}
+});
+if(!window._rfpChartsInit){
     window._rfpChartsInit=true;
     setTimeout(()=>{
       new Chart(document.getElementById('rfp-pm-chart'),{type:'bar',data:{labels:['Dusty F.','Chris B.','Marco V.','John M.','David G.','Charlie G.','Avi K.','Cameron P.','Marc M.','Adam T.'],datasets:[{data:[70,56,47,41,40,31,31,17,14,12],backgroundColor:[70,56,47,41,40,31,31,17,14,12].map(p=>p>=50?'#1D9E75':p>=35?'#BA7517':'#E24B4A'),borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(128,128,128,0.08)'},max:100,ticks:{callback:v=>v+'%',font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
