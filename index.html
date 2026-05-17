@@ -28,19 +28,18 @@
   --nav-w: 200px;
   --header-h: 56px;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #111110; --surface: #1c1c1a; --surface2: #252522;
-    --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.18);
-    --text: #f0f0ec; --text2: #a0a09a; --text3: #606058;
-    --blue-bg: #0c2540; --blue-txt: #85B7EB;
-    --green-bg: #0a2010; --green-txt: #97C459;
-    --amber-bg: #2a1a00; --amber-txt: #EF9F27;
-    --red-bg: #280a0a; --red-txt: #F09595;
-    --purple-bg: #1a1640; --purple-txt: #AFA9EC;
-    --coral-bg: #2a0c00; --coral-txt: #F0997B;
-    --gray-bg: #222220; --gray-txt: #B4B2A9;
-  }
+/* Dark mode always */
+:root {
+  --bg: #111110 !important; --surface: #1c1c1a !important; --surface2: #252522 !important;
+  --border: rgba(255,255,255,0.1) !important; --border2: rgba(255,255,255,0.18) !important;
+  --text: #f0f0ec !important; --text2: #a0a09a !important; --text3: #606058 !important;
+  --blue-bg: #0c2540 !important; --blue-txt: #85B7EB !important;
+  --green-bg: #0a2010 !important; --green-txt: #97C459 !important;
+  --amber-bg: #2a1a00 !important; --amber-txt: #EF9F27 !important;
+  --red-bg: #280a0a !important; --red-txt: #F09595 !important;
+  --purple-bg: #1a1640 !important; --purple-txt: #AFA9EC !important;
+  --coral-bg: #2a0c00 !important; --coral-txt: #F0997B !important;
+  --gray-bg: #222220 !important; --gray-txt: #B4B2A9 !important;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
@@ -202,6 +201,29 @@ tbody td { font-size: 12px; padding: 8px 8px; color: var(--text); vertical-align
   .kpi-grid, .kpi-grid-5 { grid-template-columns: repeat(2,1fr); }
   .two-col, .three-col { grid-template-columns: 1fr; }
 }
+
+/* TV / Kiosk mode */
+body.tv-mode nav { width: 160px; }
+body.tv-mode .nav-brand-name { font-size: 16px; }
+body.tv-mode .nav-item { font-size: 15px; padding: 12px 16px; }
+body.tv-mode main { margin-left: 160px; }
+body.tv-mode .kpi-n { font-size: 32px; }
+body.tv-mode .kpi-l { font-size: 13px; }
+body.tv-mode .kpi-sub { font-size: 12px; }
+body.tv-mode .bar-name { font-size: 14px; width: 150px; }
+body.tv-mode .bar-val { font-size: 14px; }
+body.tv-mode tbody td { font-size: 14px; padding: 10px 8px; }
+body.tv-mode thead th { font-size: 12px; }
+body.tv-mode .badge { font-size: 12px; padding: 3px 10px; }
+body.tv-mode .card-title { font-size: 14px; }
+body.tv-mode .page-title { font-size: 18px; }
+body.tv-mode .status-n { font-size: 28px; }
+body.tv-mode .status-l { font-size: 13px; }
+body.tv-mode .page-content { padding: 28px 36px; }
+body.tv-mode .kpi { padding: 18px 20px; }
+body.tv-mode .kpi-grid { gap: 14px; margin-bottom: 24px; }
+body.tv-mode .two-col { gap: 18px; }
+body.tv-mode .card { padding: 20px 24px; }
 </style>
 </head>
 <body>
@@ -209,6 +231,7 @@ tbody td { font-size: 12px; padding: 8px 8px; color: var(--text); vertical-align
   <span>⚡ Click to load live data from OneDrive</span>
   <span id="data-status" style="opacity:0.85;font-weight:400;"></span>
   <span id="data-spinner" style="display:none;">⟳</span>
+  <button onclick="event.stopPropagation();toggleTVMode()" id="tv-mode-btn" style="margin-left:16px;background:rgba(255,255,255,0.2);border:none;color:white;font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;font-weight:500;">📺 TV Mode</button>
 </div>
 <div style="height:33px;"></div>
 
@@ -1115,6 +1138,29 @@ function tvResetAnim(){
   b.style.transition='none';b.style.width='0';
   if(tvAnimTimer)clearTimeout(tvAnimTimer);
   if(tvPlaying){tvAnimTimer=setTimeout(()=>{b.style.transition=`width ${TV_DUR}ms linear`;b.style.width='100%';},60);}
+}
+
+// ── TV MODE ───────────────────────────────────────────────────────
+function toggleTVMode() {
+  const body = document.body;
+  const btn = document.getElementById('tv-mode-btn');
+  if (body.classList.contains('tv-mode')) {
+    body.classList.remove('tv-mode');
+    btn.textContent = '📺 TV Mode';
+    localStorage.setItem('tvMode', '0');
+  } else {
+    body.classList.add('tv-mode');
+    btn.textContent = '🖥 Exit TV Mode';
+    localStorage.setItem('tvMode', '1');
+  }
+}
+// Restore TV mode preference on load
+if (localStorage.getItem('tvMode') === '1') {
+  document.body.classList.add('tv-mode');
+  window.addEventListener('load', () => {
+    const btn = document.getElementById('tv-mode-btn');
+    if (btn) btn.textContent = '🖥 Exit TV Mode';
+  });
 }
 
 // ── INIT ─────────────────────────────────────────────────────────
