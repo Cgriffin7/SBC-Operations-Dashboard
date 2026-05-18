@@ -1203,10 +1203,17 @@ function renderBB(){
     .sort((a,b)=>b.dueDt-a.dueDt); // newest first (most recently submitted)
 
   // KPIs
-  document.getElementById('bb-k-up').textContent=upcoming.length;
+  // Sums for each section
+  const biddingVal=bidding.reduce((s,b)=>s+b.value,0);
+  const upcomingVal=upcoming.reduce((s,b)=>s+b.value,0);
+  const submittedVal=submitted.reduce((s,b)=>s+b.value,0);
+
   document.getElementById('bb-k-bid').textContent=bidding.length;
+  document.getElementById('bb-k-bid-val').textContent=biddingVal>0?fmtV(biddingVal):'—';
+  document.getElementById('bb-k-up').textContent=upcoming.length;
+  document.getElementById('bb-k-up-val').textContent=upcomingVal>0?fmtV(upcomingVal):'—';
   document.getElementById('bb-k-sub').textContent=submitted.length;
-  // pipeline value KPI removed
+  document.getElementById('bb-k-sub-val').textContent=submittedVal>0?fmtV(submittedVal):'—';
   document.getElementById('bb-count').textContent=`${filtered.length} bids`;
   document.getElementById('bb-bidding-count').textContent=bidding.length+' bids';
   document.getElementById('bb-upcoming-count').textContent=upcoming.length+' bids';
