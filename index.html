@@ -193,6 +193,70 @@ tbody td { font-size: 12px; padding: 8px 8px; color: var(--text); vertical-align
 .due-soon { color: var(--amber-txt); }
 
 /* RESPONSIVE */
+/* TV size scaling */
+body.tv50 { font-size: 14px; }
+body.tv50 .kpi-n { font-size: 28px; }
+body.tv50 tbody td { font-size: 13px; }
+body.tv50 .nav-item { font-size: 13px; }
+
+body.tv55 { font-size: 15px; }
+body.tv55 .kpi-n { font-size: 30px; }
+body.tv55 tbody td { font-size: 13px; }
+
+body.tv65 { font-size: 16px; }
+body.tv65 .kpi-n { font-size: 34px; }
+body.tv65 tbody td { font-size: 14px; }
+body.tv65 .page-content { padding: 28px 36px; }
+
+body.tv85 { font-size: 18px; }
+body.tv85 .kpi-n { font-size: 40px; }
+body.tv85 .kpi-l { font-size: 14px; }
+body.tv85 tbody td { font-size: 16px; padding: 11px 10px; }
+body.tv85 thead th { font-size: 12px; }
+body.tv85 .page-title { font-size: 22px; }
+body.tv85 .card-title { font-size: 15px; }
+body.tv85 .bar-name { font-size: 16px; width: 160px; }
+body.tv85 .bar-val { font-size: 15px; }
+body.tv85 .page-content { padding: 32px 40px; }
+body.tv85 .kpi { padding: 20px 24px; }
+body.tv85 .badge { font-size: 12px; padding: 3px 10px; }
+body.tv85 .status-n { font-size: 32px; }
+
+body.tv98 { font-size: 20px; }
+body.tv98 .kpi-n { font-size: 48px; }
+body.tv98 .kpi-l { font-size: 15px; }
+body.tv98 .kpi-sub { font-size: 13px; }
+body.tv98 tbody td { font-size: 18px; padding: 13px 10px; }
+body.tv98 thead th { font-size: 13px; }
+body.tv98 .page-title { font-size: 26px; }
+body.tv98 .card-title { font-size: 17px; }
+body.tv98 .bar-name { font-size: 18px; width: 180px; }
+body.tv98 .bar-val { font-size: 17px; }
+body.tv98 .page-content { padding: 36px 48px; }
+body.tv98 .kpi { padding: 24px 28px; }
+body.tv98 .kpi-grid { gap: 18px; margin-bottom: 28px; }
+body.tv98 .badge { font-size: 13px; padding: 4px 12px; }
+body.tv98 .status-n { font-size: 38px; }
+body.tv98 .pill { font-size: 13px; padding: 5px 16px; }
+
+/* All TV modes share nav expansion */
+body.tv50 nav, body.tv55 nav, body.tv65 nav, body.tv85 nav, body.tv98 nav {
+  width: 160px !important; box-shadow: none !important;
+}
+body.tv50 nav:hover, body.tv55 nav:hover, body.tv65 nav:hover, body.tv85 nav:hover, body.tv98 nav:hover {
+  width: 200px !important;
+}
+body.tv50 .nav-brand-name, body.tv50 .nav-brand-sub, body.tv50 .nav-item span,
+body.tv55 .nav-brand-name, body.tv55 .nav-brand-sub, body.tv55 .nav-item span,
+body.tv65 .nav-brand-name, body.tv65 .nav-brand-sub, body.tv65 .nav-item span,
+body.tv85 .nav-brand-name, body.tv85 .nav-brand-sub, body.tv85 .nav-item span,
+body.tv98 .nav-brand-name, body.tv98 .nav-brand-sub, body.tv98 .nav-item span,
+body.tv50 .nav-footer, body.tv55 .nav-footer, body.tv65 .nav-footer,
+body.tv85 .nav-footer, body.tv98 .nav-footer { opacity: 1 !important; }
+body.tv50 main, body.tv55 main, body.tv65 main, body.tv85 main, body.tv98 main {
+  margin-left: 160px !important;
+}
+
 @media (max-width: 900px) {
   nav { width: 56px; }
   .nav-brand-name, .nav-brand-sub, .nav-item span { display: none; }
@@ -211,6 +275,17 @@ nav:hover .nav-brand-name, nav:hover .nav-brand-sub, nav:hover .nav-item span, n
 .nav-item { justify-content: flex-start; padding: 9px 20px; }
 main { margin-left: 56px !important; }
 .page-header { left: 56px; }
+
+.tv-size-option {
+  font-size:13px;padding:8px 16px;cursor:pointer;color:var(--text);transition:background 0.1s;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.tv-size-option:hover { background:var(--surface2); }
+.tv-size-option.active { color:var(--green);font-weight:500; }
+.tv-size-option.active::after { content:'✓';font-size:11px; }
+#desktop-btn.active, #tv-dropdown-btn.active {
+  background:var(--text) !important;color:var(--bg) !important;
+}
 
 /* TV / Kiosk mode */
 body.tv-mode nav { width: 160px !important; box-shadow: none !important; }
@@ -247,8 +322,29 @@ body.tv-mode .card { padding: 20px 24px; }
     <span id="live-btn-label">Live data</span>
     <span id="data-status" style="opacity:0.8;font-weight:400;"></span>
   </div>
-  <!-- TV mode button -->
-  <div onclick="toggleTVMode()" id="tv-mode-btn" title="Toggle TV mode" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:var(--text2);font-size:11px;padding:6px 10px;border-radius:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);transition:all 0.2s;">📺</div>
+  <!-- Display mode switcher -->
+  <div id="display-switcher" style="position:relative;">
+    <!-- Desktop button -->
+    <div id="desktop-btn" onclick="setDisplayMode('desktop')" title="Desktop mode"
+      style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:var(--text2);font-size:13px;padding:5px 9px;border-radius:20px 0 0 20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);border-right:none;display:inline-flex;align-items:center;transition:all 0.15s;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px;"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    </div>
+    <!-- TV button -->
+    <div id="tv-dropdown-btn" onclick="toggleTVMenu(event)" title="TV display mode"
+      style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:var(--text2);font-size:13px;padding:5px 9px;border-radius:0 20px 20px 0;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:inline-flex;align-items:center;gap:4px;transition:all 0.15s;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px;"><rect x="2" y="3" width="20" height="13" rx="2"/><path d="M2 10h20M8 21h8M12 17v4"/></svg>
+      <svg viewBox="0 0 10 6" fill="currentColor" style="width:8px;height:8px;opacity:0.6;"><path d="M0 0l5 6 5-6z"/></svg>
+    </div>
+    <!-- TV size dropdown -->
+    <div id="tv-menu" style="display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-lg);box-shadow:0 8px 24px rgba(0,0,0,0.4);overflow:hidden;min-width:140px;z-index:10000;">
+      <div style="padding:8px 12px 6px;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">TV size</div>
+      <div onclick="setDisplayMode('tv50')" class="tv-size-option" data-size="tv50">50"</div>
+      <div onclick="setDisplayMode('tv55')" class="tv-size-option" data-size="tv55">55"</div>
+      <div onclick="setDisplayMode('tv65')" class="tv-size-option" data-size="tv65">65"</div>
+      <div onclick="setDisplayMode('tv85')" class="tv-size-option" data-size="tv85">85"</div>
+      <div onclick="setDisplayMode('tv98')" class="tv-size-option" data-size="tv98">98"</div>
+    </div>
+  </div>
 </div>
 
 <nav>
@@ -1239,28 +1335,52 @@ function tvResetAnim(){
   if(tvPlaying){tvAnimTimer=setTimeout(()=>{b.style.transition=`width ${TV_DUR}ms linear`;b.style.width='100%';},60);}
 }
 
-// ── TV MODE ───────────────────────────────────────────────────────
-function toggleTVMode() {
-  const body = document.body;
-  const btn = document.getElementById('tv-mode-btn');
-  if (body.classList.contains('tv-mode')) {
-    body.classList.remove('tv-mode');
-    btn.textContent = '📺';
-    localStorage.setItem('tvMode', '0');
-  } else {
-    body.classList.add('tv-mode');
-    btn.textContent = '🖥';
-    localStorage.setItem('tvMode', '1');
-  }
-}
-// Restore TV mode preference on load
-if (localStorage.getItem('tvMode') === '1') {
-  document.body.classList.add('tv-mode');
-  window.addEventListener('load', () => {
-    const btn = document.getElementById('tv-mode-btn');
-    if (btn) btn.textContent = '🖥';
+// ── DISPLAY MODE ─────────────────────────────────────────────────
+const TV_SIZES = ['tv50','tv55','tv65','tv85','tv98'];
+function setDisplayMode(mode) {
+  // Remove all existing size/mode classes
+  document.body.classList.remove('tv-mode', ...TV_SIZES);
+  // Update button states
+  document.getElementById('desktop-btn').classList.toggle('active', mode === 'desktop');
+  document.getElementById('tv-dropdown-btn').classList.toggle('active', mode !== 'desktop');
+  // Mark active option in dropdown
+  document.querySelectorAll('.tv-size-option').forEach(el => {
+    el.classList.toggle('active', el.dataset.size === mode);
   });
+  if (mode !== 'desktop') {
+    document.body.classList.add(mode);
+    // Update dropdown button icon color
+    document.getElementById('tv-dropdown-btn').style.background = 'var(--text)';
+    document.getElementById('tv-dropdown-btn').style.color = 'var(--bg)';
+    document.getElementById('desktop-btn').style.background = 'rgba(255,255,255,0.1)';
+    document.getElementById('desktop-btn').style.color = 'var(--text2)';
+  } else {
+    document.getElementById('desktop-btn').style.background = 'var(--text)';
+    document.getElementById('desktop-btn').style.color = 'var(--bg)';
+    document.getElementById('tv-dropdown-btn').style.background = 'rgba(255,255,255,0.1)';
+    document.getElementById('tv-dropdown-btn').style.color = 'var(--text2)';
+  }
+  localStorage.setItem('displayMode', mode);
+  document.getElementById('tv-menu').style.display = 'none';
 }
+
+function toggleTVMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('tv-menu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+// Close menu when clicking elsewhere
+document.addEventListener('click', () => {
+  const menu = document.getElementById('tv-menu');
+  if (menu) menu.style.display = 'none';
+});
+
+// Restore display mode preference on load
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('displayMode') || 'desktop';
+  setDisplayMode(saved);
+});
 
 // ── INIT ─────────────────────────────────────────────────────────
 // Render with static data once DOM + scripts are ready
