@@ -45,17 +45,17 @@
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
 
 /* NAV */
-nav { width: 56px !important; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 200; overflow: hidden !important; transition: none !important; }
+nav { width: 56px !important; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 200; overflow: hidden !important; transition: none !important; padding-top: var(--header-h); }
 .nav-brand { padding: 18px 20px 16px; border-bottom: 0.5px solid var(--border); overflow: hidden; white-space: nowrap; }
 .nav-brand-name { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.2; }
 .nav-brand-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
-.nav-items { flex: 1; padding: 8px 0; margin-top: var(--header-h); }
+.nav-items { flex: 1; padding: 8px 0; }
 .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; font-size: 13px; color: var(--text2); cursor: pointer; border-left: 2px solid transparent; transition: all 0.12s; text-decoration: none; white-space: nowrap; overflow: hidden; }
 .nav-item:hover { background: var(--surface2); color: var(--text); }
 .nav-item.active { color: var(--text); border-left-color: var(--text); background: var(--surface2); font-weight: 500; }
 .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.6; }
 .nav-item.active svg { opacity: 1; }
-.nav-footer { padding: 14px 20px; border-top: 0.5px solid var(--border); font-size: 11px; color: var(--text3); white-space: nowrap; overflow: hidden; opacity: 0; transition: opacity 0.2s; }
+.nav-footer { display: none !important; }
 
 /* MAIN */
 main { margin-left: var(--nav-w); flex: 1; min-height: 100vh; padding-top: 0; }
@@ -426,7 +426,7 @@ body.tv-mode .card { padding: 20px 24px; }
   <div id="view-exec" class="view active">
     <div class="page-header">
       <span class="page-title">Executive Dashboard</span>
-      <div class="header-right" style="padding-right:0;margin-right:auto;">
+      <div class="header-right">
         <span class="header-badge" id="exec-date">May 18, 2026</span>
       </div>
     </div>
@@ -478,7 +478,7 @@ body.tv-mode .card { padding: 20px 24px; }
   <div id="view-bidboard" class="view">
     <div class="page-header">
       <span class="page-title">Bid Board</span>
-      <div class="header-right" style="padding-right:0;margin-right:auto;">
+      <div class="header-right">
         <span class="header-badge" id="bb-count">Active bids</span>
       </div>
     </div>
@@ -587,7 +587,7 @@ body.tv-mode .card { padding: 20px 24px; }
   <div id="view-pm" class="view">
     <div class="page-header">
       <span class="page-title">PM Dashboard</span>
-      <div class="header-right" style="padding-right:0;margin-right:auto;">
+      <div class="header-right">
         <div class="view-toggle">
           <button class="vbtn active" id="pm-vbtn-t" onclick="setPMView('table')">Table</button>
           <button class="vbtn" id="pm-vbtn-c" onclick="setPMView('cards')">Cards</button>
@@ -628,7 +628,7 @@ body.tv-mode .card { padding: 20px 24px; }
 
       <!-- Table view: two side-by-side sections -->
       <div id="pm-table-view">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;">
+        <div style="display:grid;grid-template-columns:2fr 3fr;gap:14px;align-items:start;">
 
           <!-- PRE-CON -->
           <div class="card">
@@ -663,6 +663,7 @@ body.tv-mode .card { padding: 20px 24px; }
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Project</th>
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">PM</th>
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Super</th>
+                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Status</th>
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Revised</th>
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Off-Site</th>
               </tr></thead>
@@ -684,6 +685,12 @@ body.tv-mode .card { padding: 20px 24px; }
   <div id="view-super" class="view">
     <div class="page-header">
       <span class="page-title">Superintendent Dashboard</span>
+      <div class="header-right">
+        <div class="view-toggle">
+          <button class="vbtn active" id="su-vbtn-t" onclick="setSUView('table')">Table</button>
+          <button class="vbtn" id="su-vbtn-c" onclick="setSUView('cards')">Cards</button>
+        </div>
+      </div>
     </div>
     <div class="page-content">
       <div class="kpi-grid">
@@ -1370,15 +1377,30 @@ function renderPM(){
     <td style="font-size:11px;padding:7px 6px;text-align:right;color:var(--text2);white-space:nowrap;">${j.start||'TBD'}</td>
   </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No Pre-Con jobs</td></tr>';
 
-  // Construction table rows — Job#, Project, PM, Super, Revised, Off-Site
-  document.getElementById('pm-con-tbody').innerHTML=conJobs.length?conJobs.map(j=>`<tr style="border-bottom:0.5px solid var(--border);">
-    <td style="font-size:11px;padding:7px 6px;color:var(--text3);white-space:nowrap;">${j.job_num}</td>
-    <td style="font-size:12px;padding:7px 6px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${j.name}">${j.name}</td>
-    <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.pm}</td>
-    <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.super||'TBD'}</td>
-    <td style="font-size:12px;padding:7px 6px;text-align:right;white-space:nowrap;">${fmtV(j.revised)}</td>
-    <td style="font-size:11px;padding:7px 6px;text-align:right;color:var(--text2);white-space:nowrap;">${j.offsite||'TBD'}</td>
-  </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No active jobs</td></tr>';
+  // Construction: sort by offsite date ascending, TBD at bottom
+  const pmToday=new Date('2026-05-18');
+  function parsePMDt(s){try{const[m,d,y]=s.split('/');return new Date(y,m-1,d);}catch{return new Date('2099-01-01');}}
+  const conSorted=[...conJobs].sort((a,b)=>parsePMDt(a.offsite)-parsePMDt(b.offsite));
+
+  document.getElementById('pm-con-tbody').innerHTML=conSorted.length?conSorted.map(j=>{
+    const offDt=parsePMDt(j.offsite);
+    const daysLeft=Math.round((offDt-pmToday)/(864e5));
+    const isPast=daysLeft<0&&j.offsite!=='TBD';
+    const isRed=!isPast&&daysLeft>=0&&daysLeft<=10;
+    const isAmber=!isPast&&!isRed&&daysLeft>=0&&daysLeft<=30;
+    const dateColor=isRed?'#E24B4A':isAmber?'#BA7517':'var(--text2)';
+    const daysTag=(j.offsite&&j.offsite!=='TBD'&&!isPast)?
+      `<span style="font-size:10px;margin-left:4px;color:${dateColor};">${daysLeft}d</span>`:'';
+    return`<tr style="border-bottom:0.5px solid var(--border);">
+      <td style="font-size:11px;padding:7px 6px;color:var(--text3);white-space:nowrap;">${j.job_num}</td>
+      <td style="font-size:12px;padding:7px 6px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${j.name}">${j.name}</td>
+      <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.pm}</td>
+      <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.super||'TBD'}</td>
+      <td style="padding:7px 6px;">${badge(STATUS_BADGE[j.status]||'',j.status)}</td>
+      <td style="font-size:12px;padding:7px 6px;text-align:right;white-space:nowrap;">${fmtV(j.revised)}</td>
+      <td style="font-size:11px;padding:7px 6px;text-align:right;white-space:nowrap;color:${dateColor};font-weight:${isRed||isAmber?'500':'400'};">${j.offsite||'TBD'}${daysTag}</td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="7" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No active jobs</td></tr>';
 
   // Cards view — grouped by PM, showing active jobs only
   const byPM={};
@@ -1403,6 +1425,14 @@ function renderPM(){
   add('su-super',supers); add('su-pm',pms);
 })();
 
+function setSUView(v){
+  const tv=document.getElementById('su-table-view');
+  const cv=document.getElementById('su-cards-view');
+  if(tv)tv.style.display=v==='table'?'block':'none';
+  if(cv)cv.style.display=v==='cards'?'block':'none';
+  document.getElementById('su-vbtn-t').classList.toggle('active',v==='table');
+  document.getElementById('su-vbtn-c').classList.toggle('active',v==='cards');
+}
 function renderSU(){
   // Active = Construction AND Punch List (not just Construction)
   const activeJobs=JOBS.filter(j=>j.section==='Construction/Punch');
