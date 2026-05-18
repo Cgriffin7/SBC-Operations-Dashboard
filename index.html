@@ -483,11 +483,23 @@ body.tv-mode .card { padding: 20px 24px; }
       </div>
     </div>
     <div class="page-content">
-      <!-- KPI row — 3 cards, full width -->
+      <!-- KPI row — Bidding | Upcoming | Submitted (matches column order) -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
-        <div class="kpi" style="border-left-color:#534AB7;"><div class="kpi-n" id="bb-k-up">—</div><div class="kpi-l">Upcoming bids</div></div>
-        <div class="kpi" style="border-left-color:#378ADD;"><div class="kpi-n" id="bb-k-bid">—</div><div class="kpi-l">Actively bidding</div></div>
-        <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n" id="bb-k-sub">—</div><div class="kpi-l">Submitted</div></div>
+        <div class="kpi" style="border-left-color:#378ADD;">
+          <div class="kpi-n" id="bb-k-bid">—</div>
+          <div class="kpi-l">Actively bidding</div>
+          <div class="kpi-sub" id="bb-k-bid-val" style="margin-top:4px;font-size:13px;font-weight:500;color:var(--text2);">—</div>
+        </div>
+        <div class="kpi" style="border-left-color:#534AB7;">
+          <div class="kpi-n" id="bb-k-up">—</div>
+          <div class="kpi-l">Upcoming bids</div>
+          <div class="kpi-sub" id="bb-k-up-val" style="margin-top:4px;font-size:13px;font-weight:500;color:var(--text2);">—</div>
+        </div>
+        <div class="kpi" style="border-left-color:#1D9E75;">
+          <div class="kpi-n" id="bb-k-sub">—</div>
+          <div class="kpi-l">Submitted</div>
+          <div class="kpi-sub" id="bb-k-sub-val" style="margin-top:4px;font-size:13px;font-weight:500;color:var(--text2);">—</div>
+        </div>
       </div>
       <!-- Search + PM filter across all three columns -->
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
@@ -1233,7 +1245,10 @@ function renderBB(){
       <td style="font-size:12px;padding:6px 6px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${b.name}">${b.name}</td>
       <td style="font-size:11px;padding:6px 6px;color:var(--text2);white-space:nowrap;">${b.pm}</td>
       <td style="font-size:12px;padding:6px 6px;text-align:right;white-space:nowrap;">${fmtV(b.value)}</td>
-      <td style="font-size:11px;padding:6px 6px;text-align:right;white-space:nowrap;${dayStyle}" title="Submitted ${b.due}">${b.due}<br><span style="font-size:10px;">${dayLabel}</span></td>
+      <td style="font-size:12px;padding:6px 6px;text-align:right;white-space:nowrap;" title="Submitted ${b.due}">
+        <span>${b.due}</span>
+        <span style="font-size:10px;margin-left:5px;${dayStyle}">${dayLabel}</span>
+      </td>
     </tr>`;
   }).join(''):'<tr><td colspan="4" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No submitted bids</td></tr>';
 }
