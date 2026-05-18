@@ -294,23 +294,13 @@ body.tv98 .pill { font-size: 13px; padding: 5px 16px; }
 body.tv98 .nav-item { font-size: 15px; padding: 12px 20px; }
 body.tv98 .header-badge { font-size: 13px; padding: 5px 14px; }
 
-/* All TV sizes: expand nav, show labels, adjust main margin */
+/* All TV sizes: icon-only nav, same 56px width */
 body.tv50 nav, body.tv55 nav, body.tv65 nav, body.tv85 nav, body.tv98 nav {
-  width: 170px !important; box-shadow: none !important;
+  width: 56px !important; box-shadow: none !important;
 }
-body.tv85 nav, body.tv98 nav { width: 190px !important; }
-body.tv50 nav:hover, body.tv55 nav:hover, body.tv65 nav:hover { width: 200px !important; }
-body.tv85 nav:hover, body.tv98 nav:hover { width: 220px !important; }
-
-body.tv50 .nav-brand-name, body.tv50 .nav-brand-sub, body.tv50 .nav-item span, body.tv50 .nav-footer,
-body.tv55 .nav-brand-name, body.tv55 .nav-brand-sub, body.tv55 .nav-item span, body.tv55 .nav-footer,
-body.tv65 .nav-brand-name, body.tv65 .nav-brand-sub, body.tv65 .nav-item span, body.tv65 .nav-footer,
-body.tv85 .nav-brand-name, body.tv85 .nav-brand-sub, body.tv85 .nav-item span, body.tv85 .nav-footer,
-body.tv98 .nav-brand-name, body.tv98 .nav-brand-sub, body.tv98 .nav-item span, body.tv98 .nav-footer {
-  opacity: 1 !important; pointer-events: auto !important;
+body.tv50 main, body.tv55 main, body.tv65 main, body.tv85 main, body.tv98 main {
+  margin-left: 56px !important;
 }
-body.tv50 main, body.tv55 main, body.tv65 main { margin-left: 170px !important; }
-body.tv85 main, body.tv98 main { margin-left: 190px !important; }
 
 /* Header height scales for larger TVs */
 body.tv85 .page-header, body.tv98 .page-header { height: 64px; }
@@ -325,7 +315,7 @@ body.tv85 .page-header, body.tv98 .page-header { height: 64px; }
 nav { width: 56px; overflow: hidden; }
 nav:hover { width: 200px; box-shadow: 4px 0 24px rgba(0,0,0,0.4); }
 .nav-brand-name, .nav-brand-sub, .nav-item span, .nav-footer { opacity: 0; transition: opacity 0.2s; pointer-events: none; }
-nav:hover .nav-brand-name, nav:hover .nav-brand-sub, nav:hover .nav-item span, nav:hover .nav-footer { opacity: 1; pointer-events: auto; }
+
 .nav-item { justify-content: flex-start; padding: 9px 20px; }
 main { margin-left: 56px !important; }
 .page-header { left: 56px; }
@@ -556,6 +546,7 @@ body.tv-mode .card { padding: 20px 24px; }
               <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Project</th>
               <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">PM</th>
               <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Value</th>
+              <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Submitted</th>
             </tr></thead>
             <tbody id="bb-submitted-tbody"></tbody>
           </table>
@@ -1175,6 +1166,7 @@ function renderBB(){
   const q=document.getElementById('bb-search').value.toLowerCase();
   const pmF=document.getElementById('bb-pm').value;
   const typeF=document.getElementById('bb-type').value;
+  const today=new Date('2026-05-18');
 
   const filtered=BIDS.filter(b=>{
     if(pmF&&b.pm!==pmF)return false;
@@ -1185,7 +1177,18 @@ function renderBB(){
 
   const bidding=filtered.filter(b=>b.status==='Bidding').sort(makeSort('due',1));
   const upcoming=filtered.filter(b=>b.status==='Upcoming Bid').sort(makeSort('due',1));
-  const submitted=filtered.filter(b=>b.status==='Submitted').sort(makeSort('due',-1));
+
+  // Submitted: calculate days since submitted (using due date as proxy for submission date)
+  // Filter out anything >120 days old, sort oldest first
+  const submitted=filtered
+    .filter(b=>b.status==='Submitted')
+    .map(b=>{
+      const dueDt=parseDt(b.due);
+      const daysOut=dueDt?Math.round((today-dueDt)/(864e5)):0;
+      return {...b, daysOut, dueDt};
+    })
+    .filter(b=>b.daysOut<=120)  // remove >120 days
+    .sort((a,b)=>a.dueDt-b.dueDt); // oldest first
 
   // KPIs
   document.getElementById('bb-k-up').textContent=upcoming.length;
@@ -1193,13 +1196,19 @@ function renderBB(){
   document.getElementById('bb-k-sub').textContent=submitted.length;
   document.getElementById('bb-k-val').textContent='$'+Math.round(filtered.reduce((s,b)=>s+b.value,0)/1e6)+'M';
   document.getElementById('bb-count').textContent=`${filtered.length} bids`;
-
-  // Column counts
   document.getElementById('bb-bidding-count').textContent=bidding.length+' bids';
   document.getElementById('bb-upcoming-count').textContent=upcoming.length+' bids';
   document.getElementById('bb-submitted-count').textContent=submitted.length+' bids';
 
-  // Bidding table — project, PM, value, due date (sorted by due soonest)
+  // Helper for days outstanding color
+  function daysColor(d){
+    if(d>120)return null; // filtered out
+    if(d>60)return'#E24B4A';  // red
+    if(d>30)return'#BA7517';  // amber/yellow
+    return null; // white (default)
+  }
+
+  // Bidding table — sorted by due soonest
   document.getElementById('bb-bidding-tbody').innerHTML=bidding.length?bidding.map(b=>`<tr style="border-bottom:0.5px solid var(--border);">
     <td style="font-size:12px;padding:6px 6px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${b.name}">${b.name}</td>
     <td style="font-size:11px;padding:6px 6px;color:var(--text2);white-space:nowrap;">${b.pm}</td>
@@ -1207,7 +1216,7 @@ function renderBB(){
     <td style="font-size:12px;padding:6px 6px;text-align:right;white-space:nowrap;">${fmtDue(b.due,false)}</td>
   </tr>`).join(''):'<tr><td colspan="4" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No active bids</td></tr>';
 
-  // Upcoming table — project, PM, value, due date
+  // Upcoming table — sorted by due date
   document.getElementById('bb-upcoming-tbody').innerHTML=upcoming.length?upcoming.map(b=>`<tr style="border-bottom:0.5px solid var(--border);">
     <td style="font-size:12px;padding:6px 6px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${b.name}">${b.name}</td>
     <td style="font-size:11px;padding:6px 6px;color:var(--text2);white-space:nowrap;">${b.pm}</td>
@@ -1215,12 +1224,18 @@ function renderBB(){
     <td style="font-size:12px;padding:6px 6px;text-align:right;white-space:nowrap;">${fmtDue(b.due,false)}</td>
   </tr>`).join(''):'<tr><td colspan="4" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No upcoming bids</td></tr>';
 
-  // Submitted table — project, PM, value only (no due date needed)
-  document.getElementById('bb-submitted-tbody').innerHTML=submitted.length?submitted.map(b=>`<tr style="border-bottom:0.5px solid var(--border);">
-    <td style="font-size:12px;padding:6px 6px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${b.name}">${b.name}</td>
-    <td style="font-size:11px;padding:6px 6px;color:var(--text2);white-space:nowrap;">${b.pm}</td>
-    <td style="font-size:12px;padding:6px 6px;text-align:right;white-space:nowrap;">${fmtV(b.value)}</td>
-  </tr>`).join(''):'<tr><td colspan="3" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No submitted bids</td></tr>';
+  // Submitted table — oldest to newest, days outstanding tracker, >120d excluded
+  document.getElementById('bb-submitted-tbody').innerHTML=submitted.length?submitted.map(b=>{
+    const col=daysColor(b.daysOut);
+    const dayStyle=col?`color:${col};font-weight:500;`:'color:var(--text2);';
+    const dayLabel=b.daysOut<=0?'today':b.daysOut===1?'1 day':`${b.daysOut}d`;
+    return`<tr style="border-bottom:0.5px solid var(--border);">
+      <td style="font-size:12px;padding:6px 6px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${b.name}">${b.name}</td>
+      <td style="font-size:11px;padding:6px 6px;color:var(--text2);white-space:nowrap;">${b.pm}</td>
+      <td style="font-size:12px;padding:6px 6px;text-align:right;white-space:nowrap;">${fmtV(b.value)}</td>
+      <td style="font-size:11px;padding:6px 6px;text-align:right;white-space:nowrap;${dayStyle}" title="Submitted ${b.due}">${b.due}<br><span style="font-size:10px;">${dayLabel}</span></td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="4" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No submitted bids</td></tr>';
 }
 
 // ── PM DASHBOARD ──────────────────────────────────────────────────
