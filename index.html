@@ -384,7 +384,11 @@ body.tv-mode .card { padding: 20px 24px; }
     <div class="page-header">
       <span class="page-title">Bid Board</span>
       <div class="header-right">
-        <span class="header-badge" id="bb-count">Active bids</span>
+        <span class="header-badge" id="bb-count" style="margin-right:10px;">Active bids</span>
+        <div class="view-toggle">
+          <button class="vbtn active" id="bb-vbtn-t" onclick="setBBView('table')">Table</button>
+          <button class="vbtn" id="bb-vbtn-c" onclick="setBBView('cards')">Cards</button>
+        </div>
       </div>
     </div>
     <div class="page-content">
@@ -427,6 +431,7 @@ body.tv-mode .card { padding: 20px 24px; }
         <select id="bb-pm" onchange="renderBB()" style="font-size:12px;padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);"><option value="">All PMs</option></select>
         <select id="bb-type" onchange="renderBB()" style="font-size:12px;padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);"><option value="">All types</option><option>RFP</option><option>ROM</option><option>Budget</option></select>
       </div>
+      <div id="bb-table-view">
       <!-- Three column layout -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start;">
 
@@ -485,6 +490,8 @@ body.tv-mode .card { padding: 20px 24px; }
         </div>
 
       </div>
+    </div><!-- /bb-table-view -->
+      <div id="bb-cards-view" style="display:none;"><div class="pm-cards" id="bb-cards-grid"></div></div>
     </div>
   </div>
 
@@ -548,6 +555,7 @@ body.tv-mode .card { padding: 20px 24px; }
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Project</th>
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">PM</th>
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Super</th>
+                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Status</th>
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Revised</th>
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Start</th>
               </tr></thead>
@@ -604,6 +612,7 @@ body.tv-mode .card { padding: 20px 24px; }
         <div class="kpi" style="border-left-color:#E24B4A;"><div class="kpi-n" id="su-k-tbd">0</div><div class="kpi-l">Pre-Con needing super</div></div>
         <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n" id="su-k-supers">0</div><div class="kpi-l">Active superintendents</div></div>
       </div>
+      <div id="su-table-view">
       <div class="two-col" style="align-items:start;">
         <!-- LEFT: Active on site -->
         <div class="card">
@@ -639,6 +648,8 @@ body.tv-mode .card { padding: 20px 24px; }
           </div>
         </div>
       </div>
+      </div><!-- /su-table-view -->
+      <div id="su-cards-view" style="display:none;"><div class="pm-cards" id="su-cards-grid"></div></div>
     </div>
   </div>
 
@@ -1136,7 +1147,15 @@ if(true){
 }
 
 // ── BID BOARD ─────────────────────────────────────────────────────
-let bbSort='due', bbDir=1;
+let bbSort='due', bbDir=1, bbView='table';
+function setBBView(v) {
+  bbView = v;
+  document.getElementById('bb-table-view').style.display = v === 'table' ? 'block' : 'none';
+  document.getElementById('bb-cards-view').style.display = v === 'cards' ? 'block' : 'none';
+  document.getElementById('bb-vbtn-t').classList.toggle('active', v === 'table');
+  document.getElementById('bb-vbtn-c').classList.toggle('active', v === 'cards');
+  if (v === 'cards') renderBBCards();
+}
 (function initBB(){
   const pms=[...new Set(BIDS.map(b=>b.pm))].sort();
   const sel=document.getElementById('bb-pm');
@@ -1275,12 +1294,13 @@ function renderPM(){
   // Pre-Con table rows — Job#, Project, PM, Super, Revised, Start
   document.getElementById('pm-precon-tbody').innerHTML=preconJobs.length?preconJobs.map(j=>`<tr style="border-bottom:0.5px solid var(--border);">
     <td style="font-size:11px;padding:7px 6px;color:var(--text3);white-space:nowrap;">${j.job_num}</td>
-    <td style="font-size:12px;padding:7px 6px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${j.name}">${j.name}</td>
+    <td style="font-size:12px;padding:7px 6px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${j.name}">${j.name}</td>
     <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.pm}</td>
     <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.super||'TBD'}</td>
+    <td style="padding:7px 6px;">${badge(STATUS_BADGE[j.status]||'',j.status)}</td>
     <td style="font-size:12px;padding:7px 6px;text-align:right;white-space:nowrap;">${fmtV(j.revised)}</td>
     <td style="font-size:11px;padding:7px 6px;text-align:right;color:var(--text2);white-space:nowrap;">${j.start||'TBD'}</td>
-  </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No Pre-Con jobs</td></tr>';
+  </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No Pre-Con jobs</td></tr>';
 
   // Construction: sort by offsite date ascending, TBD at bottom
   const pmToday=new Date('2026-05-18');
@@ -1337,6 +1357,7 @@ function setSUView(v){
   if(cv)cv.style.display=v==='cards'?'block':'none';
   document.getElementById('su-vbtn-t').classList.toggle('active',v==='table');
   document.getElementById('su-vbtn-c').classList.toggle('active',v==='cards');
+  if(v==='cards') renderSUCards();
 }
 function renderSU(){
   // Active = Construction AND Punch List (not just Construction)
@@ -1566,6 +1587,87 @@ function tvResetAnim(){
   b.style.transition='none';b.style.width='0';
   if(tvAnimTimer)clearTimeout(tvAnimTimer);
   if(tvPlaying){tvAnimTimer=setTimeout(()=>{b.style.transition=`width ${TV_DUR}ms linear`;b.style.width='100%';},60);}
+}
+
+// ── BID BOARD CARDS ──────────────────────────────────────────────
+function renderBBCards() {
+  const q=document.getElementById('bb-search').value.toLowerCase();
+  const pmF=document.getElementById('bb-pm').value;
+  const typeF=document.getElementById('bb-type').value;
+  const today=new Date('2026-05-18');
+
+  const filtered=BIDS.filter(b=>{
+    if(pmF&&b.pm!==pmF)return false;
+    if(typeF&&b.type!==typeF)return false;
+    if(q&&!b.name.toLowerCase().includes(q)&&!b.pm.toLowerCase().includes(q))return false;
+    return true;
+  });
+
+  // Group by PM
+  const byPM={};
+  filtered.forEach(b=>{if(!byPM[b.pm])byPM[b.pm]=[];byPM[b.pm].push(b);});
+
+  document.getElementById('bb-cards-grid').innerHTML=Object.keys(byPM).sort().map(pm=>{
+    const bids=byPM[pm];
+    const [bg,txt]=avColors(pm);
+    const bidding=bids.filter(b=>b.status==='Bidding');
+    const upcoming=bids.filter(b=>b.status==='Upcoming Bid');
+    const submitted=bids.filter(b=>b.status==='Submitted');
+    return`<div class="pm-card">
+      <div class="pm-card-head">
+        <div class="avatar" style="background:${bg};color:${txt};">${initials(pm)}</div>
+        <div>
+          <div class="pm-card-name">${pm}</div>
+          <div class="pm-card-meta">${bids.length} bids · ${bidding.length} bidding · ${upcoming.length} upcoming · ${submitted.length} submitted</div>
+        </div>
+      </div>
+      ${bids.map(b=>`<div class="pm-job-row">
+        <div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;">${b.name}</div>
+        <div style="flex-shrink:0;display:flex;align-items:center;gap:8px;">
+          ${badge(STATUS_BADGE[b.status]||'',b.status)}
+          <span style="font-size:11px;color:var(--text2);">${fmtV(b.value)}</span>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+// ── SUPER DASHBOARD CARDS ─────────────────────────────────────────
+function renderSUCards() {
+  const activeJobs=JOBS.filter(j=>j.section==='Construction/Punch');
+  const preconJobs=JOBS.filter(j=>j.section==='Pre-Con');
+  const allJobs=[...activeJobs,...preconJobs];
+
+  // Group by super
+  const bySuper={};
+  allJobs.forEach(j=>{
+    const s=j.super&&j.super!=='TBD'?j.super:'Unassigned';
+    if(!bySuper[s])bySuper[s]=[];
+    bySuper[s].push(j);
+  });
+
+  const maxJobs=Math.max(...Object.values(bySuper).map(a=>a.length),1);
+  document.getElementById('su-cards-grid').innerHTML=Object.keys(bySuper).sort().map(s=>{
+    const sjobs=bySuper[s];
+    const active=sjobs.filter(j=>j.section==='Construction/Punch').length;
+    const [bg,txt]=avColors(s);
+    return`<div class="pm-card">
+      <div class="pm-card-head">
+        <div class="avatar" style="background:${bg};color:${txt};">${initials(s)}</div>
+        <div style="flex:1;">
+          <div class="pm-card-name">${s}</div>
+          <div class="pm-card-meta">${sjobs.length} jobs · ${active} active</div>
+        </div>
+      </div>
+      ${sjobs.map(j=>`<div class="pm-job-row">
+        <div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;">${j.name}</div>
+        <div style="flex-shrink:0;display:flex;align-items:center;gap:6px;">
+          ${badge(STATUS_BADGE[j.status]||'',j.status)}
+          <span style="font-size:11px;color:var(--text2);">${fmtV(j.revised)}</span>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  }).join('');
 }
 
 // ── TV MODE TOGGLE ────────────────────────────────────────────────
