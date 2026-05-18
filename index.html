@@ -49,7 +49,7 @@ nav { width: 56px !important; background: var(--surface); border-right: 0.5px so
 .nav-brand { padding: 18px 20px 16px; border-bottom: 0.5px solid var(--border); overflow: hidden; white-space: nowrap; }
 .nav-brand-name { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.2; }
 .nav-brand-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
-.nav-items { flex: 1; padding: 8px 0; }
+.nav-items { flex: 1; padding: 8px 0; margin-top: var(--header-h); }
 .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; font-size: 13px; color: var(--text2); cursor: pointer; border-left: 2px solid transparent; transition: all 0.12s; text-decoration: none; white-space: nowrap; overflow: hidden; }
 .nav-item:hover { background: var(--surface2); color: var(--text); }
 .nav-item.active { color: var(--text); border-left-color: var(--text); background: var(--surface2); font-weight: 500; }
@@ -584,11 +584,10 @@ body.tv-mode .card { padding: 20px 24px; }
   </div>
 
   <!-- PM DASHBOARD -->
-  <!-- PM DASHBOARD -->
   <div id="view-pm" class="view">
     <div class="page-header">
       <span class="page-title">PM Dashboard</span>
-      <div class="header-right">
+      <div class="header-right" style="padding-right:0;margin-right:auto;">
         <div class="view-toggle">
           <button class="vbtn active" id="pm-vbtn-t" onclick="setPMView('table')">Table</button>
           <button class="vbtn" id="pm-vbtn-c" onclick="setPMView('cards')">Cards</button>
@@ -596,46 +595,91 @@ body.tv-mode .card { padding: 20px 24px; }
       </div>
     </div>
     <div class="page-content">
-      <div class="kpi-grid">
-        <div class="kpi" style="border-left-color:#f5c518;"><div class="kpi-n" id="pm-k-pre">14</div><div class="kpi-l">Pre-Con</div></div>
-        <div class="kpi" style="border-left-color:#378ADD;"><div class="kpi-n" id="pm-k-con">28</div><div class="kpi-l">Construction / Punch</div></div>
-        <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n" id="pm-k-val">$353M</div><div class="kpi-l">Active revised contract total</div></div>
-        <div class="kpi" style="border-left-color:#534AB7;"><div class="kpi-n" id="pm-k-pms">0</div><div class="kpi-l">PMs with active jobs</div></div>
+      <!-- KPI row: Pre-Con | Construction/Punch — each with count + value -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+        <div class="kpi" style="border-left-color:#f5c518;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div class="kpi-n" id="pm-k-pre">—</div>
+            <div class="kpi-l">Pre-Con</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="kpi-n" id="pm-k-pre-val" style="font-size:22px;">—</div>
+            <div class="kpi-l">Revised contract</div>
+          </div>
+        </div>
+        <div class="kpi" style="border-left-color:#378ADD;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div class="kpi-n" id="pm-k-con">—</div>
+            <div class="kpi-l">Construction / Punch</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="kpi-n" id="pm-k-con-val" style="font-size:22px;">—</div>
+            <div class="kpi-l">Revised contract</div>
+          </div>
+        </div>
       </div>
-      <div class="controls">
-        <input type="text" id="pm-search" placeholder="Search project, PM, superintendent…" oninput="renderPM()">
+
+      <!-- Filters -->
+      <div class="controls" style="margin-bottom:14px;">
+        <input type="text" id="pm-search" placeholder="Search project or PM…" oninput="renderPM()">
         <select id="pm-pm" onchange="renderPM()"><option value="">All PMs</option></select>
         <select id="pm-super" onchange="renderPM()"><option value="">All supers</option></select>
-        <select id="pm-pe" onchange="renderPM()"><option value="">All PEs</option></select>
       </div>
-      <div class="pill-row">
-        <button class="pill active" data-st="" onclick="setPMStatus(this,'')">All active</button>
-        <button class="pill" data-st="Pre-Con" onclick="setPMStatus(this,'Pre-Con')">Pre-Con</button>
-        <button class="pill" data-st="Construction" onclick="setPMStatus(this,'Construction')">Construction</button>
-        <button class="pill" data-st="Punch List" onclick="setPMStatus(this,'Punch List')">Punch List</button>
-      </div>
+
+      <!-- Table view: two side-by-side sections -->
       <div id="pm-table-view">
-        <div class="tbl-wrap"><table>
-          <thead><tr>
-            <th onclick="sortPM('job_num')" data-col="job_num">Job #</th>
-            <th onclick="sortPM('name')" data-col="name">Project</th>
-            <th onclick="sortPM('pm')" data-col="pm">PM</th>
-            <th onclick="sortPM('status')" data-col="status">Status</th>
-            <th onclick="sortPM('original')" data-col="original" style="text-align:right;">Original</th>
-            <th onclick="sortPM('co')" data-col="co" style="text-align:right;">COs</th>
-            <th onclick="sortPM('revised')" data-col="revised" style="text-align:right;">Revised</th>
-            <th onclick="sortPM('super')" data-col="super">Superintendent</th>
-            <th onclick="sortPM('offsite')" data-col="offsite">Off-Site</th>
-            <th>Comments</th>
-          </tr></thead>
-          <tbody id="pm-tbody"></tbody>
-        </table></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;">
+
+          <!-- PRE-CON -->
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <span style="width:10px;height:10px;border-radius:50%;background:#f5c518;flex-shrink:0;"></span>
+              <span style="font-size:13px;font-weight:600;color:var(--text);">Pre-Con</span>
+              <span id="pm-precon-count" style="font-size:11px;color:var(--text3);margin-left:auto;"></span>
+            </div>
+            <table style="width:100%;border-collapse:collapse;">
+              <thead><tr>
+                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Job #</th>
+                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Project</th>
+                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">PM</th>
+                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Super</th>
+                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Revised</th>
+                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Start</th>
+              </tr></thead>
+              <tbody id="pm-precon-tbody"></tbody>
+            </table>
+          </div>
+
+          <!-- CONSTRUCTION / PUNCH LIST -->
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <span style="width:10px;height:10px;border-radius:50%;background:#378ADD;flex-shrink:0;"></span>
+              <span style="font-size:13px;font-weight:600;color:var(--text);">Construction / Punch List</span>
+              <span id="pm-con-count" style="font-size:11px;color:var(--text3);margin-left:auto;"></span>
+            </div>
+            <table style="width:100%;border-collapse:collapse;">
+              <thead><tr>
+                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Job #</th>
+                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Project</th>
+                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">PM</th>
+                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Super</th>
+                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Revised</th>
+                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Off-Site</th>
+              </tr></thead>
+              <tbody id="pm-con-tbody"></tbody>
+            </table>
+          </div>
+
+        </div>
       </div>
+
+      <!-- Cards view -->
       <div id="pm-cards-view" style="display:none;"><div class="pm-cards" id="pm-cards-grid"></div></div>
       <div class="tbl-info" id="pm-info"></div>
     </div>
   </div>
 
+  <!-- SUPER DASHBOARD -->
   <!-- SUPER DASHBOARD -->
   <div id="view-super" class="view">
     <div class="page-header">
@@ -1275,75 +1319,68 @@ function renderBB(){
   }).join(''):'<tr><td colspan="4" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No submitted bids</td></tr>';
 }
 
-// ── PM DASHBOARD ──────────────────────────────────────────────────
+// ── PM DASHBOARD ──────────────────────────────────────────────
 let pmStatus='', pmSort='pm', pmDir=1, pmView='table';
 let _pmSelectsInit=false;
 function initPMSelects(){
   if(_pmSelectsInit)return; _pmSelectsInit=true;
   const pms=[...new Set(JOBS.map(j=>j.pm))].sort();
   const supers=[...new Set(JOBS.map(j=>j.super).filter(s=>s&&s!=='TBD'))].sort();
-  const pes=[...new Set(JOBS.map(j=>j.pe).filter(p=>p&&p!=='TBD'&&p!=='N/A'))].sort();
   const add=(id,arr)=>{const s=document.getElementById(id);if(!s)return;arr.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});};
-  add('pm-pm',pms); add('pm-super',supers); add('pm-pe',pes);
+  add('pm-pm',pms); add('pm-super',supers);
 }
 function setPMStatus(el,s){pmStatus=s;document.querySelectorAll('#view-pm .pill').forEach(p=>p.classList.toggle('active',p.dataset.st===s));renderPM();}
 function setPMView(v){pmView=v;document.getElementById('pm-table-view').style.display=v==='table'?'block':'none';document.getElementById('pm-cards-view').style.display=v==='cards'?'block':'none';document.getElementById('pm-vbtn-t').classList.toggle('active',v==='table');document.getElementById('pm-vbtn-c').classList.toggle('active',v==='cards');}
-function sortPM(col){if(pmSort===col)pmDir*=-1;else{pmSort=col;pmDir=1;}updateSortHeaders('view-pm',col);renderPM();}
+function sortPM(col){if(pmSort===col)pmDir*=-1;else{pmSort=col;pmDir=1;}renderPM();}
+
 function renderPM(){
   const q=document.getElementById('pm-search').value.toLowerCase();
   const pmF=document.getElementById('pm-pm').value;
   const supF=document.getElementById('pm-super').value;
-  const peF=document.getElementById('pm-pe').value;
-  // PM Dashboard only shows Pre-Con and Construction/Punch — not Closeout/Retention
+
+  // Only show Pre-Con and Construction/Punch — filter out Closeout/Retention
   let data=JOBS.filter(j=>{
     if(j.section==='Closeout/Retention')return false;
-    if(pmStatus&&j.status!==pmStatus)return false;
     if(pmF&&j.pm!==pmF)return false;
     if(supF&&j.super!==supF)return false;
-    if(peF&&j.pe!==peF)return false;
-    if(q&&!j.name.toLowerCase().includes(q)&&!j.pm.toLowerCase().includes(q)&&!j.super.toLowerCase().includes(q))return false;
+    if(q&&!j.name.toLowerCase().includes(q)&&!j.pm.toLowerCase().includes(q)&&!(j.super||'').toLowerCase().includes(q))return false;
     return true;
-  }).sort(makeSort(pmSort,pmDir));
-  // KPIs
-  const precon=data.filter(j=>j.section==='Pre-Con');
-  const active=data.filter(j=>j.section==='Construction/Punch');
-  const closeout=data.filter(j=>j.section==='Closeout/Retention');
-  const totalRevised=data.reduce((s,j)=>s+j.revised,0);
-  document.getElementById('pm-k-con').textContent=active.length;
-  document.getElementById('pm-k-pre').textContent=precon.length;
-  document.getElementById('pm-k-val').textContent='$'+Math.round(totalRevised/1e6)+'M';
-  document.getElementById('pm-k-pms').textContent=new Set(data.map(j=>j.pm)).size;
-  // Section order for table
-  const sectionOrder={'Pre-Con':0,'Construction/Punch':1,'Closeout/Retention':2};
-  const sorted=[...data].sort((a,b)=>{
-    const sd=(sectionOrder[a.section]||0)-(sectionOrder[b.section]||0);
-    if(sd!==0)return sd;
-    return makeSort(pmSort,pmDir)(a,b);
   });
-  const sectionColors={'Pre-Con':'#7a6a00','Construction/Punch':'#1a4a1a','Closeout/Retention':'#003a5c'};
-  const sectionLabels={'Pre-Con':'Pre-Con','Construction/Punch':'Construction / Punch List','Closeout/Retention':'Closeout / Retention Billed'};
-  let lastSection='';
-  document.getElementById('pm-tbody').innerHTML=sorted.length?sorted.map(j=>{
-    let sectionRow='';
-    if(j.section!==lastSection){
-      lastSection=j.section;
-      sectionRow=`<tr><td colspan="10" style="background:${sectionColors[j.section]};color:white;font-size:11px;font-weight:600;padding:5px 8px;letter-spacing:0.05em;">${sectionLabels[j.section]}</td></tr>`;
-    }
-    const coDisplay=j.co?`<span style="color:#EF9F27;font-size:11px;">+${fmtV(j.co)}</span>`:'—';
-    return sectionRow+`<tr>
-      <td class="td-sm">${j.job_num}</td>
-      <td style="min-width:140px;">${j.name}</td>
-      <td class="td-muted" style="white-space:nowrap;">${j.pm}</td>
-      <td>${badge(STATUS_BADGE[j.status]||'',j.status)}</td>
-      <td style="text-align:right;">${fmtV(j.original)}</td>
-      <td style="text-align:right;">${coDisplay}</td>
-      <td style="text-align:right;font-weight:500;">${fmtV(j.revised)}</td>
-      <td class="td-muted" style="white-space:nowrap;">${j.super||'—'}</td>
-      <td class="td-muted" style="white-space:nowrap;">${j.offsite||'—'}</td>
-      <td style="font-size:11px;color:var(--text2);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${j.comments}">${j.comments}</td>
-    </tr>`;
-  }).join(''):'<tr class="empty-row"><td colspan="10">No jobs match your filters.</td></tr>';
-  // Cards view
+
+  const preconJobs=data.filter(j=>j.section==='Pre-Con').sort((a,b)=>a.pm.localeCompare(b.pm)||a.name.localeCompare(b.name));
+  const conJobs=data.filter(j=>j.section==='Construction/Punch').sort((a,b)=>a.pm.localeCompare(b.pm)||a.name.localeCompare(b.name));
+
+  // KPIs
+  const preconVal=preconJobs.reduce((s,j)=>s+j.revised,0);
+  const conVal=conJobs.reduce((s,j)=>s+j.revised,0);
+  document.getElementById('pm-k-pre').textContent=preconJobs.length;
+  document.getElementById('pm-k-pre-val').textContent=preconVal>0?fmtV(preconVal):'—';
+  document.getElementById('pm-k-con').textContent=conJobs.length;
+  document.getElementById('pm-k-con-val').textContent=conVal>0?fmtV(conVal):'—';
+  document.getElementById('pm-precon-count').textContent=preconJobs.length+' jobs';
+  document.getElementById('pm-con-count').textContent=conJobs.length+' jobs';
+
+  // Pre-Con table rows — Job#, Project, PM, Super, Revised, Start
+  document.getElementById('pm-precon-tbody').innerHTML=preconJobs.length?preconJobs.map(j=>`<tr style="border-bottom:0.5px solid var(--border);">
+    <td style="font-size:11px;padding:7px 6px;color:var(--text3);white-space:nowrap;">${j.job_num}</td>
+    <td style="font-size:12px;padding:7px 6px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${j.name}">${j.name}</td>
+    <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.pm}</td>
+    <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.super||'TBD'}</td>
+    <td style="font-size:12px;padding:7px 6px;text-align:right;white-space:nowrap;">${fmtV(j.revised)}</td>
+    <td style="font-size:11px;padding:7px 6px;text-align:right;color:var(--text2);white-space:nowrap;">${j.start||'TBD'}</td>
+  </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No Pre-Con jobs</td></tr>';
+
+  // Construction table rows — Job#, Project, PM, Super, Revised, Off-Site
+  document.getElementById('pm-con-tbody').innerHTML=conJobs.length?conJobs.map(j=>`<tr style="border-bottom:0.5px solid var(--border);">
+    <td style="font-size:11px;padding:7px 6px;color:var(--text3);white-space:nowrap;">${j.job_num}</td>
+    <td style="font-size:12px;padding:7px 6px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${j.name}">${j.name}</td>
+    <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.pm}</td>
+    <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.super||'TBD'}</td>
+    <td style="font-size:12px;padding:7px 6px;text-align:right;white-space:nowrap;">${fmtV(j.revised)}</td>
+    <td style="font-size:11px;padding:7px 6px;text-align:right;color:var(--text2);white-space:nowrap;">${j.offsite||'TBD'}</td>
+  </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No active jobs</td></tr>';
+
+  // Cards view — grouped by PM, showing active jobs only
   const byPM={};
   data.forEach(j=>{if(!byPM[j.pm])byPM[j.pm]=[];byPM[j.pm].push(j);});
   document.getElementById('pm-cards-grid').innerHTML=Object.keys(byPM).sort().map(pm=>{
@@ -1352,9 +1389,10 @@ function renderPM(){
     const actv=jbs.filter(j=>j.section==='Construction/Punch').length;
     const prc=jbs.filter(j=>j.section==='Pre-Con').length;
     const [bg,txt]=avColors(pm);
-    return`<div class="pm-card"><div class="pm-card-head"><div class="avatar" style="background:${bg};color:${txt};">${initials(pm)}</div><div><div class="pm-card-name">${pm}</div><div class="pm-card-meta">${jbs.length} jobs · ${fmtV(tot)} · ${actv} active · ${prc} pre-con</div></div></div>${jbs.map(j=>`<div class="pm-job-row"><div style="flex:1;min-width:0;"><div class="pm-job-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${j.name}</div><div style="font-size:11px;color:var(--text3);">${j.super&&j.super!=='TBD'?j.super:''}</div></div><div style="flex-shrink:0;text-align:right;">${badge(STATUS_BADGE[j.status]||'',j.status)}<div class="pm-job-val">${fmtV(j.revised)}</div></div></div>`).join('')}</div>`;
+    return`<div class="pm-card"><div class="pm-card-head"><div class="avatar" style="background:${bg};color:${txt};">${initials(pm)}</div><div><div class="pm-card-name">${pm}</div><div class="pm-card-meta">${jbs.length} active · ${fmtV(tot)} · ${actv} construction · ${prc} pre-con</div></div></div>${jbs.map(j=>`<div class="pm-job-row"><div style="flex:1;min-width:0;"><div class="pm-job-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${j.name}</div><div style="font-size:11px;color:var(--text3);">${j.super&&j.super!=='TBD'?j.super:''}</div></div><div style="flex-shrink:0;text-align:right;"><div class="pm-job-val">${fmtV(j.revised)}</div></div></div>`).join('')}</div>`;
   }).join('');
-  document.getElementById('pm-info').textContent=`Showing ${data.length} of ${JOBS.length} jobs`;
+
+  document.getElementById('pm-info').textContent=`Showing ${data.length} active jobs`;
 }
 
 // ── SUPER DASHBOARD ─────────────────────────────────────────────
