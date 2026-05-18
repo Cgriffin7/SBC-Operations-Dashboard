@@ -485,20 +485,35 @@ body.tv-mode .card { padding: 20px 24px; }
     <div class="page-content">
       <!-- KPI row — Bidding | Upcoming | Submitted (matches column order) -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
-        <div class="kpi" style="border-left-color:#378ADD;">
-          <div class="kpi-n" id="bb-k-bid">—</div>
-          <div class="kpi-l">Actively bidding</div>
-          <div class="kpi-sub" id="bb-k-bid-val" style="margin-top:4px;font-size:13px;font-weight:500;color:var(--text2);">—</div>
+        <div class="kpi" style="border-left-color:#378ADD;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div class="kpi-n" id="bb-k-bid">—</div>
+            <div class="kpi-l">Actively bidding</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="kpi-n" id="bb-k-bid-val" style="font-size:22px;">—</div>
+            <div class="kpi-l">Total value</div>
+          </div>
         </div>
-        <div class="kpi" style="border-left-color:#534AB7;">
-          <div class="kpi-n" id="bb-k-up">—</div>
-          <div class="kpi-l">Upcoming bids</div>
-          <div class="kpi-sub" id="bb-k-up-val" style="margin-top:4px;font-size:13px;font-weight:500;color:var(--text2);">—</div>
+        <div class="kpi" style="border-left-color:#534AB7;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div class="kpi-n" id="bb-k-up">—</div>
+            <div class="kpi-l">Upcoming bids</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="kpi-n" id="bb-k-up-val" style="font-size:22px;">—</div>
+            <div class="kpi-l">Total value</div>
+          </div>
         </div>
-        <div class="kpi" style="border-left-color:#1D9E75;">
-          <div class="kpi-n" id="bb-k-sub">—</div>
-          <div class="kpi-l">Submitted</div>
-          <div class="kpi-sub" id="bb-k-sub-val" style="margin-top:4px;font-size:13px;font-weight:500;color:var(--text2);">—</div>
+        <div class="kpi" style="border-left-color:#1D9E75;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div class="kpi-n" id="bb-k-sub">—</div>
+            <div class="kpi-l">Submitted</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="kpi-n" id="bb-k-sub-val" style="font-size:22px;">—</div>
+            <div class="kpi-l">Total value</div>
+          </div>
         </div>
       </div>
       <!-- Search + PM filter across all three columns -->
