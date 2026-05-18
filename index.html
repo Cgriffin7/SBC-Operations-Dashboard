@@ -45,7 +45,7 @@
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
 
 /* NAV */
-nav { width: var(--nav-w); background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 200; transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), box-shadow 0.25s; }
+nav { width: 56px !important; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 200; overflow: hidden !important; transition: none !important; }
 .nav-brand { padding: 18px 20px 16px; border-bottom: 0.5px solid var(--border); overflow: hidden; white-space: nowrap; }
 .nav-brand-name { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.2; }
 .nav-brand-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
@@ -310,13 +310,14 @@ body.tv85 .page-header, body.tv98 .page-header { height: 64px; }
   .two-col, .three-col { grid-template-columns: 1fr; }
 }
 
-/* Collapsed nav - default state */
+/* Permanent icon-only nav — fixed 56px, no hover */
 :root { --nav-w: 56px; }
-nav { width: 56px; overflow: hidden; }
-nav:hover { width: 200px; box-shadow: 4px 0 24px rgba(0,0,0,0.4); }
-.nav-brand-name, .nav-brand-sub, .nav-item span, .nav-footer { opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+nav { width: 56px !important; min-width: 56px !important; max-width: 56px !important;
+      overflow: hidden !important; transition: none !important; }
+nav:hover { width: 56px !important; box-shadow: none !important; }
+.nav-brand-name, .nav-brand-sub, .nav-item span, .nav-footer { display: none !important; }
 
-.nav-item { justify-content: flex-start; padding: 9px 20px; }
+.nav-item { justify-content: center; padding: 9px 20px; }
 main { margin-left: 56px !important; }
 .page-header { left: 56px; }
 
@@ -482,12 +483,11 @@ body.tv-mode .card { padding: 20px 24px; }
       </div>
     </div>
     <div class="page-content">
-      <!-- KPI row stays up top -->
-      <div class="kpi-grid">
+      <!-- KPI row — 3 cards, full width -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
         <div class="kpi" style="border-left-color:#534AB7;"><div class="kpi-n" id="bb-k-up">—</div><div class="kpi-l">Upcoming bids</div></div>
         <div class="kpi" style="border-left-color:#378ADD;"><div class="kpi-n" id="bb-k-bid">—</div><div class="kpi-l">Actively bidding</div></div>
         <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n" id="bb-k-sub">—</div><div class="kpi-l">Submitted</div></div>
-        <div class="kpi" style="border-left-color:#BA7517;"><div class="kpi-n" id="bb-k-val">—</div><div class="kpi-l">Pipeline value</div></div>
       </div>
       <!-- Search + PM filter across all three columns -->
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
@@ -1188,13 +1188,13 @@ function renderBB(){
       return {...b, daysOut, dueDt};
     })
     .filter(b=>b.daysOut<=120)  // remove >120 days
-    .sort((a,b)=>a.dueDt-b.dueDt); // oldest first
+    .sort((a,b)=>b.dueDt-a.dueDt); // newest first (most recently submitted)
 
   // KPIs
   document.getElementById('bb-k-up').textContent=upcoming.length;
   document.getElementById('bb-k-bid').textContent=bidding.length;
   document.getElementById('bb-k-sub').textContent=submitted.length;
-  document.getElementById('bb-k-val').textContent='$'+Math.round(filtered.reduce((s,b)=>s+b.value,0)/1e6)+'M';
+  // pipeline value KPI removed
   document.getElementById('bb-count').textContent=`${filtered.length} bids`;
   document.getElementById('bb-bidding-count').textContent=bidding.length+' bids';
   document.getElementById('bb-upcoming-count').textContent=upcoming.length+' bids';
