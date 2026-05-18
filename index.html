@@ -322,22 +322,17 @@ body.tv-mode .card { padding: 20px 24px; }
     <span id="live-btn-label">Live data</span>
     <span id="data-status" style="opacity:0.8;font-weight:400;"></span>
   </div>
-  <!-- Display mode switcher -->
+  <!-- TV size picker -->
   <div id="display-switcher" style="position:relative;">
-    <!-- Desktop button -->
-    <div id="desktop-btn" onclick="setDisplayMode('desktop')" title="Desktop mode"
-      style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:var(--text2);font-size:13px;padding:5px 9px;border-radius:20px 0 0 20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);border-right:none;display:inline-flex;align-items:center;transition:all 0.15s;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px;"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-    </div>
-    <!-- TV button -->
     <div id="tv-dropdown-btn" onclick="toggleTVMenu(event)" title="TV display mode"
-      style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:var(--text2);font-size:13px;padding:5px 9px;border-radius:0 20px 20px 0;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:inline-flex;align-items:center;gap:4px;transition:all 0.15s;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px;"><rect x="2" y="3" width="20" height="13" rx="2"/><path d="M2 10h20M8 21h8M12 17v4"/></svg>
-      <svg viewBox="0 0 10 6" fill="currentColor" style="width:8px;height:8px;opacity:0.6;"><path d="M0 0l5 6 5-6z"/></svg>
+      style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:var(--text2);font-size:11px;font-weight:500;padding:6px 10px;border-radius:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:inline-flex;align-items:center;gap:5px;transition:all 0.15s;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px;"><rect x="2" y="3" width="20" height="13" rx="2"/><path d="M2 10h20M8 21h8M12 17v4"/></svg>
+      <span id="tv-size-label">TV</span>
+      <svg viewBox="0 0 10 6" fill="currentColor" style="width:7px;height:7px;opacity:0.6;"><path d="M0 0l5 6 5-6z"/></svg>
     </div>
-    <!-- TV size dropdown -->
-    <div id="tv-menu" style="display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-lg);box-shadow:0 8px 24px rgba(0,0,0,0.4);overflow:hidden;min-width:140px;z-index:10000;">
-      <div style="padding:8px 12px 6px;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">TV size</div>
+    <div id="tv-menu" style="display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-lg);box-shadow:0 8px 24px rgba(0,0,0,0.4);overflow:hidden;min-width:150px;z-index:10000;">
+      <div style="padding:8px 12px 6px;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">Select TV size</div>
+      <div onclick="setDisplayMode('')" class="tv-size-option" data-size="">Default (desktop)</div>
       <div onclick="setDisplayMode('tv50')" class="tv-size-option" data-size="tv50">50"</div>
       <div onclick="setDisplayMode('tv55')" class="tv-size-option" data-size="tv55">55"</div>
       <div onclick="setDisplayMode('tv65')" class="tv-size-option" data-size="tv65">65"</div>
@@ -489,10 +484,10 @@ body.tv-mode .card { padding: 20px 24px; }
     </div>
     <div class="page-content">
       <div class="kpi-grid">
-        <div class="kpi" style="border-left-color:#378ADD;"><div class="kpi-n" id="pm-k-con">27</div><div class="kpi-l">Construction / Punch</div></div>
         <div class="kpi" style="border-left-color:#f5c518;"><div class="kpi-n" id="pm-k-pre">14</div><div class="kpi-l">Pre-Con</div></div>
-        <div class="kpi" style="border-left-color:#1a8fc1;"><div class="kpi-n" id="pm-k-close">24</div><div class="kpi-l">Closeout / Retention</div></div>
-        <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n" id="pm-k-val">$347M</div><div class="kpi-l">Revised contract total</div></div>
+        <div class="kpi" style="border-left-color:#378ADD;"><div class="kpi-n" id="pm-k-con">28</div><div class="kpi-l">Construction / Punch</div></div>
+        <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n" id="pm-k-val">$353M</div><div class="kpi-l">Active revised contract total</div></div>
+        <div class="kpi" style="border-left-color:#534AB7;"><div class="kpi-n" id="pm-k-pms">0</div><div class="kpi-l">PMs with active jobs</div></div>
       </div>
       <div class="controls">
         <input type="text" id="pm-search" placeholder="Search project, PM, superintendent…" oninput="renderPM()">
@@ -501,12 +496,10 @@ body.tv-mode .card { padding: 20px 24px; }
         <select id="pm-pe" onchange="renderPM()"><option value="">All PEs</option></select>
       </div>
       <div class="pill-row">
-        <button class="pill active" data-st="" onclick="setPMStatus(this,'')">All (65)</button>
-        <button class="pill" data-st="Pre-Con" onclick="setPMStatus(this,'Pre-Con')">Pre-Con (14)</button>
-        <button class="pill" data-st="Construction" onclick="setPMStatus(this,'Construction')">Construction (28)</button>
+        <button class="pill active" data-st="" onclick="setPMStatus(this,'')">All active</button>
+        <button class="pill" data-st="Pre-Con" onclick="setPMStatus(this,'Pre-Con')">Pre-Con</button>
+        <button class="pill" data-st="Construction" onclick="setPMStatus(this,'Construction')">Construction</button>
         <button class="pill" data-st="Punch List" onclick="setPMStatus(this,'Punch List')">Punch List</button>
-        <button class="pill" data-st="Closeout" onclick="setPMStatus(this,'Closeout')">Closeout (17)</button>
-        <button class="pill" data-st="Retention Billed" onclick="setPMStatus(this,'Retention Billed')">Retention (6)</button>
       </div>
       <div id="pm-table-view">
         <div class="tbl-wrap"><table>
@@ -581,57 +574,94 @@ body.tv-mode .card { padding: 20px 24px; }
   </div>
 
   <!-- BIDS & RFPs -->
-  <!-- BIDS & RFPs -->
   <div id="view-rfps" class="view">
     <div class="page-header">
       <span class="page-title">Bids &amp; RFPs</span>
-      <div class="header-right"><span class="header-badge">233 records</span></div>
+      <div class="header-right"><span class="header-badge" id="rfp-badge">Active pipeline</span></div>
     </div>
     <div class="page-content">
+      <!-- Top analytics cards - always visible -->
       <div class="kpi-grid kpi-grid-5">
-        <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n" id="rfp-k-won">63</div><div class="kpi-l">Awarded</div></div>
-        <div class="kpi" style="border-left-color:#E24B4A;"><div class="kpi-n" id="rfp-k-lost">88</div><div class="kpi-l">Lost</div></div>
-        <div class="kpi" style="border-left-color:#BA7517;"><div class="kpi-n" id="rfp-k-pend">56</div><div class="kpi-l">Pending</div></div>
-        <div class="kpi" style="border-left-color:#378ADD;"><div class="kpi-n" id="rfp-k-wr">41.7%</div><div class="kpi-l">Win rate</div></div>
-        <div class="kpi" style="border-left-color:#534AB7;"><div class="kpi-n" id="rfp-k-val">$71M</div><div class="kpi-l">Value won</div></div>
+        <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n" id="rfp-k-won">—</div><div class="kpi-l">Awarded</div></div>
+        <div class="kpi" style="border-left-color:#E24B4A;"><div class="kpi-n" id="rfp-k-lost">—</div><div class="kpi-l">Lost</div></div>
+        <div class="kpi" style="border-left-color:#BA7517;"><div class="kpi-n" id="rfp-k-pend">—</div><div class="kpi-l">Pending</div></div>
+        <div class="kpi" style="border-left-color:#378ADD;"><div class="kpi-n" id="rfp-k-wr">—</div><div class="kpi-l">Win rate</div></div>
+        <div class="kpi" style="border-left-color:#534AB7;"><div class="kpi-n" id="rfp-k-val">—</div><div class="kpi-l">Value won</div></div>
       </div>
-      <div class="two-col">
-        <div class="card"><div class="card-title">Win rate by PM</div><div class="chart-wrap" style="height:200px;"><canvas id="rfp-pm-chart" role="img" aria-label="Win rate by PM bar chart">Win rates 12% to 70%.</canvas></div></div>
-        <div class="card"><div class="card-title">Outcomes by year</div><div class="chart-wrap" style="height:200px;"><canvas id="rfp-year-chart" role="img" aria-label="Bid outcomes by year 2024 to 2026">Annual won/lost/pending counts.</canvas></div></div>
+      <div class="two-col" style="margin-bottom:20px;">
+        <div class="card"><div class="card-title">Win rate by PM</div><div class="chart-wrap" style="height:200px;"><canvas id="rfp-pm-chart" role="img" aria-label="Win rate by PM">Win rates by PM.</canvas></div></div>
+        <div class="card"><div class="card-title">Outcomes by year</div><div class="chart-wrap" style="height:200px;"><canvas id="rfp-year-chart" role="img" aria-label="Bid outcomes by year">Annual outcomes.</canvas></div></div>
       </div>
-      <div class="controls">
-        <input type="text" id="rfp-search" placeholder="Search project, PM, client, location…" oninput="renderRFP()">
-        <select id="rfp-pm" onchange="renderRFP()"><option value="">All PMs</option></select>
-        <select id="rfp-type" onchange="renderRFP()"><option value="">All types</option><option>RFP</option><option>ROM</option><option>Budget</option></select>
-        <select id="rfp-client" onchange="renderRFP()"><option value="">All clients</option></select>
+
+      <!-- Active pipeline section -->
+      <div class="card" style="margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+          <div style="font-size:13px;font-weight:500;color:var(--text);">Active bid pipeline</div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <input type="text" id="rfp-search" placeholder="Search project or PM…" oninput="renderRFP()" style="font-size:12px;padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface2);color:var(--text);outline:none;width:200px;">
+            <select id="rfp-pm" onchange="renderRFP()" style="font-size:12px;padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface2);color:var(--text);"><option value="">All PMs</option></select>
+            <select id="rfp-type" onchange="renderRFP()" style="font-size:12px;padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface2);color:var(--text);"><option value="">All types</option><option>RFP</option><option>ROM</option><option>Budget</option></select>
+          </div>
+        </div>
+        <!-- Status tabs for active pipeline -->
+        <div class="pill-row" style="margin-bottom:12px;">
+          <button class="pill active" data-st="active" onclick="setPipelineTab(this,'active')">All active</button>
+          <button class="pill" data-st="Upcoming Bid" onclick="setPipelineTab(this,'Upcoming Bid')">Upcoming</button>
+          <button class="pill" data-st="Bidding" onclick="setPipelineTab(this,'Bidding')">Bidding</button>
+          <button class="pill" data-st="Submitted" onclick="setPipelineTab(this,'Submitted')">Submitted</button>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr>
+            <th onclick="sortRFP('name')" data-col="name">Project</th>
+            <th onclick="sortRFP('pm')" data-col="pm">PM</th>
+            <th onclick="sortRFP('type')" data-col="type">Type</th>
+            <th onclick="sortRFP('value')" data-col="value" style="text-align:right;">Value</th>
+            <th onclick="sortRFP('due')" data-col="due">Due date</th>
+            <th>Notes</th>
+          </tr></thead>
+          <tbody id="rfp-tbody"></tbody>
+        </table></div>
+        <div class="tbl-info" id="rfp-info"></div>
       </div>
-      <div class="pill-row">
-        <button class="pill active" data-r="" onclick="setRFPResult(this,'')">All</button>
-        <button class="pill" data-r="Awarded" onclick="setRFPResult(this,'Awarded')">Awarded</button>
-        <button class="pill" data-r="Lost" onclick="setRFPResult(this,'Lost')">Lost</button>
-        <button class="pill" data-r="Dead" onclick="setRFPResult(this,'Dead')">Dead</button>
-        <button class="pill" data-r="Pending" onclick="setRFPResult(this,'Pending')">Pending</button>
-        <button class="pill" data-r="Bidding" onclick="setRFPResult(this,'Bidding')">Bidding</button>
-        <button class="pill" data-r="Upcoming Bid" onclick="setRFPResult(this,'Upcoming Bid')">Upcoming</button>
+
+      <!-- Historical toggle -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text2);">
+          <input type="checkbox" id="rfp-show-history" onchange="toggleRFPHistory()" style="width:15px;height:15px;cursor:pointer;">
+          Show awarded / lost / dead history
+        </label>
       </div>
-      <div class="tbl-wrap"><table>
-        <thead><tr>
-          <th onclick="sortRFP('name')" data-col="name">Project</th>
-          <th onclick="sortRFP('pm')" data-col="pm">PM</th>
-          <th onclick="sortRFP('type')" data-col="type">Type</th>
-          <th onclick="sortRFP('result')" data-col="result">Result</th>
-          <th onclick="sortRFP('value')" data-col="value" style="text-align:right;">Value</th>
-          <th onclick="sortRFP('client')" data-col="client">Client</th>
-          <th onclick="sortRFP('location')" data-col="location">Location</th>
-          <th onclick="sortRFP('due')" data-col="due">Due</th>
-          <th>Notes</th>
-        </tr></thead>
-        <tbody id="rfp-tbody"></tbody>
-      </table></div>
-      <div class="tbl-info" id="rfp-info"></div>
+      <div id="rfp-history-section" style="display:none;">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+            <div style="font-size:13px;font-weight:500;color:var(--text);">Historical bids</div>
+            <div class="pill-row" style="margin:0;">
+              <button class="pill active" data-hr="all" onclick="setHistoryTab(this,'all')">All</button>
+              <button class="pill" data-hr="Awarded" onclick="setHistoryTab(this,'Awarded')">Awarded</button>
+              <button class="pill" data-hr="Lost" onclick="setHistoryTab(this,'Lost')">Lost</button>
+              <button class="pill" data-hr="Dead" onclick="setHistoryTab(this,'Dead')">Dead</button>
+            </div>
+          </div>
+          <div class="tbl-wrap"><table>
+            <thead><tr>
+              <th onclick="sortHist('name')" data-col="name">Project</th>
+              <th onclick="sortHist('pm')" data-col="pm">PM</th>
+              <th onclick="sortHist('type')" data-col="type">Type</th>
+              <th onclick="sortHist('result')" data-col="result">Result</th>
+              <th onclick="sortHist('value')" data-col="value" style="text-align:right;">Value</th>
+              <th onclick="sortHist('client')" data-col="client">Client</th>
+              <th onclick="sortHist('due')" data-col="due">Due</th>
+              <th>Notes</th>
+            </tr></thead>
+            <tbody id="hist-tbody"></tbody>
+          </table></div>
+          <div class="tbl-info" id="hist-info"></div>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- TV MODE -->
   <!-- TV MODE -->
   <div id="view-tv" class="view">
     <div class="page-header">
@@ -1087,7 +1117,9 @@ function renderPM(){
   const pmF=document.getElementById('pm-pm').value;
   const supF=document.getElementById('pm-super').value;
   const peF=document.getElementById('pm-pe').value;
+  // PM Dashboard only shows Pre-Con and Construction/Punch — not Closeout/Retention
   let data=JOBS.filter(j=>{
+    if(j.section==='Closeout/Retention')return false;
     if(pmStatus&&j.status!==pmStatus)return false;
     if(pmF&&j.pm!==pmF)return false;
     if(supF&&j.super!==supF)return false;
@@ -1102,8 +1134,8 @@ function renderPM(){
   const totalRevised=data.reduce((s,j)=>s+j.revised,0);
   document.getElementById('pm-k-con').textContent=active.length;
   document.getElementById('pm-k-pre').textContent=precon.length;
-  document.getElementById('pm-k-close').textContent=closeout.length;
   document.getElementById('pm-k-val').textContent='$'+Math.round(totalRevised/1e6)+'M';
+  document.getElementById('pm-k-pms').textContent=new Set(data.map(j=>j.pm)).size;
   // Section order for table
   const sectionOrder={'Pre-Con':0,'Construction/Punch':1,'Closeout/Retention':2};
   const sorted=[...data].sort((a,b)=>{
@@ -1157,6 +1189,7 @@ function renderPM(){
 })();
 
 function renderSU(){
+  // Active = Construction AND Punch List (not just Construction)
   const activeJobs=JOBS.filter(j=>j.section==='Construction/Punch');
   const preconJobs=JOBS.filter(j=>j.section==='Pre-Con');
 
@@ -1168,21 +1201,28 @@ function renderSU(){
   document.getElementById('su-k-tbd').textContent=tbd;
   document.getElementById('su-k-supers').textContent=activeSups;
 
-  // Active on site table - sorted by off-site date
   function parseDtSU(s){try{const[m,d,y]=s.split('/');return new Date(y,m-1,d);}catch{return new Date('2099-01-01');}}
+  const today=new Date('2026-05-16');
+
+  // Active on site — sorted by off-site date ascending
   const activeSorted=[...activeJobs].sort((a,b)=>parseDtSU(a.offsite)-parseDtSU(b.offsite));
   document.getElementById('su-active-tbody').innerHTML=activeSorted.map(j=>{
-    const isUrgent=parseDtSU(j.offsite)<new Date('2026-06-01');
+    const offDt=parseDtSU(j.offsite);
+    const daysLeft=Math.round((offDt-today)/(864e5));
+    // Amber = coming off within 30 days AND date hasn't passed
+    const isComingSoon=daysLeft>=0&&daysLeft<=30&&offDt.getFullYear()!==2099;
+    const isPast=daysLeft<0&&j.offsite!=='TBD';
+    const dateStyle=isComingSoon?'color:var(--amber-txt);font-weight:500;':isPast?'color:var(--red-txt);':'' ;
     return`<tr style="border-bottom:0.5px solid var(--border);">
       <td style="font-size:12px;padding:7px 6px;font-weight:500;white-space:nowrap;">${j.super||'—'}</td>
       <td style="font-size:12px;padding:7px 6px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${j.name}">${j.name}</td>
       <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.pm}</td>
       <td style="padding:7px 6px;">${badge(STATUS_BADGE[j.status]||'',j.status)}</td>
-      <td style="font-size:12px;padding:7px 6px;text-align:right;white-space:nowrap;${isUrgent?'color:var(--amber-txt);font-weight:500;':''}">${j.offsite}</td>
+      <td style="font-size:12px;padding:7px 6px;text-align:right;white-space:nowrap;${dateStyle}">${j.offsite}${isComingSoon?' <span style="font-size:10px;">('+daysLeft+'d)</span>':''}</td>
     </tr>`;
   }).join('');
 
-  // Pre-Con table - sorted by start date, TBD at bottom
+  // Pre-Con — sorted by start date ascending, TBD at bottom
   const preconSorted=[...preconJobs].sort((a,b)=>{
     const da=parseDtSU(a.start),db=parseDtSU(b.start);
     return da-db;
@@ -1197,7 +1237,7 @@ function renderSU(){
     </tr>`;
   }).join('');
 
-  // Super availability - last off-site per super, sorted earliest to latest
+  // Super availability — last off-site per super, NO bar, sorted earliest to latest
   const superMap={};
   activeJobs.forEach(j=>{
     if(!j.super||j.super==='TBD')return;
@@ -1211,82 +1251,125 @@ function renderSU(){
       dateStr:data.lastDate.getFullYear()===2099?'TBD':data.lastDate.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})}))
     .sort((a,b)=>a.date-b.date);
 
-  const today=new Date('2026-05-16');
   document.getElementById('su-avail-list').innerHTML=availList.map(a=>{
     const daysUntil=Math.round((a.date-today)/(864e5));
-    const color=daysUntil<=30?'#E24B4A':daysUntil<=60?'#BA7517':'#1D9E75';
-    const tag=daysUntil<=30&&a.date.getFullYear()!==2099?
-      `<span style="font-size:10px;background:${color}22;color:${color};padding:1px 6px;border-radius:8px;margin-left:6px;">${daysUntil}d</span>`:'';
-    return`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
-      <div style="font-size:12px;font-weight:500;color:var(--text);width:150px;flex-shrink:0;">${a.name}</div>
-      <div style="flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;">
-        <div style="height:100%;width:${Math.min(100,a.jobs*20)}%;background:${color};border-radius:3px;"></div>
+    const color=daysUntil<0?'var(--text3)':daysUntil<=30?'#E24B4A':daysUntil<=60?'#BA7517':'#1D9E75';
+    const tag=daysUntil>=0&&daysUntil<=30&&a.date.getFullYear()!==2099?
+      `<span style="font-size:10px;background:${color}22;color:${color};padding:1px 6px;border-radius:8px;margin-left:4px;">${daysUntil}d</span>`:'';
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--border);">
+      <div style="font-size:12px;font-weight:500;color:var(--text);">${a.name}</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:11px;color:var(--text3);">${a.jobs} job${a.jobs>1?'s':''}</span>
+        <span style="font-size:12px;color:${color};font-weight:500;">${a.dateStr}${tag}</span>
       </div>
-      <div style="font-size:12px;color:${color};font-weight:500;width:90px;text-align:right;flex-shrink:0;">${a.dateStr}${tag}</div>
-      <div style="font-size:11px;color:var(--text3);width:40px;text-align:right;flex-shrink:0;">${a.jobs} job${a.jobs>1?'s':''}</div>
     </div>`;
   }).join('');
 }
 
 // ── BIDS & RFPs ───────────────────────────────────────────────────
-let rfpResult='', rfpSort='due', rfpDir=1;
+let rfpPipelineTab='active', rfpHistTab='all', rfpSort='due', rfpDir=1;
+let histSort='due', histDir=-1;
+
 (function initRFP(){
   const pms=[...new Set(RFPS.map(r=>r.pm).filter(Boolean))].sort();
-  const clients=[...new Set(RFPS.map(r=>r.client).filter(c=>c&&c.length>1))].sort();
-  const add=(id,arr)=>{const s=document.getElementById(id);arr.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});};
-  add('rfp-pm',pms); add('rfp-client',clients.slice(0,40));
+  const add=(id,arr)=>{const s=document.getElementById(id);if(!s)return;arr.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});};
+  add('rfp-pm',pms);
+  // Init charts
   if(window._rfpPmChart){try{window._rfpPmChart.destroy();}catch(e){}window._rfpPmChart=null;}
-if(window._rfpYearChart){try{window._rfpYearChart.destroy();}catch(e){}window._rfpYearChart=null;}
-if(true){
-    window._rfpChartsInit=true;
-    waitForChartJS(()=>{
-      window._rfpPmChart=new Chart(document.getElementById('rfp-pm-chart'),{type:'bar',data:{labels:['Dusty F.','Chris B.','Marco V.','John M.','David G.','Charlie G.','Avi K.','Cameron P.','Marc M.','Adam T.'],datasets:[{data:[70,56,47,41,40,31,31,17,14,12],backgroundColor:[70,56,47,41,40,31,31,17,14,12].map(p=>p>=50?'#1D9E75':p>=35?'#BA7517':'#E24B4A'),borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(128,128,128,0.08)'},max:100,ticks:{callback:v=>v+'%',font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
-      window._rfpYearChart=new Chart(document.getElementById('rfp-year-chart'),{type:'bar',data:{labels:['2024','2025','2026'],datasets:[{label:'Awarded',data:[1,48,13],backgroundColor:'#1D9E75',borderRadius:2},{label:'Lost',data:[1,75,6],backgroundColor:'#E24B4A',borderRadius:2},{label:'Pending',data:[0,13,41],backgroundColor:'#BA7517',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(128,128,128,0.08)'}}}}});
-    });
-  }
+  if(window._rfpYearChart){try{window._rfpYearChart.destroy();}catch(e){}window._rfpYearChart=null;}
+  window._rfpChartsInit=true;
+  waitForChartJS(()=>{
+    window._rfpPmChart=new Chart(document.getElementById('rfp-pm-chart'),{type:'bar',data:{labels:['Dusty F.','Chris B.','Marco V.','John M.','David G.','Charlie G.','Avi K.','Cameron P.','Marc M.','Adam T.'],datasets:[{data:[70,56,47,41,40,31,31,17,14,12],backgroundColor:[70,56,47,41,40,31,31,17,14,12].map(p=>p>=50?'#1D9E75':p>=35?'#BA7517':'#E24B4A'),borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(128,128,128,0.08)'},max:100,ticks:{callback:v=>v+'%',font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+    window._rfpYearChart=new Chart(document.getElementById('rfp-year-chart'),{type:'bar',data:{labels:['2024','2025','2026'],datasets:[{label:'Awarded',data:[1,48,13],backgroundColor:'#1D9E75',borderRadius:2},{label:'Lost',data:[1,75,6],backgroundColor:'#E24B4A',borderRadius:2},{label:'Pending',data:[0,13,41],backgroundColor:'#BA7517',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(128,128,128,0.08)'}}}}});
+  });
 })();
-function setRFPResult(el,r){rfpResult=r;document.querySelectorAll('#view-rfps .pill').forEach(p=>p.classList.toggle('active',p.dataset.r===r));renderRFP();}
+
+function setPipelineTab(el,tab){
+  rfpPipelineTab=tab;
+  document.querySelectorAll('#view-rfps .pill[data-st]').forEach(p=>p.classList.toggle('active',p.dataset.st===tab));
+  renderRFP();
+}
+function setHistoryTab(el,tab){
+  rfpHistTab=tab;
+  document.querySelectorAll('#view-rfps .pill[data-hr]').forEach(p=>p.classList.toggle('active',p.dataset.hr===tab));
+  renderHistory();
+}
+function toggleRFPHistory(){
+  const show=document.getElementById('rfp-show-history').checked;
+  document.getElementById('rfp-history-section').style.display=show?'block':'none';
+  if(show)renderHistory();
+}
 function sortRFP(col){if(rfpSort===col)rfpDir*=-1;else{rfpSort=col;rfpDir=1;}updateSortHeaders('view-rfps',col);renderRFP();}
-function renderRFP(){
+function sortHist(col){if(histSort===col)histDir*=-1;else{histSort=col;histDir=1;}renderHistory();}
+
+// Active pipeline statuses
+const ACTIVE_STATUSES=['Upcoming Bid','Bidding','Submitted'];
+const HISTORY_RESULTS=['Awarded','Lost','Dead'];
+
+function getActiveBids(){
   const q=document.getElementById('rfp-search').value.toLowerCase();
   const pmF=document.getElementById('rfp-pm').value;
   const typeF=document.getElementById('rfp-type').value;
-  const clF=document.getElementById('rfp-client').value;
-  let data=RFPS.filter(r=>{
-    if(rfpResult){
-      if(['Awarded','Lost','Pending'].includes(rfpResult)&&r.result!==rfpResult)return false;
-      if(rfpResult==='Bidding'&&r.status!=='Bidding')return false;
-      if(rfpResult==='Upcoming Bid'&&r.status!=='Upcoming Bid')return false;
-    }
+  return RFPS.filter(r=>{
+    if(!ACTIVE_STATUSES.includes(r.status))return false;
+    if(rfpPipelineTab!=='active'&&r.status!==rfpPipelineTab)return false;
     if(pmF&&r.pm!==pmF)return false;
     if(typeF&&r.type!==typeF)return false;
-    if(clF&&r.client!==clF)return false;
-    if(q&&!r.name.toLowerCase().includes(q)&&!r.pm.toLowerCase().includes(q)&&!r.client.toLowerCase().includes(q)&&!r.location.toLowerCase().includes(q))return false;
+    if(q&&!r.name.toLowerCase().includes(q)&&!r.pm.toLowerCase().includes(q))return false;
     return true;
   }).sort(makeSort(rfpSort,rfpDir));
-  const won=data.filter(r=>r.result==='Awarded').length;
-  const lost=data.filter(r=>r.result==='Lost').length;
-  const pend=data.filter(r=>r.result==='Pending').length;
+}
+
+function getHistoryBids(){
+  return RFPS.filter(r=>{
+    if(!HISTORY_RESULTS.includes(r.result))return false;
+    if(rfpHistTab!=='all'&&r.result!==rfpHistTab)return false;
+    return true;
+  }).sort(makeSort(histSort,histDir));
+}
+
+function renderRFP(){
+  // KPIs from full dataset
+  const won=RFPS.filter(r=>r.result==='Awarded').length;
+  const lost=RFPS.filter(r=>r.result==='Lost').length;
+  const pend=RFPS.filter(r=>r.result==='Pending').length;
   const total=won+lost;
-  const wonVal=data.filter(r=>r.result==='Awarded').reduce((s,r)=>s+r.value,0);
+  const wonVal=RFPS.filter(r=>r.result==='Awarded').reduce((s,r)=>s+r.value,0);
   document.getElementById('rfp-k-won').textContent=won;
   document.getElementById('rfp-k-lost').textContent=lost;
   document.getElementById('rfp-k-pend').textContent=pend;
   document.getElementById('rfp-k-wr').textContent=total?(won/total*100).toFixed(1)+'%':'—';
   document.getElementById('rfp-k-val').textContent='$'+(wonVal/1e6).toFixed(1)+'M';
+
+  // Active pipeline table - simpler columns
+  const data=getActiveBids();
   document.getElementById('rfp-tbody').innerHTML=data.length?data.map(r=>`<tr>
-    <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.name}">${r.name}</td>
+    <td style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.name}">${r.name}</td>
     <td class="td-muted" style="white-space:nowrap;">${r.pm}</td>
     <td>${badge(TYPE_BADGE[r.type]||'',r.type)}</td>
-    <td>${r.result?badge(RESULT_BADGE[r.result]||'',r.result):badge(STATUS_BADGE[r.status]||'',r.status)}</td>
     <td style="text-align:right;">${fmtV(r.value)}</td>
-    <td class="td-muted" style="max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.client}">${r.client||'—'}</td>
-    <td class="td-muted" style="white-space:nowrap;">${r.location||'—'}</td>
+    <td style="white-space:nowrap;">${fmtDue(r.due,r.status==='Submitted')}</td>
+    <td style="font-size:11px;color:var(--text2);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.notes}">${r.notes}</td>
+  </tr>`).join(''):'<tr class="empty-row"><td colspan="6">No active bids match your filters.</td></tr>';
+  document.getElementById('rfp-info').textContent=`Showing ${data.length} active bids`;
+}
+
+function renderHistory(){
+  const data=getHistoryBids();
+  document.getElementById('hist-tbody').innerHTML=data.length?data.map(r=>`<tr>
+    <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.name}">${r.name}</td>
+    <td class="td-muted" style="white-space:nowrap;">${r.pm}</td>
+    <td>${badge(TYPE_BADGE[r.type]||'',r.type)}</td>
+    <td>${badge(RESULT_BADGE[r.result]||'',r.result)}</td>
+    <td style="text-align:right;">${fmtV(r.value)}</td>
+    <td class="td-muted" style="max-width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.client}">${r.client||'—'}</td>
     <td class="td-muted" style="white-space:nowrap;">${r.due||'—'}</td>
     <td style="font-size:11px;color:var(--text2);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.notes}">${r.notes}</td>
-  </tr>`).join(''):'<tr class="empty-row"><td colspan="9">No records match your filters.</td></tr>';
-  document.getElementById('rfp-info').textContent=`Showing ${data.length} of ${RFPS.length} records`;
+  </tr>`).join(''):'<tr class="empty-row"><td colspan="8">No historical bids match.</td></tr>';
+  document.getElementById('hist-info').textContent=`Showing ${data.length} historical bids`;
 }
+
+// Remove old setRFPResult — no longer needed
 
 // ── TV MODE ───────────────────────────────────────────────────────
 let tvCurrent=0, tvPlaying=false, tvTimer=null, tvAnimTimer=null;
@@ -1338,27 +1421,21 @@ function tvResetAnim(){
 // ── DISPLAY MODE ─────────────────────────────────────────────────
 const TV_SIZES = ['tv50','tv55','tv65','tv85','tv98'];
 function setDisplayMode(mode) {
-  // Remove all existing size/mode classes
-  document.body.classList.remove('tv-mode', ...TV_SIZES);
-  // Update button states
-  document.getElementById('desktop-btn').classList.toggle('active', mode === 'desktop');
-  document.getElementById('tv-dropdown-btn').classList.toggle('active', mode !== 'desktop');
-  // Mark active option in dropdown
+  document.body.classList.remove(...TV_SIZES);
+  if (mode) document.body.classList.add(mode);
   document.querySelectorAll('.tv-size-option').forEach(el => {
     el.classList.toggle('active', el.dataset.size === mode);
   });
-  if (mode !== 'desktop') {
-    document.body.classList.add(mode);
-    // Update dropdown button icon color
-    document.getElementById('tv-dropdown-btn').style.background = 'var(--text)';
-    document.getElementById('tv-dropdown-btn').style.color = 'var(--bg)';
-    document.getElementById('desktop-btn').style.background = 'rgba(255,255,255,0.1)';
-    document.getElementById('desktop-btn').style.color = 'var(--text2)';
+  const btn = document.getElementById('tv-dropdown-btn');
+  const lbl = document.getElementById('tv-size-label');
+  if (mode) {
+    btn.style.background = 'var(--text)';
+    btn.style.color = 'var(--bg)';
+    lbl.textContent = mode.replace('tv','') + '"';
   } else {
-    document.getElementById('desktop-btn').style.background = 'var(--text)';
-    document.getElementById('desktop-btn').style.color = 'var(--bg)';
-    document.getElementById('tv-dropdown-btn').style.background = 'rgba(255,255,255,0.1)';
-    document.getElementById('tv-dropdown-btn').style.color = 'var(--text2)';
+    btn.style.background = 'rgba(255,255,255,0.1)';
+    btn.style.color = 'var(--text2)';
+    lbl.textContent = 'TV';
   }
   localStorage.setItem('displayMode', mode);
   document.getElementById('tv-menu').style.display = 'none';
@@ -1378,7 +1455,7 @@ document.addEventListener('click', () => {
 
 // Restore display mode preference on load
 window.addEventListener('load', () => {
-  const saved = localStorage.getItem('displayMode') || 'desktop';
+  const saved = localStorage.getItem('displayMode') || '';
   setDisplayMode(saved);
 });
 
