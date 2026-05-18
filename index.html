@@ -59,7 +59,7 @@ nav { width: var(--nav-w); background: var(--surface); border-right: 0.5px solid
 
 /* MAIN */
 main { margin-left: var(--nav-w); flex: 1; min-height: 100vh; padding-top: 0; }
-.page-header { height: var(--header-h); display: flex; align-items: center; justify-content: space-between; padding: 0 160px 0 28px; background: var(--surface); border-bottom: 0.5px solid var(--border); position: sticky; top: 0; z-index: 50; }
+.page-header { height: var(--header-h); display: flex; align-items: center; justify-content: space-between; padding: 0 200px 0 28px; background: var(--surface); border-bottom: 0.5px solid var(--border); position: sticky; top: 0; z-index: 50; }
 .page-title { font-size: 15px; font-weight: 600; color: var(--text); }
 .header-right { display: flex; align-items: center; gap: 10px; }
 .header-badge { font-size: 11px; background: var(--surface2); border: 0.5px solid var(--border); border-radius: 20px; padding: 3px 10px; color: var(--text2); }
@@ -193,75 +193,129 @@ tbody td { font-size: 12px; padding: 8px 8px; color: var(--text); vertical-align
 .due-soon { color: var(--amber-txt); }
 
 /* RESPONSIVE */
-/* TV size scaling */
-body.tv50 { font-size: 14px; }
-body.tv50 .kpi-n { font-size: 28px; }
-body.tv50 tbody td { font-size: 13px; }
+/* ── TV SIZE PROFILES ────────────────────────────────────────────
+   All TVs: 4K (3840×2160), browser at F11 fullscreen.
+   Chrome on 4K defaults to 200% UI scaling → effective viewport ~1920×1080.
+   Profiles scale font sizes for comfortable reading at viewing distance:
+   50" ≈ 6ft  |  55" ≈ 7ft  |  65" ≈ 8ft  |  85" ≈ 11ft  |  98" ≈ 13ft
+──────────────────────────────────────────────────────────────────────── */
+
+/* 50" — close viewing, modest upsize */
+body.tv50 { --tv-base: 14px; }
+body.tv50 .kpi-n { font-size: 30px; }
+body.tv50 .kpi-l { font-size: 12px; }
+body.tv50 .kpi-sub { font-size: 11px; }
+body.tv50 .kpi { padding: 14px 18px; }
+body.tv50 .page-title { font-size: 16px; }
+body.tv50 .card-title { font-size: 13px; }
+body.tv50 tbody td { font-size: 13px; padding: 8px 7px; }
+body.tv50 thead th { font-size: 11px; }
+body.tv50 .badge { font-size: 11px; }
+body.tv50 .bar-name { font-size: 13px; width: 140px; }
+body.tv50 .bar-val { font-size: 13px; }
+body.tv50 .status-n { font-size: 26px; }
+body.tv50 .status-l { font-size: 12px; }
+body.tv50 .page-content { padding: 20px 28px; }
 body.tv50 .nav-item { font-size: 13px; }
 
-body.tv55 { font-size: 15px; }
-body.tv55 .kpi-n { font-size: 30px; }
-body.tv55 tbody td { font-size: 13px; }
+/* 55" — slightly more distance */
+body.tv55 .kpi-n { font-size: 34px; }
+body.tv55 .kpi-l { font-size: 13px; }
+body.tv55 .kpi { padding: 16px 20px; }
+body.tv55 .page-title { font-size: 17px; }
+body.tv55 .card-title { font-size: 13px; }
+body.tv55 tbody td { font-size: 14px; padding: 9px 7px; }
+body.tv55 thead th { font-size: 11px; }
+body.tv55 .badge { font-size: 11px; }
+body.tv55 .bar-name { font-size: 14px; width: 145px; }
+body.tv55 .bar-val { font-size: 13px; }
+body.tv55 .status-n { font-size: 28px; }
+body.tv55 .page-content { padding: 22px 30px; }
 
-body.tv65 { font-size: 16px; }
-body.tv65 .kpi-n { font-size: 34px; }
-body.tv65 tbody td { font-size: 14px; }
-body.tv65 .page-content { padding: 28px 36px; }
+/* 65" — standard office TV distance */
+body.tv65 .kpi-n { font-size: 38px; }
+body.tv65 .kpi-l { font-size: 13px; }
+body.tv65 .kpi { padding: 18px 22px; }
+body.tv65 .kpi-grid { gap: 12px; margin-bottom: 20px; }
+body.tv65 .page-title { font-size: 18px; }
+body.tv65 .card-title { font-size: 14px; }
+body.tv65 tbody td { font-size: 14px; padding: 10px 8px; }
+body.tv65 thead th { font-size: 11px; }
+body.tv65 .badge { font-size: 12px; padding: 3px 9px; }
+body.tv65 .bar-name { font-size: 14px; width: 150px; }
+body.tv65 .bar-val { font-size: 14px; }
+body.tv65 .status-n { font-size: 30px; }
+body.tv65 .page-content { padding: 24px 34px; }
+body.tv65 .two-col { gap: 16px; }
 
-body.tv85 { font-size: 18px; }
-body.tv85 .kpi-n { font-size: 40px; }
+/* 85" — larger room, more distance */
+body.tv85 .kpi-n { font-size: 46px; }
 body.tv85 .kpi-l { font-size: 14px; }
-body.tv85 tbody td { font-size: 16px; padding: 11px 10px; }
-body.tv85 thead th { font-size: 12px; }
+body.tv85 .kpi-sub { font-size: 12px; }
+body.tv85 .kpi { padding: 20px 26px; }
+body.tv85 .kpi-grid { gap: 14px; margin-bottom: 24px; }
 body.tv85 .page-title { font-size: 22px; }
 body.tv85 .card-title { font-size: 15px; }
-body.tv85 .bar-name { font-size: 16px; width: 160px; }
-body.tv85 .bar-val { font-size: 15px; }
-body.tv85 .page-content { padding: 32px 40px; }
-body.tv85 .kpi { padding: 20px 24px; }
+body.tv85 tbody td { font-size: 16px; padding: 11px 9px; }
+body.tv85 thead th { font-size: 12px; }
 body.tv85 .badge { font-size: 12px; padding: 3px 10px; }
-body.tv85 .status-n { font-size: 32px; }
+body.tv85 .bar-name { font-size: 16px; width: 165px; }
+body.tv85 .bar-val { font-size: 15px; }
+body.tv85 .bar-jobs { font-size: 13px; }
+body.tv85 .status-n { font-size: 36px; }
+body.tv85 .status-l { font-size: 13px; }
+body.tv85 .page-content { padding: 28px 40px; }
+body.tv85 .two-col { gap: 18px; }
+body.tv85 .card { padding: 18px 22px; }
+body.tv85 .pill { font-size: 12px; padding: 5px 14px; }
+body.tv85 .nav-item { font-size: 14px; padding: 11px 18px; }
 
-body.tv98 { font-size: 20px; }
-body.tv98 .kpi-n { font-size: 48px; }
+/* 98" — boardroom / large space */
+body.tv98 .kpi-n { font-size: 54px; }
 body.tv98 .kpi-l { font-size: 15px; }
 body.tv98 .kpi-sub { font-size: 13px; }
-body.tv98 tbody td { font-size: 18px; padding: 13px 10px; }
-body.tv98 thead th { font-size: 13px; }
+body.tv98 .kpi { padding: 24px 30px; }
+body.tv98 .kpi-grid { gap: 16px; margin-bottom: 28px; }
 body.tv98 .page-title { font-size: 26px; }
 body.tv98 .card-title { font-size: 17px; }
-body.tv98 .bar-name { font-size: 18px; width: 180px; }
-body.tv98 .bar-val { font-size: 17px; }
-body.tv98 .page-content { padding: 36px 48px; }
-body.tv98 .kpi { padding: 24px 28px; }
-body.tv98 .kpi-grid { gap: 18px; margin-bottom: 28px; }
+body.tv98 tbody td { font-size: 18px; padding: 13px 10px; }
+body.tv98 thead th { font-size: 13px; }
 body.tv98 .badge { font-size: 13px; padding: 4px 12px; }
-body.tv98 .status-n { font-size: 38px; }
+body.tv98 .bar-name { font-size: 18px; width: 185px; }
+body.tv98 .bar-val { font-size: 17px; }
+body.tv98 .bar-jobs { font-size: 14px; }
+body.tv98 .bar-track { height: 8px; }
+body.tv98 .status-n { font-size: 42px; }
+body.tv98 .status-l { font-size: 14px; }
+body.tv98 .page-content { padding: 32px 48px; }
+body.tv98 .two-col { gap: 20px; }
+body.tv98 .card { padding: 22px 28px; }
 body.tv98 .pill { font-size: 13px; padding: 5px 16px; }
+body.tv98 .nav-item { font-size: 15px; padding: 12px 20px; }
+body.tv98 .header-badge { font-size: 13px; padding: 5px 14px; }
 
-/* All TV modes share nav expansion */
+/* All TV sizes: expand nav, show labels, adjust main margin */
 body.tv50 nav, body.tv55 nav, body.tv65 nav, body.tv85 nav, body.tv98 nav {
-  width: 160px !important; box-shadow: none !important;
+  width: 170px !important; box-shadow: none !important;
 }
-body.tv50 nav:hover, body.tv55 nav:hover, body.tv65 nav:hover, body.tv85 nav:hover, body.tv98 nav:hover {
-  width: 200px !important;
+body.tv85 nav, body.tv98 nav { width: 190px !important; }
+body.tv50 nav:hover, body.tv55 nav:hover, body.tv65 nav:hover { width: 200px !important; }
+body.tv85 nav:hover, body.tv98 nav:hover { width: 220px !important; }
+
+body.tv50 .nav-brand-name, body.tv50 .nav-brand-sub, body.tv50 .nav-item span, body.tv50 .nav-footer,
+body.tv55 .nav-brand-name, body.tv55 .nav-brand-sub, body.tv55 .nav-item span, body.tv55 .nav-footer,
+body.tv65 .nav-brand-name, body.tv65 .nav-brand-sub, body.tv65 .nav-item span, body.tv65 .nav-footer,
+body.tv85 .nav-brand-name, body.tv85 .nav-brand-sub, body.tv85 .nav-item span, body.tv85 .nav-footer,
+body.tv98 .nav-brand-name, body.tv98 .nav-brand-sub, body.tv98 .nav-item span, body.tv98 .nav-footer {
+  opacity: 1 !important; pointer-events: auto !important;
 }
-body.tv50 .nav-brand-name, body.tv50 .nav-brand-sub, body.tv50 .nav-item span,
-body.tv55 .nav-brand-name, body.tv55 .nav-brand-sub, body.tv55 .nav-item span,
-body.tv65 .nav-brand-name, body.tv65 .nav-brand-sub, body.tv65 .nav-item span,
-body.tv85 .nav-brand-name, body.tv85 .nav-brand-sub, body.tv85 .nav-item span,
-body.tv98 .nav-brand-name, body.tv98 .nav-brand-sub, body.tv98 .nav-item span,
-body.tv50 .nav-footer, body.tv55 .nav-footer, body.tv65 .nav-footer,
-body.tv85 .nav-footer, body.tv98 .nav-footer { opacity: 1 !important; }
-body.tv50 main, body.tv55 main, body.tv65 main, body.tv85 main, body.tv98 main {
-  margin-left: 160px !important;
-}
+body.tv50 main, body.tv55 main, body.tv65 main { margin-left: 170px !important; }
+body.tv85 main, body.tv98 main { margin-left: 190px !important; }
+
+/* Header height scales for larger TVs */
+body.tv85 .page-header, body.tv98 .page-header { height: 64px; }
 
 @media (max-width: 900px) {
-  nav { width: 56px; }
-  .nav-brand-name, .nav-brand-sub, .nav-item span { display: none; }
-  .nav-item { justify-content: center; padding: 10px; }
-  main { margin-left: 56px; }
   .kpi-grid, .kpi-grid-5 { grid-template-columns: repeat(2,1fr); }
   .two-col, .three-col { grid-template-columns: 1fr; }
 }
@@ -317,10 +371,9 @@ body.tv-mode .card { padding: 20px 24px; }
 <body>
 <div id="data-status-bar" style="position:fixed;top:14px;right:16px;z-index:9999;display:flex;align-items:center;gap:6px;">
   <!-- Live data button -->
-  <div id="live-btn" onclick="loadLiveData()" title="Load live data from OneDrive" style="background:#1D9E75;color:white;font-size:11px;font-weight:500;padding:6px 12px;border-radius:20px;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,0.3);transition:all 0.2s;white-space:nowrap;">
-    <span style="font-size:10px;">⚡</span>
-    <span id="live-btn-label">Live data</span>
-    <span id="data-status" style="opacity:0.8;font-weight:400;"></span>
+  <div id="live-btn" onclick="loadLiveData()" title="Load live data from OneDrive" style="background:#1D9E75;color:white;font-size:11px;font-weight:500;padding:5px 10px;border-radius:20px;cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.3);transition:all 0.2s;white-space:nowrap;">
+    <span id="live-btn-label">⚡ Live</span>
+    <span id="data-status" style="opacity:0.8;font-weight:400;font-size:10px;"></span>
   </div>
   <!-- TV size picker -->
   <div id="display-switcher" style="position:relative;">
@@ -382,8 +435,8 @@ body.tv-mode .card { padding: 20px 24px; }
   <div id="view-exec" class="view active">
     <div class="page-header">
       <span class="page-title">Executive Dashboard</span>
-      <div class="header-right">
-        <span class="header-badge" id="exec-date">May 15, 2026</span>
+      <div class="header-right" style="padding-right:0;margin-right:auto;">
+        <span class="header-badge" id="exec-date">May 18, 2026</span>
       </div>
     </div>
     <div class="page-content">
@@ -434,43 +487,85 @@ body.tv-mode .card { padding: 20px 24px; }
   <div id="view-bidboard" class="view">
     <div class="page-header">
       <span class="page-title">Bid Board</span>
-      <div class="header-right">
-        <span class="header-badge" id="bb-count">76 bids</span>
+      <div class="header-right" style="padding-right:0;margin-right:auto;">
+        <span class="header-badge" id="bb-count">Active bids</span>
       </div>
     </div>
     <div class="page-content">
+      <!-- KPI row stays up top -->
       <div class="kpi-grid">
-        <div class="kpi" style="border-left-color:#BA7517;"><div class="kpi-n" id="bb-k-up">10</div><div class="kpi-l">Upcoming bids</div></div>
-        <div class="kpi" style="border-left-color:#378ADD;"><div class="kpi-n" id="bb-k-bid">14</div><div class="kpi-l">Actively bidding</div></div>
-        <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n" id="bb-k-sub">52</div><div class="kpi-l">Submitted</div></div>
-        <div class="kpi" style="border-left-color:#534AB7;"><div class="kpi-n" id="bb-k-val">$303M</div><div class="kpi-l">Pipeline value</div></div>
+        <div class="kpi" style="border-left-color:#534AB7;"><div class="kpi-n" id="bb-k-up">—</div><div class="kpi-l">Upcoming bids</div></div>
+        <div class="kpi" style="border-left-color:#378ADD;"><div class="kpi-n" id="bb-k-bid">—</div><div class="kpi-l">Actively bidding</div></div>
+        <div class="kpi" style="border-left-color:#1D9E75;"><div class="kpi-n" id="bb-k-sub">—</div><div class="kpi-l">Submitted</div></div>
+        <div class="kpi" style="border-left-color:#BA7517;"><div class="kpi-n" id="bb-k-val">—</div><div class="kpi-l">Pipeline value</div></div>
       </div>
-      <div class="controls">
-        <input type="text" id="bb-search" placeholder="Search project or PM…" oninput="renderBB()">
-        <select id="bb-pm" onchange="renderBB()"><option value="">All PMs</option></select>
-        <select id="bb-type" onchange="renderBB()"><option value="">All types</option><option>RFP</option><option>ROM</option><option>Budget</option></select>
+      <!-- Search + PM filter across all three columns -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <input type="text" id="bb-search" placeholder="Search project or PM…" oninput="renderBB()" style="flex:1;min-width:180px;font-size:12px;padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);outline:none;">
+        <select id="bb-pm" onchange="renderBB()" style="font-size:12px;padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);"><option value="">All PMs</option></select>
+        <select id="bb-type" onchange="renderBB()" style="font-size:12px;padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);"><option value="">All types</option><option>RFP</option><option>ROM</option><option>Budget</option></select>
       </div>
-      <div class="pill-row" id="bb-pills">
-        <button class="pill active" data-st="" onclick="setBBStatus(this,'')">All (76)</button>
-        <button class="pill" data-st="Upcoming Bid" onclick="setBBStatus(this,'Upcoming Bid')">Upcoming (10)</button>
-        <button class="pill" data-st="Bidding" onclick="setBBStatus(this,'Bidding')">Bidding (14)</button>
-        <button class="pill" data-st="Submitted" onclick="setBBStatus(this,'Submitted')">Submitted (52)</button>
+      <!-- Three column layout -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start;">
+
+        <!-- BIDDING -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="width:10px;height:10px;border-radius:50%;background:#378ADD;flex-shrink:0;"></span>
+            <span style="font-size:13px;font-weight:600;color:var(--text);">Bidding</span>
+            <span id="bb-bidding-count" style="font-size:11px;color:var(--text3);margin-left:auto;"></span>
+          </div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr>
+              <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Project</th>
+              <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">PM</th>
+              <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Value</th>
+              <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Due</th>
+            </tr></thead>
+            <tbody id="bb-bidding-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- UPCOMING -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="width:10px;height:10px;border-radius:50%;background:#534AB7;flex-shrink:0;"></span>
+            <span style="font-size:13px;font-weight:600;color:var(--text);">Upcoming</span>
+            <span id="bb-upcoming-count" style="font-size:11px;color:var(--text3);margin-left:auto;"></span>
+          </div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr>
+              <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Project</th>
+              <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">PM</th>
+              <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Value</th>
+              <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Due</th>
+            </tr></thead>
+            <tbody id="bb-upcoming-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- SUBMITTED -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="width:10px;height:10px;border-radius:50%;background:#1D9E75;flex-shrink:0;"></span>
+            <span style="font-size:13px;font-weight:600;color:var(--text);">Submitted</span>
+            <span id="bb-submitted-count" style="font-size:11px;color:var(--text3);margin-left:auto;"></span>
+          </div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr>
+              <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Project</th>
+              <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">PM</th>
+              <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Value</th>
+            </tr></thead>
+            <tbody id="bb-submitted-tbody"></tbody>
+          </table>
+        </div>
+
       </div>
-      <div class="tbl-wrap"><table>
-        <thead><tr>
-          <th onclick="sortBB('name')" data-col="name">Project</th>
-          <th onclick="sortBB('pm')" data-col="pm">PM</th>
-          <th onclick="sortBB('status')" data-col="status">Status</th>
-          <th onclick="sortBB('type')" data-col="type">Type</th>
-          <th onclick="sortBB('value')" data-col="value" style="text-align:right;">Value</th>
-          <th onclick="sortBB('due')" data-col="due">Due date</th>
-        </tr></thead>
-        <tbody id="bb-tbody"></tbody>
-      </table></div>
-      <div class="tbl-info" id="bb-info"></div>
     </div>
   </div>
 
+  <!-- PM DASHBOARD -->
   <!-- PM DASHBOARD -->
   <div id="view-pm" class="view">
     <div class="page-header">
@@ -804,19 +899,23 @@ async function getToken() {
 }
 
 function setStatus(msg, loading) {
-  document.getElementById('data-status').textContent = msg;
   const btn = document.getElementById('live-btn');
   const lbl = document.getElementById('live-btn-label');
+  const stat = document.getElementById('data-status');
   if (loading) {
     btn.style.background = '#BA7517';
-    lbl.textContent = 'Loading…';
+    lbl.textContent = msg;
+    stat.textContent = '';
+  } else if (msg.startsWith('Error')) {
+    btn.style.background = '#E24B4A';
+    lbl.textContent = '⚡ Retry';
+    stat.textContent = '';
   } else {
-    btn.style.background = msg.startsWith('Error') ? '#E24B4A' : '#1D9E75';
-    lbl.textContent = msg.startsWith('Error') ? 'Retry' : '⚡ Live';
-    // Clear the status text after 5s on success
-    if (!msg.startsWith('Error')) {
-      setTimeout(() => { document.getElementById('data-status').textContent = ''; }, 8000);
-    }
+    btn.style.background = '#1D9E75';
+    lbl.textContent = '⚡ Live';
+    // Show update time briefly
+    stat.textContent = msg.includes('Updated') ? msg.split('Updated')[1].trim() : '';
+    setTimeout(() => { stat.textContent = ''; }, 6000);
   }
 }
 
@@ -1063,39 +1162,65 @@ if(true){
 }
 
 // ── BID BOARD ─────────────────────────────────────────────────────
-let bbStatus='', bbSort='due', bbDir=1;
+let bbSort='due', bbDir=1;
 (function initBB(){
   const pms=[...new Set(BIDS.map(b=>b.pm))].sort();
   const sel=document.getElementById('bb-pm');
   pms.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o);});
 })();
-function setBBStatus(el,s){bbStatus=s;document.querySelectorAll('#view-bidboard .pill').forEach(p=>p.classList.toggle('active',p.dataset.st===s));renderBB();}
-function sortBB(col){if(bbSort===col)bbDir*=-1;else{bbSort=col;bbDir=1;}updateSortHeaders('view-bidboard',col);renderBB();}
+
+function sortBB(col){if(bbSort===col)bbDir*=-1;else{bbSort=col;bbDir=1;}renderBB();}
+
 function renderBB(){
   const q=document.getElementById('bb-search').value.toLowerCase();
   const pmF=document.getElementById('bb-pm').value;
   const typeF=document.getElementById('bb-type').value;
-  let data=BIDS.filter(b=>{
-    if(bbStatus&&b.status!==bbStatus)return false;
+
+  const filtered=BIDS.filter(b=>{
     if(pmF&&b.pm!==pmF)return false;
     if(typeF&&b.type!==typeF)return false;
     if(q&&!b.name.toLowerCase().includes(q)&&!b.pm.toLowerCase().includes(q))return false;
     return true;
-  }).sort(makeSort(bbSort,bbDir));
-  document.getElementById('bb-k-up').textContent=data.filter(b=>b.status==='Upcoming Bid').length;
-  document.getElementById('bb-k-bid').textContent=data.filter(b=>b.status==='Bidding').length;
-  document.getElementById('bb-k-sub').textContent=data.filter(b=>b.status==='Submitted').length;
-  document.getElementById('bb-k-val').textContent='$'+Math.round(data.reduce((s,b)=>s+b.value,0)/1e6)+'M';
-  document.getElementById('bb-tbody').innerHTML=data.length?data.map(b=>`<tr>
-    <td style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${b.name}">${b.name}</td>
-    <td class="td-muted" style="white-space:nowrap;">${b.pm}</td>
-    <td>${badge(STATUS_BADGE[b.status]||'',b.status)}</td>
-    <td>${badge(TYPE_BADGE[b.type]||'',b.type)}</td>
-    <td style="text-align:right;">${fmtV(b.value)}</td>
-    <td style="white-space:nowrap;">${fmtDue(b.due,b.status==='Submitted')}</td>
-  </tr>`).join(''):'<tr class="empty-row"><td colspan="6">No bids match your filters.</td></tr>';
-  document.getElementById('bb-info').textContent=`Showing ${data.length} of ${BIDS.length} bids`;
-  document.getElementById('bb-count').textContent=`${data.length} bids`;
+  });
+
+  const bidding=filtered.filter(b=>b.status==='Bidding').sort(makeSort('due',1));
+  const upcoming=filtered.filter(b=>b.status==='Upcoming Bid').sort(makeSort('due',1));
+  const submitted=filtered.filter(b=>b.status==='Submitted').sort(makeSort('due',-1));
+
+  // KPIs
+  document.getElementById('bb-k-up').textContent=upcoming.length;
+  document.getElementById('bb-k-bid').textContent=bidding.length;
+  document.getElementById('bb-k-sub').textContent=submitted.length;
+  document.getElementById('bb-k-val').textContent='$'+Math.round(filtered.reduce((s,b)=>s+b.value,0)/1e6)+'M';
+  document.getElementById('bb-count').textContent=`${filtered.length} bids`;
+
+  // Column counts
+  document.getElementById('bb-bidding-count').textContent=bidding.length+' bids';
+  document.getElementById('bb-upcoming-count').textContent=upcoming.length+' bids';
+  document.getElementById('bb-submitted-count').textContent=submitted.length+' bids';
+
+  // Bidding table — project, PM, value, due date (sorted by due soonest)
+  document.getElementById('bb-bidding-tbody').innerHTML=bidding.length?bidding.map(b=>`<tr style="border-bottom:0.5px solid var(--border);">
+    <td style="font-size:12px;padding:6px 6px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${b.name}">${b.name}</td>
+    <td style="font-size:11px;padding:6px 6px;color:var(--text2);white-space:nowrap;">${b.pm}</td>
+    <td style="font-size:12px;padding:6px 6px;text-align:right;white-space:nowrap;">${fmtV(b.value)}</td>
+    <td style="font-size:12px;padding:6px 6px;text-align:right;white-space:nowrap;">${fmtDue(b.due,false)}</td>
+  </tr>`).join(''):'<tr><td colspan="4" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No active bids</td></tr>';
+
+  // Upcoming table — project, PM, value, due date
+  document.getElementById('bb-upcoming-tbody').innerHTML=upcoming.length?upcoming.map(b=>`<tr style="border-bottom:0.5px solid var(--border);">
+    <td style="font-size:12px;padding:6px 6px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${b.name}">${b.name}</td>
+    <td style="font-size:11px;padding:6px 6px;color:var(--text2);white-space:nowrap;">${b.pm}</td>
+    <td style="font-size:12px;padding:6px 6px;text-align:right;white-space:nowrap;">${fmtV(b.value)}</td>
+    <td style="font-size:12px;padding:6px 6px;text-align:right;white-space:nowrap;">${fmtDue(b.due,false)}</td>
+  </tr>`).join(''):'<tr><td colspan="4" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No upcoming bids</td></tr>';
+
+  // Submitted table — project, PM, value only (no due date needed)
+  document.getElementById('bb-submitted-tbody').innerHTML=submitted.length?submitted.map(b=>`<tr style="border-bottom:0.5px solid var(--border);">
+    <td style="font-size:12px;padding:6px 6px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${b.name}">${b.name}</td>
+    <td style="font-size:11px;padding:6px 6px;color:var(--text2);white-space:nowrap;">${b.pm}</td>
+    <td style="font-size:12px;padding:6px 6px;text-align:right;white-space:nowrap;">${fmtV(b.value)}</td>
+  </tr>`).join(''):'<tr><td colspan="3" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No submitted bids</td></tr>';
 }
 
 // ── PM DASHBOARD ──────────────────────────────────────────────────
