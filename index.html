@@ -226,6 +226,46 @@ body.tv-mode main { margin-left: 56px !important; }
 /* Header height scales for larger TVs */
 body.tv85 .page-header, body.tv98 .page-header { height: 64px; }
 
+/* ── GOOGLE TV MODE (BrowseHere / WebKit TV browser) ────────────
+   Accounts for overscan, smaller effective viewport, larger base font rendering
+   Scale everything down ~75% and add safe-zone padding
+──────────────────────────────────────────────────────────────── */
+body.gtv-mode {
+  font-size: 11px;
+  zoom: 0.75;
+  -webkit-text-size-adjust: none;
+}
+body.gtv-mode main { padding: 0; }
+body.gtv-mode .page-content { padding: 14px 18px; }
+body.gtv-mode .kpi-n { font-size: 22px; }
+body.gtv-mode .kpi-l { font-size: 11px; }
+body.gtv-mode .kpi-sub { font-size: 10px; }
+body.gtv-mode .kpi { padding: 10px 14px; }
+body.gtv-mode .kpi-grid { gap: 8px; margin-bottom: 14px; }
+body.gtv-mode .page-title { font-size: 14px; }
+body.gtv-mode .card-title { font-size: 11px; }
+body.gtv-mode .card { padding: 10px 14px; }
+body.gtv-mode tbody td { font-size: 11px; padding: 5px 6px; }
+body.gtv-mode thead th { font-size: 9px; }
+body.gtv-mode .badge { font-size: 9px; padding: 1px 6px; }
+body.gtv-mode .bar-name { font-size: 11px; width: 110px; }
+body.gtv-mode .bar-val { font-size: 11px; }
+body.gtv-mode .bar-track { height: 5px; }
+body.gtv-mode .two-col { gap: 10px; }
+body.gtv-mode .status-n { font-size: 22px; }
+body.gtv-mode .status-l { font-size: 10px; }
+body.gtv-mode .pill { font-size: 10px; padding: 3px 8px; }
+body.gtv-mode .pill-row { margin-bottom: 8px; gap: 4px; }
+body.gtv-mode .controls { gap: 6px; margin-bottom: 8px; }
+body.gtv-mode .controls input, body.gtv-mode .controls select { font-size: 11px; padding: 5px 8px; }
+body.gtv-mode .page-header { height: 44px; }
+body.gtv-mode nav { padding-top: 44px; }
+body.gtv-mode .pm-card { padding: 10px 14px; }
+body.gtv-mode .pm-card-name { font-size: 12px; }
+body.gtv-mode .pm-card-meta { font-size: 10px; }
+body.gtv-mode .pm-job-name { font-size: 11px; }
+body.gtv-mode .status-grid { gap: 6px; margin-bottom: 14px; }
+
 @media (max-width: 900px) {
   .kpi-grid, .kpi-grid-5 { grid-template-columns: repeat(2,1fr); }
   .two-col, .three-col { grid-template-columns: 1fr; }
@@ -285,7 +325,7 @@ body.tv-mode .card { padding: 20px 24px; }
     <span id="data-status" style="opacity:0.8;font-weight:400;font-size:10px;"></span>
   </div>
   <!-- TV mode toggle -->
-  <div id="tv-toggle-btn" onclick="toggleTVMode()" title="Toggle TV display mode"
+  <div id="display-mode-btn" onclick="cycleDisplayMode()" title="Toggle display mode"
     style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:var(--text2);font-size:11px;font-weight:500;padding:6px 10px;border-radius:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:inline-flex;align-items:center;gap:5px;transition:all 0.15s;">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px;"><rect x="2" y="3" width="20" height="13" rx="2"/><path d="M2 10h20M8 21h8M12 17v4"/></svg>
     <span id="tv-btn-label">TV</span>
@@ -1680,32 +1720,51 @@ function renderSUCards() {
   }).join('');
 }
 
-// ── TV MODE TOGGLE ────────────────────────────────────────────────
-function toggleTVMode() {
-  const active = document.body.classList.toggle('tv-mode');
-  const btn = document.getElementById('tv-toggle-btn');
+// ── DISPLAY MODE CYCLE: Desktop → TV → Google TV → Desktop ───────
+// modes: '' = desktop, 'tv-mode' = 50" Chrome TV, 'gtv-mode' = Google TV (BrowseHere)
+const DISPLAY_MODES = ['', 'tv-mode', 'gtv-mode'];
+const DISPLAY_LABELS = { '': 'TV', 'tv-mode': 'Google TV', 'gtv-mode': 'Exit' };
+const DISPLAY_SUBLABELS = { '': 'Chrome TV mode', 'tv-mode': 'Google TV / BrowseHere', 'gtv-mode': 'Back to desktop' };
+
+function cycleDisplayMode() {
+  const currentMode = DISPLAY_MODES.find(m => m && document.body.classList.contains(m)) || '';
+  const currentIdx = DISPLAY_MODES.indexOf(currentMode);
+  const nextMode = DISPLAY_MODES[(currentIdx + 1) % DISPLAY_MODES.length];
+
+  // Remove all mode classes
+  document.body.classList.remove('tv-mode', 'gtv-mode');
+  if (nextMode) document.body.classList.add(nextMode);
+
+  updateDisplayBtn(nextMode);
+  localStorage.setItem('displayMode', nextMode);
+}
+
+function setDisplayMode(mode) {
+  document.body.classList.remove('tv-mode', 'gtv-mode');
+  if (mode) document.body.classList.add(mode);
+  updateDisplayBtn(mode);
+  localStorage.setItem('displayMode', mode);
+}
+
+function updateDisplayBtn(mode) {
+  const btn = document.getElementById('display-mode-btn');
   const lbl = document.getElementById('tv-btn-label');
-  if (active) {
+  if (!btn || !lbl) return;
+  if (mode) {
     btn.style.background = 'var(--text)';
     btn.style.color = 'var(--bg)';
-    lbl.textContent = 'Exit TV';
+    lbl.textContent = DISPLAY_LABELS[mode] || 'TV';
   } else {
     btn.style.background = 'rgba(255,255,255,0.1)';
     btn.style.color = 'var(--text2)';
     lbl.textContent = 'TV';
   }
-  localStorage.setItem('tvMode', active ? '1' : '0');
 }
 
-// Restore TV mode on load
+// Restore display mode on load
 window.addEventListener('load', () => {
-  if (localStorage.getItem('tvMode') === '1') {
-    document.body.classList.add('tv-mode');
-    const btn = document.getElementById('tv-toggle-btn');
-    const lbl = document.getElementById('tv-btn-label');
-    if (btn) { btn.style.background = 'var(--text)'; btn.style.color = 'var(--bg)'; }
-    if (lbl) lbl.textContent = 'Exit TV';
-  }
+  const saved = localStorage.getItem('displayMode') || '';
+  if (saved) setDisplayMode(saved);
 });
 
 // ── INIT ─────────────────────────────────────────────────────────
