@@ -1339,9 +1339,9 @@ function renderPM(){
     const preconVal=jbs.filter(j=>j.section==='Pre-Con').reduce((s,j)=>s+j.revised,0);
     const conVal=jbs.filter(j=>j.section==='Construction/Punch').reduce((s,j)=>s+j.revised,0);
     return`<div class="pm-card"><div class="pm-card-head"><div class="avatar" style="background:${bg};color:${txt};">${initials(pm)}</div><div style="flex:1;min-width:0;"><div class="pm-card-name">${pm}</div><div class="pm-card-meta" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;">
-        <span style="white-space:nowrap;"><span style="color:var(--amber-txt);font-weight:500;">${prc}</span> pre-con <span style="color:var(--text3);">${fmtV(preconVal)}</span></span>
+        <span style="white-space:nowrap;"><span style="color:var(--amber-txt);font-weight:500;">${prc}</span> pre-con <span style="color:var(--text2);font-weight:600;">${fmtV(preconVal)}</span></span>
         <span style="color:var(--text3);">·</span>
-        <span style="white-space:nowrap;"><span style="color:var(--blue-txt);font-weight:500;">${actv}</span> construction <span style="color:var(--text3);">${fmtV(conVal)}</span></span>
+        <span style="white-space:nowrap;"><span style="color:var(--blue-txt);font-weight:500;">${actv}</span> construction <span style="color:var(--text2);font-weight:600;">${fmtV(conVal)}</span></span>
       </div></div></div>${jbs.map(j=>`<div class="pm-job-row" style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid var(--border);">
         <div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;">${j.name}</div>
         <div style="flex-shrink:0;font-size:12px;color:var(--text2);white-space:nowrap;width:54px;text-align:right;">${fmtV(j.revised)}</div>
