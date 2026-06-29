@@ -549,25 +549,13 @@ body.tv-mode .card { padding: 20px 24px; }
     <div class="page-content">
       <!-- KPI row: Pre-Con | Construction/Punch — each with count + value -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
-        <div class="kpi" style="border-left-color:#f5c518;display:flex;align-items:center;justify-content:space-between;">
-          <div>
-            <div class="kpi-n" id="pm-k-pre">—</div>
-            <div class="kpi-l">Pre-Con</div>
-          </div>
-          <div style="text-align:right;">
-            <div class="kpi-n" id="pm-k-pre-val" style="font-size:22px;">—</div>
-            <div class="kpi-l">Revised contract</div>
-          </div>
+        <div class="kpi" style="border-left-color:#f5c518;">
+          <div class="kpi-n" id="pm-k-pre">—</div>
+          <div class="kpi-l">Pre-Con</div>
         </div>
-        <div class="kpi" style="border-left-color:#378ADD;display:flex;align-items:center;justify-content:space-between;">
-          <div>
-            <div class="kpi-n" id="pm-k-con">—</div>
-            <div class="kpi-l">Construction / Punch</div>
-          </div>
-          <div style="text-align:right;">
-            <div class="kpi-n" id="pm-k-con-val" style="font-size:22px;">—</div>
-            <div class="kpi-l">Revised contract</div>
-          </div>
+        <div class="kpi" style="border-left-color:#378ADD;">
+          <div class="kpi-n" id="pm-k-con">—</div>
+          <div class="kpi-l">Construction / Punch</div>
         </div>
       </div>
 
@@ -596,7 +584,6 @@ body.tv-mode .card { padding: 20px 24px; }
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">PM</th>
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Super</th>
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Status</th>
-                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Revised</th>
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Start</th>
               </tr></thead>
               <tbody id="pm-precon-tbody"></tbody>
@@ -617,7 +604,6 @@ body.tv-mode .card { padding: 20px 24px; }
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">PM</th>
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Super</th>
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:left;border-bottom:0.5px solid var(--border);">Status</th>
-                <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Revised</th>
                 <th style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:0 6px 8px;text-align:right;border-bottom:0.5px solid var(--border);">Off-Site</th>
               </tr></thead>
               <tbody id="pm-con-tbody"></tbody>
@@ -1325,9 +1311,7 @@ function renderPM(){
   const preconVal=preconJobs.reduce((s,j)=>s+j.revised,0);
   const conVal=conJobs.reduce((s,j)=>s+j.revised,0);
   document.getElementById('pm-k-pre').textContent=preconJobs.length;
-  document.getElementById('pm-k-pre-val').textContent=preconVal>0?fmtV(preconVal):'—';
   document.getElementById('pm-k-con').textContent=conJobs.length;
-  document.getElementById('pm-k-con-val').textContent=conVal>0?fmtV(conVal):'—';
   document.getElementById('pm-precon-count').textContent=preconJobs.length+' jobs';
   document.getElementById('pm-con-count').textContent=conJobs.length+' jobs';
 
@@ -1338,9 +1322,8 @@ function renderPM(){
     <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.pm}</td>
     <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.super||'TBD'}</td>
     <td style="padding:7px 6px;">${badge(STATUS_BADGE[j.status]||'',j.status)}</td>
-    <td style="font-size:12px;padding:7px 6px;text-align:right;white-space:nowrap;">${fmtV(j.revised)}</td>
     <td style="font-size:11px;padding:7px 6px;text-align:right;color:var(--text2);white-space:nowrap;">${j.start||'TBD'}</td>
-  </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No Pre-Con jobs</td></tr>';
+  </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No Pre-Con jobs</td></tr>';
 
   // Construction: sort by offsite date ascending, TBD at bottom
   const pmToday=new Date('2026-05-20');
@@ -1362,10 +1345,9 @@ function renderPM(){
       <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.pm}</td>
       <td style="font-size:11px;padding:7px 6px;color:var(--text2);white-space:nowrap;">${j.super||'TBD'}</td>
       <td style="padding:7px 6px;">${badge(STATUS_BADGE[j.status]||'',j.status)}</td>
-      <td style="font-size:12px;padding:7px 6px;text-align:right;white-space:nowrap;">${fmtV(j.revised)}</td>
       <td style="font-size:11px;padding:7px 6px;text-align:right;white-space:nowrap;color:${dateColor};font-weight:${isRed||isAmber?'500':'400'};">${j.offsite||'TBD'}${daysTag}</td>
     </tr>`;
-  }).join(''):'<tr><td colspan="7" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No active jobs</td></tr>';
+  }).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;font-size:12px;color:var(--text3);">No active jobs</td></tr>';
 
   // Cards view — grouped by PM, showing active jobs only
   const byPM={};
@@ -1379,12 +1361,11 @@ function renderPM(){
     const preconVal=jbs.filter(j=>j.section==='Pre-Con').reduce((s,j)=>s+j.revised,0);
     const conVal=jbs.filter(j=>j.section==='Construction/Punch').reduce((s,j)=>s+j.revised,0);
     return`<div class="pm-card"><div class="pm-card-head"><div class="avatar" style="background:${bg};color:${txt};">${initials(pm)}</div><div style="flex:1;min-width:0;"><div class="pm-card-name">${pm}</div><div class="pm-card-meta" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;">
-        <span style="white-space:nowrap;"><span style="color:var(--amber-txt);font-weight:500;">${prc}</span> pre-con <span style="color:var(--text2);font-weight:600;">${fmtV(preconVal)}</span></span>
+        <span style="white-space:nowrap;"><span style="color:var(--amber-txt);font-weight:500;">${prc}</span> pre-con</span>
         <span style="color:var(--text3);">·</span>
-        <span style="white-space:nowrap;"><span style="color:var(--blue-txt);font-weight:500;">${actv}</span> construction <span style="color:var(--text2);font-weight:600;">${fmtV(conVal)}</span></span>
+        <span style="white-space:nowrap;"><span style="color:var(--blue-txt);font-weight:500;">${actv}</span> construction</span>
       </div></div></div>${jbs.map(j=>`<div class="pm-job-row" style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid var(--border);">
         <div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;">${j.name}</div>
-        <div style="flex-shrink:0;font-size:12px;color:var(--text2);white-space:nowrap;width:54px;text-align:right;">${fmtV(j.revised)}</div>
         <div style="flex-shrink:0;width:80px;text-align:right;">${badge(STATUS_BADGE[j.status]||'',j.status)}</div>
       </div>`).join('')}</div>`;
   }).join('');
