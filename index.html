@@ -568,22 +568,25 @@ body.tv-mode .card { padding: 20px 24px; }
       </div>
 
       <div class="card">
-        <div class="card-title" style="font-size:14px;">WIP Value Share by PM</div>
-        <div style="display:flex;gap:32px;align-items:flex-start;">
-          <div style="flex:0 0 220px;">
-            <div class="chart-wrap" style="height:220px;"><canvas id="m-pie-wip-pm" role="img" aria-label="Share of total WIP value by PM"></canvas></div>
+        <div class="card-title" style="font-size:14px;">WIP &amp; Bid Pipeline Value Share by PM</div>
+        <div style="display:flex;gap:24px;align-items:center;">
+          <div style="flex:0 0 240px;">
+            <p style="font-size:12px;color:var(--text2);margin:0 0 8px;text-align:center;">WIP value</p>
+            <div class="chart-wrap" style="height:240px;"><canvas id="m-pie-wip-pm" role="img" aria-label="Share of total WIP value by PM"></canvas></div>
           </div>
-          <div id="m-pie-wip-pm-legend" style="flex:1;columns:4;column-gap:20px;font-size:17px;"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title" style="font-size:14px;">Bid Pipeline Value Share by PM</div>
-        <div style="display:flex;gap:32px;align-items:flex-start;">
-          <div style="flex:0 0 220px;">
-            <div class="chart-wrap" style="height:220px;"><canvas id="m-pie-pipe-pm" role="img" aria-label="Share of total pipeline value by PM"></canvas></div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;padding:0 0 8px;border-bottom:1px solid var(--border2);font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:0.04em;">
+              <span style="width:10px;flex-shrink:0;"></span>
+              <span style="flex:1;min-width:0;">PM</span>
+              <span style="width:150px;text-align:right;">WIP value</span>
+              <span style="width:150px;text-align:right;">Pipeline value</span>
+            </div>
+            <div id="m-pie-pm-legend"></div>
           </div>
-          <div id="m-pie-pipe-pm-legend" style="flex:1;columns:4;column-gap:20px;font-size:17px;"></div>
+          <div style="flex:0 0 240px;">
+            <p style="font-size:12px;color:var(--text2);margin:0 0 8px;text-align:center;">Pipeline value</p>
+            <div class="chart-wrap" style="height:240px;"><canvas id="m-pie-pipe-pm" role="img" aria-label="Share of total pipeline value by PM"></canvas></div>
+          </div>
         </div>
       </div>
 
@@ -1260,42 +1263,37 @@ function renderMain(){
     });
   }
 
-  // Two pies — WIP value share by PM, Pipeline value share by PM (all PMs, no folding)
+  // Two pies — WIP and Pipeline value share by PM, one fixed color per PM, one shared list
   ['_mainPieWipPM','_mainPiePipePM'].forEach(k=>{
     if(window[k]){try{window[k].destroy();}catch(e){}window[k]=null;}
   });
   if(typeof Chart!=='undefined'){
     const pmPalette=['#7F77DD','#1D9E75','#D85A30','#D4537E','#888780','#378ADD','#639922','#BA7517','#E24B4A',
                       '#AFA9EC','#5DCAA5','#F0997B','#ED93B1','#B4B2A9','#85B7EB','#97C459','#EF9F27','#F09595'];
+    const pmColor=r=>pmPalette[rows.indexOf(r)%pmPalette.length];
 
-    const wipRows=[...rows].sort((a,b)=>b.wipV-a.wipV);
-    const wipTotal=wipRows.reduce((s,r)=>s+r.wipV,0);
+    const wipTotal=rows.reduce((s,r)=>s+r.wipV,0);
+    const pipeTotal=rows.reduce((s,r)=>s+r.pipeV,0);
+
     window._mainPieWipPM=new Chart(document.getElementById('m-pie-wip-pm'),{
       type:'pie',
-      data:{labels:wipRows.map(r=>r.pm),datasets:[{data:wipRows.map(r=>r.wipV),backgroundColor:pmPalette,borderWidth:0}]},
+      data:{labels:rows.map(r=>r.pm),datasets:[{data:rows.map(r=>r.wipV),backgroundColor:rows.map(pmColor),borderWidth:0}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
         tooltip:{callbacks:{label:c=>`${c.label}: ${fmtV(c.raw)} (${Math.round(c.raw/wipTotal*100)}%)`}}}}
     });
-    document.getElementById('m-pie-wip-pm-legend').innerHTML=wipRows.map((r,i)=>
-      `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;break-inside:avoid;">
-        <span style="width:9px;height:9px;border-radius:2px;background:${pmPalette[i%pmPalette.length]};flex-shrink:0;display:inline-block;"></span>
-        <span style="color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.pm}</span>
-        <span style="color:var(--text2);margin-left:auto;white-space:nowrap;padding-left:8px;">${r.wipV?fmtV(r.wipV):'$0'} · ${Math.round(r.wipV/wipTotal*100)}%</span>
-      </div>`).join('');
-
-    const pipeRows=[...rows].sort((a,b)=>b.pipeV-a.pipeV);
-    const pipeTotal=pipeRows.reduce((s,r)=>s+r.pipeV,0);
     window._mainPiePipePM=new Chart(document.getElementById('m-pie-pipe-pm'),{
       type:'pie',
-      data:{labels:pipeRows.map(r=>r.pm),datasets:[{data:pipeRows.map(r=>r.pipeV),backgroundColor:pmPalette,borderWidth:0}]},
+      data:{labels:rows.map(r=>r.pm),datasets:[{data:rows.map(r=>r.pipeV),backgroundColor:rows.map(pmColor),borderWidth:0}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
         tooltip:{callbacks:{label:c=>`${c.label}: ${fmtV(c.raw)} (${Math.round(c.raw/pipeTotal*100)}%)`}}}}
     });
-    document.getElementById('m-pie-pipe-pm-legend').innerHTML=pipeRows.map((r,i)=>
-      `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;break-inside:avoid;">
-        <span style="width:9px;height:9px;border-radius:2px;background:${pmPalette[i%pmPalette.length]};flex-shrink:0;display:inline-block;"></span>
-        <span style="color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.pm}</span>
-        <span style="color:var(--text2);margin-left:auto;white-space:nowrap;padding-left:8px;">${r.pipeV?fmtV(r.pipeV):'$0'} · ${Math.round(r.pipeV/pipeTotal*100)}%</span>
+
+    document.getElementById('m-pie-pm-legend').innerHTML=rows.map(r=>
+      `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border);">
+        <span style="width:10px;height:10px;border-radius:2px;background:${pmColor(r)};flex-shrink:0;display:inline-block;"></span>
+        <span style="color:var(--text);font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;">${r.pm}</span>
+        <span style="color:var(--text2);font-size:15px;white-space:nowrap;width:150px;text-align:right;">${r.wipV?fmtV(r.wipV):'$0'} · ${Math.round(r.wipV/wipTotal*100)}%</span>
+        <span style="color:var(--text2);font-size:15px;white-space:nowrap;width:150px;text-align:right;">${r.pipeV?fmtV(r.pipeV):'$0'} · ${Math.round(r.pipeV/pipeTotal*100)}%</span>
       </div>`).join('');
   }
 }
