@@ -568,49 +568,45 @@ body.tv-mode .card { padding: 20px 24px; }
       </div>
 
       <div class="card">
-        <div class="card-title" style="font-size:14px;">WIP &amp; Bid Pipeline Composition</div>
-        <div style="display:flex;gap:20px;">
-          <div style="flex:1;min-width:0;">
-            <p style="font-size:12px;color:var(--text2);margin:0 0 8px;text-align:center;">WIP by count</p>
-            <div class="chart-wrap" style="height:170px;"><canvas id="m-pie-wip-n" role="img" aria-label="WIP projects by status, count"></canvas></div>
+        <div class="card-title" style="font-size:14px;">WIP &amp; Bid Pipeline Value Share by PM</div>
+        <div style="display:flex;gap:32px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:320px;">
+            <p style="font-size:12px;color:var(--text2);margin:0 0 8px;text-align:center;">WIP value by PM</p>
+            <div class="chart-wrap" style="height:220px;"><canvas id="m-pie-wip-pm" role="img" aria-label="Share of total WIP value by PM"></canvas></div>
+            <div id="m-pie-wip-pm-legend" style="columns:2;column-gap:16px;margin-top:14px;font-size:12px;"></div>
           </div>
-          <div style="flex:1;min-width:0;">
-            <p style="font-size:12px;color:var(--text2);margin:0 0 8px;text-align:center;">WIP by value</p>
-            <div class="chart-wrap" style="height:170px;"><canvas id="m-pie-wip-v" role="img" aria-label="WIP value by status"></canvas></div>
+          <div style="flex:1;min-width:320px;">
+            <p style="font-size:12px;color:var(--text2);margin:0 0 8px;text-align:center;">Pipeline value by PM</p>
+            <div class="chart-wrap" style="height:220px;"><canvas id="m-pie-pipe-pm" role="img" aria-label="Share of total pipeline value by PM"></canvas></div>
+            <div id="m-pie-pipe-pm-legend" style="columns:2;column-gap:16px;margin-top:14px;font-size:12px;"></div>
           </div>
-          <div style="flex:1;min-width:0;">
-            <p style="font-size:12px;color:var(--text2);margin:0 0 8px;text-align:center;">Bids by count</p>
-            <div class="chart-wrap" style="height:170px;"><canvas id="m-pie-bid-n" role="img" aria-label="Bids by status, count"></canvas></div>
-          </div>
-          <div style="flex:1;min-width:0;">
-            <p style="font-size:12px;color:var(--text2);margin:0 0 8px;text-align:center;">Bids by value</p>
-            <div class="chart-wrap" style="height:170px;"><canvas id="m-pie-bid-v" role="img" aria-label="Bids value by status"></canvas></div>
-          </div>
-        </div>
-        <div style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;justify-content:center;">
-          <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#b5d4f4;display:inline-block;"></span>Pre-Con</span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#378ADD;display:inline-block;"></span>Construction</span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#0C447C;display:inline-block;"></span>Punch List</span>
-          <span style="width:1px;background:var(--border);"></span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#fac775;display:inline-block;"></span>Upcoming</span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#eb6834;display:inline-block;"></span>Bidding</span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#993C1D;display:inline-block;"></span>Pending</span>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title" style="font-size:14px;">Work In Progress + Bid Pipeline by PM</div>
-        <div class="tbl-wrap"><table id="main-tbl" style="font-size:19px;table-layout:fixed;width:100%;">
-          <colgroup>
-            <col style="width:26%;"><col style="width:16%;"><col style="width:20%;"><col style="width:16%;"><col style="width:22%;">
-          </colgroup>
+        <div class="card-title" style="font-size:14px;">Work In Progress + Bid Pipeline by PM — Full Detail</div>
+        <div class="tbl-wrap"><table id="main-tbl" style="font-size:17px;white-space:nowrap;">
           <thead>
+            <tr style="border-bottom:0.5px solid var(--border);">
+              <th rowspan="2" style="text-align:left;vertical-align:bottom;padding:10px 12px 8px;">PM</th>
+              <th colspan="2" style="text-align:center;padding:10px 8px;font-size:13px;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#b5d4f4;display:inline-block;"></span>Pre-Con</span></th>
+              <th colspan="2" style="text-align:center;padding:10px 8px;font-size:13px;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#378ADD;display:inline-block;"></span>Construction</span></th>
+              <th colspan="2" style="text-align:center;padding:10px 8px;font-size:13px;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#0C447C;display:inline-block;"></span>Punch List</span></th>
+              <th colspan="2" style="text-align:center;padding:10px 8px;font-size:13px;background:var(--surface2);border-left:2px solid var(--border2);">Total WIP</th>
+              <th colspan="2" style="text-align:center;padding:10px 8px;font-size:13px;border-left:2px solid var(--border2);"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#fac775;display:inline-block;"></span>Upcoming</span></th>
+              <th colspan="2" style="text-align:center;padding:10px 8px;font-size:13px;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#eb6834;display:inline-block;"></span>Bidding</span></th>
+              <th colspan="2" style="text-align:center;padding:10px 8px;font-size:13px;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#993C1D;display:inline-block;"></span>Pending</span></th>
+              <th colspan="2" style="text-align:center;padding:10px 8px;font-size:13px;background:var(--surface2);border-left:2px solid var(--border2);">Total Pipeline</th>
+            </tr>
             <tr style="border-bottom:2px solid var(--border2);">
-              <th style="text-align:left;padding:12px 10px;font-size:14px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">PM</th>
-              <th style="text-align:right;padding:12px 10px;font-size:14px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">WIP jobs</th>
-              <th style="text-align:right;padding:12px 10px;font-size:14px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">WIP value</th>
-              <th style="text-align:right;padding:12px 10px;font-size:14px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">Pipeline jobs</th>
-              <th style="text-align:right;padding:12px 10px;font-size:14px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">Pipeline value</th>
+              <th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);border-left:2px solid var(--border2);">#</th><th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);">$</th>
+              <th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);">#</th><th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);">$</th>
+              <th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);">#</th><th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);">$</th>
+              <th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);background:var(--surface2);border-left:2px solid var(--border2);">#</th><th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);background:var(--surface2);">$</th>
+              <th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);border-left:2px solid var(--border2);">#</th><th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);">$</th>
+              <th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);">#</th><th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);">$</th>
+              <th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);">#</th><th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);">$</th>
+              <th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);background:var(--surface2);border-left:2px solid var(--border2);">#</th><th style="text-align:right;padding:6px 8px 10px;font-size:12px;color:var(--text2);background:var(--surface2);">$</th>
             </tr>
           </thead>
           <tbody id="main-tbody"></tbody>
@@ -1123,7 +1119,7 @@ async function loadLiveData() {
     setStatus('Live · ' + JOBS.length + ' jobs · ' + BIDS.length + ' bids · Updated ' + now, false);
 
     // Destroy and reset all charts for fresh re-render with live data
-    ['_execDonutChart','_execPipeChart','_rfpPmChart','_rfpYearChart','_mainChart','_mainPieWipN','_mainPieWipV','_mainPieBidN','_mainPieBidV'].forEach(k=>{
+    ['_execDonutChart','_execPipeChart','_rfpPmChart','_rfpYearChart','_mainChart','_mainPieWipPM','_mainPiePipePM'].forEach(k=>{
       if(window[k]){try{window[k].destroy();}catch(e){}window[k]=null;}
     });
     window._execChartsInit = false;
@@ -1216,18 +1212,18 @@ function renderMain(){
     return{pm,preN,preV,conN,conV,punN,punV,wipN,wipV,upN,upV,bidN,bidV,penN,penV,pipeN,pipeV};
   }).filter(r=>r.wipN+r.pipeN>0).sort((a,b)=>(b.wipV+b.pipeV)-(a.wipV+a.pipeV));
 
-  const cell=(n,v)=>`<td style="text-align:right;padding:14px 10px;">${n||'—'}</td><td style="text-align:right;padding:14px 10px;font-weight:500;">${v?fmtV(v):'—'}</td>`;
+  const cell=(n,v,isTotal)=>`<td style="text-align:right;padding:12px 8px;${isTotal?'background:var(--surface2);border-left:2px solid var(--border2);':''}">${n||'—'}</td><td style="text-align:right;padding:12px 8px;font-weight:500;${isTotal?'background:var(--surface2);':''}">${v?fmtV(v):'—'}</td>`;
 
   document.getElementById('main-tbody').innerHTML=rows.map((r,i)=>`<tr style="border-bottom:0.5px solid var(--border);${i%2===1?'background:var(--surface2);':''}">
-    <td style="font-weight:500;padding:14px 10px;">${r.pm}</td>
-    ${cell(r.wipN,r.wipV)}
-    ${cell(r.pipeN,r.pipeV)}
+    <td style="font-weight:600;font-size:22px;padding:12px 12px;">${r.pm}</td>
+    ${cell(r.preN,r.preV)}${cell(r.conN,r.conV)}${cell(r.punN,r.punV)}${cell(r.wipN,r.wipV,true)}
+    ${cell(r.upN,r.upV)}${cell(r.bidN,r.bidV)}${cell(r.penN,r.penV)}${cell(r.pipeN,r.pipeV,true)}
   </tr>`).join('');
   const tot=k=>rows.reduce((s,r)=>s+r[k],0);
   document.getElementById('main-tfoot').innerHTML=`<tr style="border-top:2px solid var(--border2);font-weight:600;">
-    <td style="padding:14px 10px;">Total</td>
-    ${cell(tot('wipN'),tot('wipV'))}
-    ${cell(tot('pipeN'),tot('pipeV'))}
+    <td style="font-size:22px;padding:12px 12px;">Total</td>
+    ${cell(tot('preN'),tot('preV'))}${cell(tot('conN'),tot('conV'))}${cell(tot('punN'),tot('punV'))}${cell(tot('wipN'),tot('wipV'),true)}
+    ${cell(tot('upN'),tot('upV'))}${cell(tot('bidN'),tot('bidV'))}${cell(tot('penN'),tot('penV'))}${cell(tot('pipeN'),tot('pipeV'),true)}
   </tr>`;
 
   // KPI cards
@@ -1253,28 +1249,49 @@ function renderMain(){
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.raw} ${c.raw===1?'project':'projects'}`}}},
         scales:{
-          x:{grid:{display:false},ticks:{font:{size:11},autoSkip:false,maxRotation:60,minRotation:45}},
-          y:{grid:{color:'rgba(128,128,128,0.08)'},ticks:{stepSize:1,precision:0}}
+          x:{grid:{display:false},ticks:{font:{size:14,weight:'600'},color:'#F0EFEC',autoSkip:false,maxRotation:60,minRotation:45}},
+          y:{grid:{color:'rgba(128,128,128,0.08)'},ticks:{stepSize:1,precision:0,color:'#C3C2B7'}}
         }}
     });
   }
 
-  // Four pies — WIP/Bids by count and by value, company-wide totals
-  ['_mainPieWipN','_mainPieWipV','_mainPieBidN','_mainPieBidV'].forEach(k=>{
+  // Two pies — WIP value share by PM, Pipeline value share by PM (all PMs, no folding)
+  ['_mainPieWipPM','_mainPiePipePM'].forEach(k=>{
     if(window[k]){try{window[k].destroy();}catch(e){}window[k]=null;}
   });
   if(typeof Chart!=='undefined'){
-    const mkPie=(id,data,colors)=>new Chart(document.getElementById(id),{
+    const pmPalette=['#7F77DD','#1D9E75','#D85A30','#D4537E','#888780','#378ADD','#639922','#BA7517','#E24B4A',
+                      '#AFA9EC','#5DCAA5','#F0997B','#ED93B1','#B4B2A9','#85B7EB','#97C459','#EF9F27','#F09595'];
+
+    const wipRows=rows.filter(r=>r.wipV>0).sort((a,b)=>b.wipV-a.wipV);
+    const wipTotal=wipRows.reduce((s,r)=>s+r.wipV,0);
+    window._mainPieWipPM=new Chart(document.getElementById('m-pie-wip-pm'),{
       type:'pie',
-      data:{datasets:[{data,backgroundColor:colors,borderWidth:0}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+      data:{labels:wipRows.map(r=>r.pm),datasets:[{data:wipRows.map(r=>r.wipV),backgroundColor:pmPalette,borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>`${c.label}: ${fmtV(c.raw)} (${Math.round(c.raw/wipTotal*100)}%)`}}}}
     });
-    const wipColors=['#b5d4f4','#378ADD','#0C447C'];
-    const bidColors=['#fac775','#eb6834','#993C1D'];
-    window._mainPieWipN=mkPie('m-pie-wip-n',[tot('preN'),tot('conN'),tot('punN')],wipColors);
-    window._mainPieWipV=mkPie('m-pie-wip-v',[tot('preV'),tot('conV'),tot('punV')],wipColors);
-    window._mainPieBidN=mkPie('m-pie-bid-n',[tot('upN'),tot('bidN'),tot('penN')],bidColors);
-    window._mainPieBidV=mkPie('m-pie-bid-v',[tot('upV'),tot('bidV'),tot('penV')],bidColors);
+    document.getElementById('m-pie-wip-pm-legend').innerHTML=wipRows.map((r,i)=>
+      `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;break-inside:avoid;">
+        <span style="width:9px;height:9px;border-radius:2px;background:${pmPalette[i%pmPalette.length]};flex-shrink:0;display:inline-block;"></span>
+        <span style="color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.pm}</span>
+        <span style="color:var(--text2);margin-left:auto;white-space:nowrap;padding-left:8px;">${fmtV(r.wipV)} · ${Math.round(r.wipV/wipTotal*100)}%</span>
+      </div>`).join('');
+
+    const pipeRows=rows.filter(r=>r.pipeV>0).sort((a,b)=>b.pipeV-a.pipeV);
+    const pipeTotal=pipeRows.reduce((s,r)=>s+r.pipeV,0);
+    window._mainPiePipePM=new Chart(document.getElementById('m-pie-pipe-pm'),{
+      type:'pie',
+      data:{labels:pipeRows.map(r=>r.pm),datasets:[{data:pipeRows.map(r=>r.pipeV),backgroundColor:pmPalette,borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>`${c.label}: ${fmtV(c.raw)} (${Math.round(c.raw/pipeTotal*100)}%)`}}}}
+    });
+    document.getElementById('m-pie-pipe-pm-legend').innerHTML=pipeRows.map((r,i)=>
+      `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;break-inside:avoid;">
+        <span style="width:9px;height:9px;border-radius:2px;background:${pmPalette[i%pmPalette.length]};flex-shrink:0;display:inline-block;"></span>
+        <span style="color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.pm}</span>
+        <span style="color:var(--text2);margin-left:auto;white-space:nowrap;padding-left:8px;">${fmtV(r.pipeV)} · ${Math.round(r.pipeV/pipeTotal*100)}%</span>
+      </div>`).join('');
   }
 }
 
