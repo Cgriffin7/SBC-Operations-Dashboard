@@ -1245,6 +1245,32 @@ function renderMain(){
   if(typeof Chart!=='undefined'){
     const chartRows=[...rows].sort((a,b)=>a.pm.localeCompare(b.pm));
     const labels=chartRows.map(r=>shortName(r.pm));
+    const groupDividers={
+      id:'groupDividers',
+      beforeDatasetsDraw(chart){
+        const {ctx,chartArea:{top,bottom},scales:{x}}=chart;
+        const n=chart.data.labels.length;
+        if(!n)return;
+        const bandW=(x.right-x.left)/n;
+        ctx.save();
+        for(let i=0;i<n;i++){
+          const left=x.left+i*bandW;
+          if(i%2===1){
+            ctx.fillStyle='rgba(255,255,255,0.07)';
+            ctx.fillRect(left,top,bandW,bottom-top);
+          }
+          if(i>0){
+            ctx.strokeStyle='rgba(255,255,255,0.22)';
+            ctx.lineWidth=1.5;
+            ctx.beginPath();
+            ctx.moveTo(left,top);
+            ctx.lineTo(left,bottom);
+            ctx.stroke();
+          }
+        }
+        ctx.restore();
+      }
+    };
     window._mainChart=new Chart(document.getElementById('m-chart'),{
       type:'bar',
       data:{labels,datasets:[
@@ -1255,6 +1281,7 @@ function renderMain(){
         {label:'Bidding',data:chartRows.map(r=>r.bidN),backgroundColor:'#eb6834'},
         {label:'Pending',data:chartRows.map(r=>r.penN),backgroundColor:'#993C1D'}
       ]},
+      plugins:[groupDividers],
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.raw} ${c.raw===1?'project':'projects'}`}}},
         scales:{
