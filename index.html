@@ -560,23 +560,24 @@ body.tv-mode .card { padding: 20px 24px; }
           <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#378ADD;display:inline-block;"></span>Construction</span>
           <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#0C447C;display:inline-block;"></span>Punch List</span>
           <span style="width:1px;background:var(--border);"></span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#fac775;display:inline-block;"></span>Upcoming</span>
           <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#eb6834;display:inline-block;"></span>Bidding</span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#993C1D;display:inline-block;"></span>Pending</span>
         </div>
         <div class="chart-wrap" id="m-chart-wrap" style="height:420px;"><canvas id="m-chart" role="img" aria-label="WIP and pipeline value by status, six bars per PM"></canvas></div>
       </div>
 
       <div class="card">
         <div class="card-title" style="font-size:14px;">Work In Progress + Bid Pipeline by PM</div>
-        <div class="tbl-wrap"><table id="main-tbl" style="font-size:16px;">
+        <div class="tbl-wrap"><table id="main-tbl" style="font-size:19px;table-layout:fixed;width:100%;">
+          <colgroup>
+            <col style="width:26%;"><col style="width:16%;"><col style="width:20%;"><col style="width:16%;"><col style="width:22%;">
+          </colgroup>
           <thead>
             <tr style="border-bottom:2px solid var(--border2);">
-              <th style="text-align:left;padding:10px 8px;font-size:13px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">PM</th>
-              <th style="text-align:right;padding:10px 8px;font-size:13px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">WIP jobs</th>
-              <th style="text-align:right;padding:10px 8px;font-size:13px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">WIP value</th>
-              <th style="text-align:right;padding:10px 8px;font-size:13px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">Pipeline jobs</th>
-              <th style="text-align:right;padding:10px 8px;font-size:13px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">Pipeline value</th>
+              <th style="text-align:left;padding:12px 10px;font-size:14px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">PM</th>
+              <th style="text-align:right;padding:12px 10px;font-size:14px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">WIP jobs</th>
+              <th style="text-align:right;padding:12px 10px;font-size:14px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">WIP value</th>
+              <th style="text-align:right;padding:12px 10px;font-size:14px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">Pipeline jobs</th>
+              <th style="text-align:right;padding:12px 10px;font-size:14px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">Pipeline value</th>
             </tr>
           </thead>
           <tbody id="main-tbody"></tbody>
@@ -1182,16 +1183,16 @@ function renderMain(){
     return{pm,preN,preV,conN,conV,punN,punV,wipN,wipV,upN,upV,bidN,bidV,penN,penV,pipeN,pipeV};
   }).filter(r=>r.wipN+r.pipeN>0).sort((a,b)=>(b.wipV+b.pipeV)-(a.wipV+a.pipeV));
 
-  const cell=(n,v)=>`<td style="text-align:right;padding:10px 8px;">${n||'—'}</td><td style="text-align:right;padding:10px 8px;font-weight:500;">${v?fmtV(v):'—'}</td>`;
+  const cell=(n,v)=>`<td style="text-align:right;padding:14px 10px;">${n||'—'}</td><td style="text-align:right;padding:14px 10px;font-weight:500;">${v?fmtV(v):'—'}</td>`;
 
   document.getElementById('main-tbody').innerHTML=rows.map((r,i)=>`<tr style="border-bottom:0.5px solid var(--border);${i%2===1?'background:var(--surface2);':''}">
-    <td style="font-weight:500;padding:10px 8px;">${r.pm}</td>
+    <td style="font-weight:500;padding:14px 10px;">${r.pm}</td>
     ${cell(r.wipN,r.wipV)}
     ${cell(r.pipeN,r.pipeV)}
   </tr>`).join('');
   const tot=k=>rows.reduce((s,r)=>s+r[k],0);
   document.getElementById('main-tfoot').innerHTML=`<tr style="border-top:2px solid var(--border2);font-weight:600;">
-    <td style="padding:10px 8px;">Total</td>
+    <td style="padding:14px 10px;">Total</td>
     ${cell(tot('wipN'),tot('wipV'))}
     ${cell(tot('pipeN'),tot('pipeV'))}
   </tr>`;
@@ -1212,9 +1213,7 @@ function renderMain(){
         {label:'Pre-Con',data:rows.map(r=>r.preV),backgroundColor:'#b5d4f4'},
         {label:'Construction',data:rows.map(r=>r.conV),backgroundColor:'#378ADD'},
         {label:'Punch List',data:rows.map(r=>r.punV),backgroundColor:'#0C447C'},
-        {label:'Upcoming',data:rows.map(r=>r.upV),backgroundColor:'#fac775'},
-        {label:'Bidding',data:rows.map(r=>r.bidV),backgroundColor:'#eb6834'},
-        {label:'Pending',data:rows.map(r=>r.penV),backgroundColor:'#993C1D'}
+        {label:'Bidding',data:rows.map(r=>r.bidV),backgroundColor:'#eb6834'}
       ]},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmtV(c.raw)}`}}},
