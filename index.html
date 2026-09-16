@@ -554,68 +554,33 @@ body.tv-mode .card { padding: 20px 24px; }
       </div>
 
       <div class="card">
-        <div class="card-title">Work In Progress by PM</div>
-        <div class="chart-wrap" id="m-wip-chart-wrap" style="height:340px;"><canvas id="m-wip-chart" role="img" aria-label="WIP value by PM, by status"></canvas></div>
-        <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;">
-          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#f5c518;display:inline-block;"></span>Pre-Con</span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#378ADD;display:inline-block;"></span>Construction</span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#1D9E75;display:inline-block;"></span>Punch List</span>
+        <div class="card-title" style="font-size:14px;">Workload by PM — WIP &amp; Bid Pipeline</div>
+        <div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap;">
+          <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#b5d4f4;display:inline-block;"></span>Pre-Con</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#378ADD;display:inline-block;"></span>Construction</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#0C447C;display:inline-block;"></span>Punch List</span>
+          <span style="width:1px;background:var(--border);"></span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#fac775;display:inline-block;"></span>Upcoming</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#eb6834;display:inline-block;"></span>Bidding</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#993C1D;display:inline-block;"></span>Pending</span>
         </div>
+        <div class="chart-wrap" id="m-chart-wrap" style="height:420px;"><canvas id="m-chart" role="img" aria-label="WIP and pipeline value by status, six bars per PM"></canvas></div>
       </div>
 
       <div class="card">
-        <div class="card-title">Bid Pipeline by PM</div>
-        <div class="chart-wrap" id="m-pipe-chart-wrap" style="height:340px;"><canvas id="m-pipe-chart" role="img" aria-label="Bid pipeline value by PM, by status"></canvas></div>
-        <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;">
-          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#EF9F27;display:inline-block;"></span>Upcoming</span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#378ADD;display:inline-block;"></span>Bidding</span>
-          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:#1D9E75;display:inline-block;"></span>Pending</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Work In Progress by PM</div>
-        <div class="tbl-wrap"><table>
+        <div class="card-title" style="font-size:14px;">Work In Progress + Bid Pipeline by PM</div>
+        <div class="tbl-wrap"><table id="main-tbl" style="font-size:16px;">
           <thead>
-            <tr style="border-bottom:0.5px solid var(--border);">
-              <th rowspan="2" style="vertical-align:bottom;">PM</th>
-              <th colspan="2" style="text-align:center;border-left:0.5px solid var(--border);"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#f5c518;display:inline-block;"></span>Pre-Con</span></th>
-              <th colspan="2" style="text-align:center;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#378ADD;display:inline-block;"></span>Construction</span></th>
-              <th colspan="2" style="text-align:center;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#1D9E75;display:inline-block;"></span>Punch List</span></th>
-              <th colspan="2" style="text-align:center;background:var(--surface2);">Total WIP</th>
-            </tr>
-            <tr>
-              <th style="border-left:0.5px solid var(--border);">#</th><th>$</th>
-              <th>#</th><th>$</th>
-              <th>#</th><th>$</th>
-              <th style="background:var(--surface2);">#</th><th style="background:var(--surface2);">$</th>
+            <tr style="border-bottom:2px solid var(--border2);">
+              <th style="text-align:left;padding:10px 8px;font-size:13px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">PM</th>
+              <th style="text-align:right;padding:10px 8px;font-size:13px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">WIP jobs</th>
+              <th style="text-align:right;padding:10px 8px;font-size:13px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">WIP value</th>
+              <th style="text-align:right;padding:10px 8px;font-size:13px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">Pipeline jobs</th>
+              <th style="text-align:right;padding:10px 8px;font-size:13px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text2);">Pipeline value</th>
             </tr>
           </thead>
-          <tbody id="main-wip-tbody"></tbody>
-          <tfoot id="main-wip-tfoot"></tfoot>
-        </table></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Bid Pipeline by PM</div>
-        <div class="tbl-wrap"><table>
-          <thead>
-            <tr style="border-bottom:0.5px solid var(--border);">
-              <th rowspan="2" style="vertical-align:bottom;">PM</th>
-              <th colspan="2" style="text-align:center;border-left:0.5px solid var(--border);"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#EF9F27;display:inline-block;"></span>Upcoming</span></th>
-              <th colspan="2" style="text-align:center;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#378ADD;display:inline-block;"></span>Bidding</span></th>
-              <th colspan="2" style="text-align:center;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#1D9E75;display:inline-block;"></span>Pending</span></th>
-              <th colspan="2" style="text-align:center;background:var(--surface2);">Total Pipeline</th>
-            </tr>
-            <tr>
-              <th style="border-left:0.5px solid var(--border);">#</th><th>$</th>
-              <th>#</th><th>$</th>
-              <th>#</th><th>$</th>
-              <th style="background:var(--surface2);">#</th><th style="background:var(--surface2);">$</th>
-            </tr>
-          </thead>
-          <tbody id="main-pipe-tbody"></tbody>
-          <tfoot id="main-pipe-tfoot"></tfoot>
+          <tbody id="main-tbody"></tbody>
+          <tfoot id="main-tfoot"></tfoot>
         </table></div>
       </div>
     </div>
@@ -1124,7 +1089,7 @@ async function loadLiveData() {
     setStatus('Live · ' + JOBS.length + ' jobs · ' + BIDS.length + ' bids · Updated ' + now, false);
 
     // Destroy and reset all charts for fresh re-render with live data
-    ['_execDonutChart','_execPipeChart','_rfpPmChart','_rfpYearChart','_mainWipChart','_mainPipeChart'].forEach(k=>{
+    ['_execDonutChart','_execPipeChart','_rfpPmChart','_rfpYearChart','_mainChart'].forEach(k=>{
       if(window[k]){try{window[k].destroy();}catch(e){}window[k]=null;}
     });
     window._execChartsInit = false;
@@ -1194,6 +1159,7 @@ function showView(id){
 // ── MAIN DASHBOARD (PM Workload) ────────────────────────────────
 function renderMain(){
   const pms=[...new Set([...JOBS.map(j=>j.pm), ...BIDS.map(b=>b.pm)])].filter(p=>p&&p!=='TBD').sort();
+  const shortName=n=>{const p=n.trim().split(' ');return p.length>1?p[0][0]+'. '+p[p.length-1]:n;};
   const rows=pms.map(pm=>{
     const jobs=JOBS.filter(j=>j.pm===pm);
     const preN=jobs.filter(j=>j.status==='Pre-Con').length;
@@ -1214,72 +1180,48 @@ function renderMain(){
     const pipeN=upN+bidN+penN, pipeV=upV+bidV+penV;
 
     return{pm,preN,preV,conN,conV,punN,punV,wipN,wipV,upN,upV,bidN,bidV,penN,penV,pipeN,pipeV};
-  }).filter(r=>r.wipN+r.pipeN>0);
+  }).filter(r=>r.wipN+r.pipeN>0).sort((a,b)=>(b.wipV+b.pipeV)-(a.wipV+a.pipeV));
 
-  const cell=(n,v,bg)=>`<td style="text-align:right;${bg?'background:var(--surface2);':''}">${n||'—'}</td><td style="text-align:right;${bg?'background:var(--surface2);':''}">${v?fmtV(v):'—'}</td>`;
+  const cell=(n,v)=>`<td style="text-align:right;padding:10px 8px;">${n||'—'}</td><td style="text-align:right;padding:10px 8px;font-weight:500;">${v?fmtV(v):'—'}</td>`;
 
-  // WIP table — only PMs with active WIP jobs
-  const wipRows=rows.filter(r=>r.wipN>0).sort((a,b)=>b.wipV-a.wipV);
-  document.getElementById('main-wip-tbody').innerHTML=wipRows.map(r=>`<tr style="border-bottom:0.5px solid var(--border);">
-    <td style="font-size:12px;font-weight:500;white-space:nowrap;">${r.pm}</td>
-    ${cell(r.preN,r.preV)}${cell(r.conN,r.conV)}${cell(r.punN,r.punV)}${cell(r.wipN,r.wipV,true)}
+  document.getElementById('main-tbody').innerHTML=rows.map((r,i)=>`<tr style="border-bottom:0.5px solid var(--border);${i%2===1?'background:var(--surface2);':''}">
+    <td style="font-weight:500;padding:10px 8px;">${r.pm}</td>
+    ${cell(r.wipN,r.wipV)}
+    ${cell(r.pipeN,r.pipeV)}
   </tr>`).join('');
-  const totW=k=>wipRows.reduce((s,r)=>s+r[k],0);
-  document.getElementById('main-wip-tfoot').innerHTML=`<tr style="border-top:1px solid var(--border2);font-weight:600;">
-    <td style="font-size:12px;">Total</td>
-    ${cell(totW('preN'),totW('preV'))}${cell(totW('conN'),totW('conV'))}${cell(totW('punN'),totW('punV'))}${cell(totW('wipN'),totW('wipV'),true)}
-  </tr>`;
-
-  // Pipeline table — only PMs with active pipeline
-  const pipeRows=rows.filter(r=>r.pipeN>0).sort((a,b)=>b.pipeV-a.pipeV);
-  document.getElementById('main-pipe-tbody').innerHTML=pipeRows.map(r=>`<tr style="border-bottom:0.5px solid var(--border);">
-    <td style="font-size:12px;font-weight:500;white-space:nowrap;">${r.pm}</td>
-    ${cell(r.upN,r.upV)}${cell(r.bidN,r.bidV)}${cell(r.penN,r.penV)}${cell(r.pipeN,r.pipeV,true)}
-  </tr>`).join('');
-  const totP=k=>pipeRows.reduce((s,r)=>s+r[k],0);
-  document.getElementById('main-pipe-tfoot').innerHTML=`<tr style="border-top:1px solid var(--border2);font-weight:600;">
-    <td style="font-size:12px;">Total</td>
-    ${cell(totP('upN'),totP('upV'))}${cell(totP('bidN'),totP('bidV'))}${cell(totP('penN'),totP('penV'))}${cell(totP('pipeN'),totP('pipeV'),true)}
+  const tot=k=>rows.reduce((s,r)=>s+r[k],0);
+  document.getElementById('main-tfoot').innerHTML=`<tr style="border-top:2px solid var(--border2);font-weight:600;">
+    <td style="padding:10px 8px;">Total</td>
+    ${cell(tot('wipN'),tot('wipV'))}
+    ${cell(tot('pipeN'),tot('pipeV'))}
   </tr>`;
 
   // KPI cards
-  document.getElementById('m-wip-jobs').textContent=totW('wipN');
-  document.getElementById('m-wip-val').textContent=fmtV(totW('wipV'));
-  document.getElementById('m-pipe-jobs').textContent=totP('pipeN');
-  document.getElementById('m-pipe-val').textContent=fmtV(totP('pipeV'));
+  document.getElementById('m-wip-jobs').textContent=tot('wipN');
+  document.getElementById('m-wip-val').textContent=fmtV(tot('wipV'));
+  document.getElementById('m-pipe-jobs').textContent=tot('pipeN');
+  document.getElementById('m-pipe-val').textContent=fmtV(tot('pipeV'));
 
-  // Sort PMs by total WIP value for the WIP chart, and by pipeline value for the pipeline chart
-  const wipChartRows=wipRows;
-  const pipeChartRows=pipeRows;
-  const wipChartH=Math.max(220, wipChartRows.length*32);
-  const pipeChartH=Math.max(220, pipeChartRows.length*32);
-  document.getElementById('m-wip-chart-wrap').style.height=wipChartH+'px';
-  document.getElementById('m-pipe-chart-wrap').style.height=pipeChartH+'px';
-
-  if(window._mainWipChart){try{window._mainWipChart.destroy();}catch(e){}window._mainWipChart=null;}
-  if(window._mainPipeChart){try{window._mainPipeChart.destroy();}catch(e){}window._mainPipeChart=null;}
+  // Six grouped bars per PM — fixed width, no scroll (TV display)
+  if(window._mainChart){try{window._mainChart.destroy();}catch(e){}window._mainChart=null;}
   if(typeof Chart!=='undefined'){
-    window._mainWipChart=new Chart(document.getElementById('m-wip-chart'),{
+    const labels=rows.map(r=>shortName(r.pm));
+    window._mainChart=new Chart(document.getElementById('m-chart'),{
       type:'bar',
-      data:{labels:wipChartRows.map(r=>r.pm),datasets:[
-        {label:'Pre-Con',data:wipChartRows.map(r=>r.preV),backgroundColor:'#f5c518'},
-        {label:'Construction',data:wipChartRows.map(r=>r.conV),backgroundColor:'#378ADD'},
-        {label:'Punch List',data:wipChartRows.map(r=>r.punV),backgroundColor:'#1D9E75'}
+      data:{labels,datasets:[
+        {label:'Pre-Con',data:rows.map(r=>r.preV),backgroundColor:'#b5d4f4'},
+        {label:'Construction',data:rows.map(r=>r.conV),backgroundColor:'#378ADD'},
+        {label:'Punch List',data:rows.map(r=>r.punV),backgroundColor:'#0C447C'},
+        {label:'Upcoming',data:rows.map(r=>r.upV),backgroundColor:'#fac775'},
+        {label:'Bidding',data:rows.map(r=>r.bidV),backgroundColor:'#eb6834'},
+        {label:'Pending',data:rows.map(r=>r.penV),backgroundColor:'#993C1D'}
       ]},
-      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmtV(c.raw)}`}}},
-        scales:{x:{stacked:true,grid:{color:'rgba(128,128,128,0.08)'},ticks:{callback:v=>fmtV(v)}},y:{stacked:true,grid:{display:false}}}}
-    });
-    window._mainPipeChart=new Chart(document.getElementById('m-pipe-chart'),{
-      type:'bar',
-      data:{labels:pipeChartRows.map(r=>r.pm),datasets:[
-        {label:'Upcoming',data:pipeChartRows.map(r=>r.upV),backgroundColor:'#EF9F27'},
-        {label:'Bidding',data:pipeChartRows.map(r=>r.bidV),backgroundColor:'#378ADD'},
-        {label:'Pending',data:pipeChartRows.map(r=>r.penV),backgroundColor:'#1D9E75'}
-      ]},
-      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmtV(c.raw)}`}}},
-        scales:{x:{stacked:true,grid:{color:'rgba(128,128,128,0.08)'},ticks:{callback:v=>fmtV(v)}},y:{stacked:true,grid:{display:false}}}}
+        scales:{
+          x:{grid:{display:false},ticks:{font:{size:11},autoSkip:false,maxRotation:60,minRotation:45}},
+          y:{grid:{color:'rgba(128,128,128,0.08)'},ticks:{callback:v=>fmtV(v)}}
+        }}
     });
   }
 }
