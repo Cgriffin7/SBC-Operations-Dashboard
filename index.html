@@ -585,7 +585,7 @@ body.tv-mode .card { padding: 20px 24px; }
 
       <div class="card">
         <div class="card-title" style="font-size:14px;">Work In Progress + Bid Pipeline by PM — Full Detail</div>
-        <div class="tbl-wrap"><table id="main-tbl" style="font-size:17px;white-space:nowrap;">
+        <div class="tbl-wrap"><table id="main-tbl" style="font-size:21px;white-space:nowrap;">
           <thead>
             <tr style="border-bottom:0.5px solid var(--border);">
               <th rowspan="2" style="text-align:left;vertical-align:bottom;padding:10px 12px 8px;">PM</th>
@@ -1232,19 +1232,20 @@ function renderMain(){
   document.getElementById('m-pipe-jobs').textContent=tot('pipeN');
   document.getElementById('m-pipe-val').textContent=fmtV(tot('pipeV'));
 
-  // Six grouped bars per PM, by project count — fixed width, no scroll (TV display)
+  // Six grouped bars per PM, by project count — fixed width, no scroll (TV display), A-Z order
   if(window._mainChart){try{window._mainChart.destroy();}catch(e){}window._mainChart=null;}
   if(typeof Chart!=='undefined'){
-    const labels=rows.map(r=>shortName(r.pm));
+    const chartRows=[...rows].sort((a,b)=>a.pm.localeCompare(b.pm));
+    const labels=chartRows.map(r=>shortName(r.pm));
     window._mainChart=new Chart(document.getElementById('m-chart'),{
       type:'bar',
       data:{labels,datasets:[
-        {label:'Pre-Con',data:rows.map(r=>r.preN),backgroundColor:'#b5d4f4'},
-        {label:'Construction',data:rows.map(r=>r.conN),backgroundColor:'#378ADD'},
-        {label:'Punch List',data:rows.map(r=>r.punN),backgroundColor:'#0C447C'},
-        {label:'Upcoming',data:rows.map(r=>r.upN),backgroundColor:'#fac775'},
-        {label:'Bidding',data:rows.map(r=>r.bidN),backgroundColor:'#eb6834'},
-        {label:'Pending',data:rows.map(r=>r.penN),backgroundColor:'#993C1D'}
+        {label:'Pre-Con',data:chartRows.map(r=>r.preN),backgroundColor:'#b5d4f4'},
+        {label:'Construction',data:chartRows.map(r=>r.conN),backgroundColor:'#378ADD'},
+        {label:'Punch List',data:chartRows.map(r=>r.punN),backgroundColor:'#0C447C'},
+        {label:'Upcoming',data:chartRows.map(r=>r.upN),backgroundColor:'#fac775'},
+        {label:'Bidding',data:chartRows.map(r=>r.bidN),backgroundColor:'#eb6834'},
+        {label:'Pending',data:chartRows.map(r=>r.penN),backgroundColor:'#993C1D'}
       ]},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.raw} ${c.raw===1?'project':'projects'}`}}},
@@ -1263,7 +1264,7 @@ function renderMain(){
     const pmPalette=['#7F77DD','#1D9E75','#D85A30','#D4537E','#888780','#378ADD','#639922','#BA7517','#E24B4A',
                       '#AFA9EC','#5DCAA5','#F0997B','#ED93B1','#B4B2A9','#85B7EB','#97C459','#EF9F27','#F09595'];
 
-    const wipRows=rows.filter(r=>r.wipV>0).sort((a,b)=>b.wipV-a.wipV);
+    const wipRows=[...rows].sort((a,b)=>b.wipV-a.wipV);
     const wipTotal=wipRows.reduce((s,r)=>s+r.wipV,0);
     window._mainPieWipPM=new Chart(document.getElementById('m-pie-wip-pm'),{
       type:'pie',
@@ -1275,10 +1276,10 @@ function renderMain(){
       `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;break-inside:avoid;">
         <span style="width:9px;height:9px;border-radius:2px;background:${pmPalette[i%pmPalette.length]};flex-shrink:0;display:inline-block;"></span>
         <span style="color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.pm}</span>
-        <span style="color:var(--text2);margin-left:auto;white-space:nowrap;padding-left:8px;">${fmtV(r.wipV)} · ${Math.round(r.wipV/wipTotal*100)}%</span>
+        <span style="color:var(--text2);margin-left:auto;white-space:nowrap;padding-left:8px;">${r.wipV?fmtV(r.wipV):'$0'} · ${Math.round(r.wipV/wipTotal*100)}%</span>
       </div>`).join('');
 
-    const pipeRows=rows.filter(r=>r.pipeV>0).sort((a,b)=>b.pipeV-a.pipeV);
+    const pipeRows=[...rows].sort((a,b)=>b.pipeV-a.pipeV);
     const pipeTotal=pipeRows.reduce((s,r)=>s+r.pipeV,0);
     window._mainPiePipePM=new Chart(document.getElementById('m-pie-pipe-pm'),{
       type:'pie',
@@ -1290,7 +1291,7 @@ function renderMain(){
       `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;break-inside:avoid;">
         <span style="width:9px;height:9px;border-radius:2px;background:${pmPalette[i%pmPalette.length]};flex-shrink:0;display:inline-block;"></span>
         <span style="color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.pm}</span>
-        <span style="color:var(--text2);margin-left:auto;white-space:nowrap;padding-left:8px;">${fmtV(r.pipeV)} · ${Math.round(r.pipeV/pipeTotal*100)}%</span>
+        <span style="color:var(--text2);margin-left:auto;white-space:nowrap;padding-left:8px;">${r.pipeV?fmtV(r.pipeV):'$0'} · ${Math.round(r.pipeV/pipeTotal*100)}%</span>
       </div>`).join('');
   }
 }
