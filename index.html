@@ -568,18 +568,22 @@ body.tv-mode .card { padding: 20px 24px; }
       </div>
 
       <div class="card">
-        <div class="card-title" style="font-size:14px;">WIP &amp; Bid Pipeline Value Share by PM</div>
-        <div style="display:flex;gap:32px;flex-wrap:wrap;">
-          <div style="flex:1;min-width:320px;">
-            <p style="font-size:12px;color:var(--text2);margin:0 0 8px;text-align:center;">WIP value by PM</p>
+        <div class="card-title" style="font-size:14px;">WIP Value Share by PM</div>
+        <div style="display:flex;gap:32px;align-items:flex-start;">
+          <div style="flex:0 0 220px;">
             <div class="chart-wrap" style="height:220px;"><canvas id="m-pie-wip-pm" role="img" aria-label="Share of total WIP value by PM"></canvas></div>
-            <div id="m-pie-wip-pm-legend" style="columns:2;column-gap:16px;margin-top:14px;font-size:12px;"></div>
           </div>
-          <div style="flex:1;min-width:320px;">
-            <p style="font-size:12px;color:var(--text2);margin:0 0 8px;text-align:center;">Pipeline value by PM</p>
+          <div id="m-pie-wip-pm-legend" style="flex:1;columns:4;column-gap:20px;font-size:17px;"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="font-size:14px;">Bid Pipeline Value Share by PM</div>
+        <div style="display:flex;gap:32px;align-items:flex-start;">
+          <div style="flex:0 0 220px;">
             <div class="chart-wrap" style="height:220px;"><canvas id="m-pie-pipe-pm" role="img" aria-label="Share of total pipeline value by PM"></canvas></div>
-            <div id="m-pie-pipe-pm-legend" style="columns:2;column-gap:16px;margin-top:14px;font-size:12px;"></div>
           </div>
+          <div id="m-pie-pipe-pm-legend" style="flex:1;columns:4;column-gap:20px;font-size:17px;"></div>
         </div>
       </div>
 
@@ -1212,7 +1216,7 @@ function renderMain(){
     return{pm,preN,preV,conN,conV,punN,punV,wipN,wipV,upN,upV,bidN,bidV,penN,penV,pipeN,pipeV};
   }).filter(r=>r.wipN+r.pipeN>0).sort((a,b)=>(b.wipV+b.pipeV)-(a.wipV+a.pipeV));
 
-  const cell=(n,v,isTotal)=>`<td style="text-align:right;padding:12px 8px;${isTotal?'background:var(--surface2);border-left:2px solid var(--border2);':''}">${n||'—'}</td><td style="text-align:right;padding:12px 8px;font-weight:500;${isTotal?'background:var(--surface2);':''}">${v?fmtV(v):'—'}</td>`;
+  const cell=(n,v,isTotal)=>`<td style="text-align:right;padding:12px 8px;font-size:20px;${isTotal?'background:var(--surface2);border-left:2px solid var(--border2);':''}">${n||'—'}</td><td style="text-align:right;padding:12px 8px;font-size:20px;font-weight:500;${isTotal?'background:var(--surface2);':''}">${v?fmtV(v):'—'}</td>`;
 
   document.getElementById('main-tbody').innerHTML=rows.map((r,i)=>`<tr style="border-bottom:0.5px solid var(--border);${i%2===1?'background:var(--surface2);':''}">
     <td style="font-weight:600;font-size:22px;padding:12px 12px;">${r.pm}</td>
